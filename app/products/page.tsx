@@ -9,7 +9,7 @@ import { RetailerSlug } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 interface ProductsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     search?: string;
     category?: string;
     retailer?: string;
@@ -17,17 +17,18 @@ interface ProductsPageProps {
     maxPrice?: string;
     sortBy?: "price_asc" | "price_desc" | "discount" | "newest";
     inStock?: string;
-  };
+  }>;
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const searchQuery = searchParams.search;
-  const categorySlug = searchParams.category;
-  const retailerSlug = searchParams.retailer as RetailerSlug | undefined;
-  const minPrice = searchParams.minPrice ? Number(searchParams.minPrice) : undefined;
-  const maxPrice = searchParams.maxPrice ? Number(searchParams.maxPrice) : undefined;
-  const sortBy = searchParams.sortBy || "discount";
-  const inStockOnly = searchParams.inStock === "true";
+  const resolvedParams = await searchParams;
+  const searchQuery = resolvedParams.search;
+  const categorySlug = resolvedParams.category;
+  const retailerSlug = resolvedParams.retailer as RetailerSlug | undefined;
+  const minPrice = resolvedParams.minPrice ? Number(resolvedParams.minPrice) : undefined;
+  const maxPrice = resolvedParams.maxPrice ? Number(resolvedParams.maxPrice) : undefined;
+  const sortBy = resolvedParams.sortBy || "discount";
+  const inStockOnly = resolvedParams.inStock === "true";
 
   const categories = await repository.getCategories();
   const retailers = await repository.getRetailers();

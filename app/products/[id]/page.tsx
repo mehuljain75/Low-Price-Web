@@ -19,15 +19,16 @@ import { ProductCard } from "@/components/ProductCard";
 import { DemoBadge } from "@/components/DemoBadge";
 
 interface ProductDetailsPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export const dynamic = "force-dynamic";
 
 export default async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
-  const comparison = await repository.getProductByIdOrSlug(params.id);
+  const resolvedParams = await params;
+  const comparison = await repository.getProductByIdOrSlug(resolvedParams.id);
 
   if (!comparison) {
     notFound();

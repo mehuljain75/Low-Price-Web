@@ -8,15 +8,16 @@ import { RetailerSlug } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 interface DealsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     minDiscount?: string;
     retailer?: string;
-  };
+  }>;
 }
 
 export default async function DealsPage({ searchParams }: DealsPageProps) {
-  const minDiscount = searchParams.minDiscount ? Number(searchParams.minDiscount) : 20;
-  const retailerSlug = searchParams.retailer as RetailerSlug | undefined;
+  const resolvedParams = await searchParams;
+  const minDiscount = resolvedParams.minDiscount ? Number(resolvedParams.minDiscount) : 20;
+  const retailerSlug = resolvedParams.retailer as RetailerSlug | undefined;
 
   const allDeals = await repository.getTodaysDeals(minDiscount);
   const retailers = await repository.getRetailers();
