@@ -44,7 +44,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ comparison }) => {
                 {discountPercent}% OFF
               </span>
             )}
-            {lowestOffer.isDemo && <DemoBadge size="sm" />}
+            {lowestOffer.isDemo ? (
+              <DemoBadge size="sm" />
+            ) : (
+              <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-200 animate-pulse" />
+                LIVE DEAL
+              </span>
+            )}
           </div>
 
           <div className="absolute top-2.5 right-2.5 z-10">

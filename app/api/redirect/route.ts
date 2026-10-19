@@ -13,7 +13,43 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Missing offerId parameter", { status: 400 });
   }
 
-  // Look up offer in catalog
+  // 1. Check if it is a live Amazon offer from memory cache
+  const { getLiveOfferById } = await import("@/lib/services/amazon-search");
+  const liveOffer = getLiveOfferById(offerId);
+  if (liveOffer) {
+    const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(
+      liveOffer.retailerSlug,
+      liveOffer.productUrl,
+      subId
+    );
+    return NextResponse.redirect(finalAffiliateUrl, {
+      status: 307,
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+        "X-Affiliate-Redirect": "true",
+        "X-Retailer": liveOffer.retailerSlug,
+      },
+    });
+  }
+
+  // 2. Direct ASIN fallback for Amazon offers (e.g. off_amz_B0DFMGNY45)
+  if (offerId.startsWith("off_amz_")) {
+    const asin = offerId.replace("off_amz_", "");
+    const targetUrl = asin.length === 10
+      ? `https://www.amazon.in/dp/${asin}`
+      : `https://www.amazon.in/s?k=deals`;
+    const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("amazon", targetUrl, subId);
+    return NextResponse.redirect(finalAffiliateUrl, {
+      status: 307,
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+        "X-Affiliate-Redirect": "true",
+        "X-Retailer": "amazon",
+      },
+    });
+  }
+
+  // 3. Look up offer in demo catalog
   const offer = demoOffers.find((o) => o.id === offerId);
 
   if (!offer) {

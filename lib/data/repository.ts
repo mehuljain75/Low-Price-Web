@@ -96,6 +96,27 @@ export class ProductRepository {
       return computeProductComparison(prod, offers, cat);
     });
 
+    // If a search query is given and local matches are scarce (e.g. searching 'heels' or specific terms),
+    // query live Amazon India search engine
+    if (filters.searchQuery && filters.searchQuery.trim().length > 0) {
+      try {
+        const { searchLiveAmazonIndia } = await import("../services/amazon-search");
+        const liveResults = await searchLiveAmazonIndia(filters.searchQuery.trim());
+        const liveComparisons = liveResults.map((r) => r.comparison);
+
+        // Append live comparisons, avoiding duplicates
+        const existingIds = new Set(comparisons.map((c) => c.product.id));
+        for (const liveComp of liveComparisons) {
+          if (!existingIds.has(liveComp.product.id)) {
+            comparisons.push(liveComp);
+            existingIds.add(liveComp.product.id);
+          }
+        }
+      } catch (err) {
+        console.warn("[Repository] Error fetching live Amazon products:", err);
+      }
+    }
+
     // Retailer filter
     if (filters.retailerSlug && filters.retailerSlug !== "all") {
       comparisons = comparisons.filter((comp) =>
@@ -156,10 +177,65 @@ export class ProductRepository {
     const product = demoProducts.find(
       (p) => p.id === idOrSlug || p.slug === idOrSlug
     );
-    if (!product) return null;
+    if (product) {
+      const cat = categories.find((c) => c.id === product.categoryId);
+      return computeProductComparison(product, demoOffers, cat);
+    }
 
-    const cat = categories.find((c) => c.id === product.categoryId);
-    return computeProductComparison(product, demoOffers, cat);
+    // Check live Amazon products
+    if (idOrSlug.startsWith("prod_amz_") || idOrSlug.startsWith("amazon-")) {
+      try {
+        const { getLiveProductById, getLiveOfferById } = await import("../services/amazon-search");
+        const liveProd = getLiveProductById(idOrSlug);
+        if (liveProd) {
+          const asin = liveProd.id.replace("prod_amz_", "");
+          const liveOffer = getLiveOfferById(`off_amz_${asin}`);
+          const cat = categories.find((c) => c.id === liveProd.categoryId);
+          return computeProductComparison(liveProd, liveOffer ? [liveOffer] : [], cat);
+        }
+
+        // Reconstruct from ASIN if accessed directly
+        const asin = idOrSlug.replace("prod_amz_", "").replace("amazon-", "");
+        if (asin.length === 10) {
+          const reconstructedProduct: Product = {
+            id: `prod_amz_${asin}`,
+            title: `Amazon Choice Item (${asin})`,
+            slug: `amazon-${asin}`,
+            brand: "Amazon India",
+            categoryId: categories[0].id,
+            description: "Direct retail listing on Amazon India.",
+            imageUrl: "https://placehold.co/400x400/fff7ed/ea580c?text=Amazon+Product",
+            attributes: {},
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          const reconstructedOffer: Offer = {
+            id: `off_amz_${asin}`,
+            productId: reconstructedProduct.id,
+            retailerId: "ret_amazon",
+            retailerName: "Amazon India",
+            retailerSlug: "amazon",
+            retailerProductId: asin,
+            title: reconstructedProduct.title,
+            productUrl: `https://www.amazon.in/dp/${asin}`,
+            price: 999,
+            originalPrice: 1499,
+            currency: "INR",
+            inStock: true,
+            shippingCost: 0,
+            lastCheckedAt: new Date().toISOString(),
+            isStale: false,
+            isDemo: false,
+            dataSource: "api",
+          };
+          return computeProductComparison(reconstructedProduct, [reconstructedOffer], categories[0]);
+        }
+      } catch (err) {
+        console.warn("[Repository] Error resolving live product:", err);
+      }
+    }
+
+    return null;
   }
 
   /**

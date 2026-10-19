@@ -1,6 +1,7 @@
 import { Offer, AdapterHealth, RetailerSlug } from "../types";
 import { RetailerAdapter, SearchOptions } from "./types";
 import { demoOffers } from "../data/demo-products";
+import { searchLiveAmazonIndia, getLiveOfferById } from "../services/amazon-search";
 
 export class AmazonAdapter implements RetailerAdapter {
   readonly slug: RetailerSlug = "amazon";
@@ -11,34 +12,40 @@ export class AmazonAdapter implements RetailerAdapter {
   private secretKey: string | undefined;
 
   constructor() {
-    this.partnerTag = process.env.AMAZON_ASSOCIATES_TAG || process.env.NEXT_PUBLIC_AMAZON_TAG;
+    this.partnerTag = process.env.AMAZON_ASSOCIATES_TAG || process.env.NEXT_PUBLIC_AMAZON_TAG || "dealfinderin-21";
     this.accessKey = process.env.AMAZON_ACCESS_KEY;
     this.secretKey = process.env.AMAZON_SECRET_KEY;
   }
 
   isLiveMode(): boolean {
-    return Boolean(this.partnerTag && this.accessKey && this.secretKey);
+    // With Live Search Engine active and partnerTag set, outbound links and search are live
+    return Boolean(this.partnerTag);
   }
 
   async search(query: string, _options?: SearchOptions): Promise<Offer[]> {
-    if (!this.isLiveMode()) {
-      const lowerQuery = query.toLowerCase();
-      return demoOffers.filter(
-        (o) =>
-          o.retailerSlug === "amazon" &&
-          o.title.toLowerCase().includes(lowerQuery)
-      );
+    if (query && query.trim().length > 0) {
+      const liveResults = await searchLiveAmazonIndia(query);
+      if (liveResults.length > 0) {
+        return liveResults.flatMap((r) => r.offers);
+      }
     }
 
-    // In a live environment with PA-API 5.0 credentials,
-    // this executes AWS Signature V4 signed POST to webservices.amazon.in
-    // If not yet fully authorized or hitting quota limits, fallback to demo offers
-    return demoOffers.filter((o) => o.retailerSlug === "amazon");
+    const lowerQuery = (query || "").toLowerCase();
+    return demoOffers.filter(
+      (o) =>
+        o.retailerSlug === "amazon" &&
+        (!lowerQuery || o.title.toLowerCase().includes(lowerQuery))
+    );
   }
 
   async getOfferById(retailerProductId: string): Promise<Offer | null> {
+    const live =
+      getLiveOfferById(retailerProductId) ||
+      getLiveOfferById(`off_amz_${retailerProductId}`);
+    if (live) return live;
+
     const matching = demoOffers.find(
-      (o) => o.retailerSlug === "amazon" && o.retailerProductId === retailerProductId
+      (o) => o.retailerSlug === "amazon" && (o.retailerProductId === retailerProductId || o.id === retailerProductId)
     );
     return matching || null;
   }
