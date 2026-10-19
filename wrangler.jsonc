@@ -8,6 +8,9 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "vars": {
+    "AMAZON_ASSOCIATES_TAG": "dealfinderin-21"
+  },
   "observability": {
     "enabled": true
   }
