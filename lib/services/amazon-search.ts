@@ -150,15 +150,18 @@ export function parseAmazonSearchHtml(html: string, query: string): LiveSearchRe
 
     seenAsins.add(asin);
 
-    // Brand heuristic: first word or two of title, avoiding generic tokens
-    let brand = query;
+    // Brand heuristic: extract real brand from title, avoiding generic tokens
+    let brand = "Generic";
     const words = title.split(/\s+/);
-    if (words.length > 0) {
-      const first = words[0].replace(/['":,.]/g, "");
-      if (!["men", "mens", "women", "womens", "unisex", "kids", "boys", "girls"].includes(first.toLowerCase())) {
-        brand = first;
-      } else if (words.length > 1) {
-        brand = words[1].replace(/['":,.]/g, "");
+    for (let w = 0; w < Math.min(words.length, 4); w++) {
+      const cleanWord = words[w].replace(/[^a-zA-Z0-9&'-]/g, "");
+      const lower = cleanWord.toLowerCase();
+      if (
+        cleanWord.length > 1 &&
+        !["men", "mens", "women", "womens", "unisex", "kids", "boys", "girls", "latest", "new", "stylish", "comfortable", "casual", "formal"].includes(lower)
+      ) {
+        brand = cleanWord;
+        break;
       }
     }
     const category = detectCategory(query, title);

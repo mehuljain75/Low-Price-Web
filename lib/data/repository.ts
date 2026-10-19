@@ -252,26 +252,31 @@ export class ProductRepository {
         // Append live comparisons, avoiding duplicates
         const existingIds = new Set(comparisons.map((c) => c.product.id));
         for (const liveComp of liveComparisons) {
-          if (!existingIds.has(liveComp.product.id)) {
-            if (filters.brand) {
-              const brandLower = filters.brand.toLowerCase().trim();
-              const hasBrand =
-                liveComp.product.brand.toLowerCase().includes(brandLower) ||
-                liveComp.product.title.toLowerCase().includes(brandLower);
+          if (existingIds.has(liveComp.product.id)) continue;
 
-              if (hasBrand) {
-                comparisons.push(liveComp);
-                existingIds.add(liveComp.product.id);
-              } else {
-                liveComp.product.brand = filters.brand;
-                comparisons.push(liveComp);
-                existingIds.add(liveComp.product.id);
-              }
-            } else {
-              comparisons.push(liveComp);
-              existingIds.add(liveComp.product.id);
+          // Category filter check: Only include products that match the selected category
+          if (filters.categorySlug && filters.categorySlug !== "all") {
+            const targetCat = categories.find((c) => c.slug === filters.categorySlug);
+            if (targetCat && liveComp.product.categoryId !== targetCat.id) {
+              continue;
             }
           }
+
+          // Brand filter check: Strictly match brand, NEVER overwrite product brand
+          if (filters.brand && filters.brand.trim().length > 0) {
+            const brandLower = filters.brand.toLowerCase().trim();
+            const matchesBrand =
+              liveComp.product.brand.toLowerCase() === brandLower ||
+              liveComp.product.brand.toLowerCase().includes(brandLower) ||
+              liveComp.product.title.toLowerCase().includes(brandLower);
+
+            if (!matchesBrand) {
+              continue;
+            }
+          }
+
+          comparisons.push(liveComp);
+          existingIds.add(liveComp.product.id);
         }
       } catch (err) {
         console.warn("[Repository] Error fetching live Amazon products:", err);

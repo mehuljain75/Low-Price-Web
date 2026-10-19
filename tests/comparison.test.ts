@@ -198,5 +198,22 @@ describe("Repository Brand Search & Filtering", () => {
       expect(match).toBe(true);
     }
   });
+
+  it("never assigns Apple brand to fashion/heel products and isolates categories", async () => {
+    const { repository } = await import("@/lib/data/repository");
+    // Querying fashion category should never return products branded as Apple
+    const fashionProducts = await repository.getProducts({ categorySlug: "fashion" });
+    for (const comp of fashionProducts) {
+      expect(comp.product.brand.toLowerCase()).not.toBe("apple");
+      expect(comp.product.categoryId).toBe("cat_fashion");
+    }
+
+    // Querying heels should return authentic footwear brands (Shoetopia, TRASE, Theater)
+    const heelProducts = await repository.getProducts({ searchQuery: "heels" });
+    expect(heelProducts.length).toBeGreaterThan(0);
+    for (const comp of heelProducts) {
+      expect(comp.product.brand.toLowerCase()).not.toBe("apple");
+    }
+  });
 });
 
