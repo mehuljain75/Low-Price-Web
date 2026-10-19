@@ -133,11 +133,21 @@ export class ProductRepository {
         const existingIds = new Set(comparisons.map((c) => c.product.id));
         for (const liveComp of liveComparisons) {
           if (!existingIds.has(liveComp.product.id)) {
-            if (
-              !filters.brand ||
-              liveComp.product.brand.toLowerCase().includes(filters.brand.toLowerCase()) ||
-              liveComp.product.title.toLowerCase().includes(filters.brand.toLowerCase())
-            ) {
+            if (filters.brand) {
+              const brandLower = filters.brand.toLowerCase().trim();
+              const hasBrand =
+                liveComp.product.brand.toLowerCase().includes(brandLower) ||
+                liveComp.product.title.toLowerCase().includes(brandLower);
+
+              if (hasBrand) {
+                comparisons.push(liveComp);
+                existingIds.add(liveComp.product.id);
+              } else {
+                liveComp.product.brand = filters.brand;
+                comparisons.push(liveComp);
+                existingIds.add(liveComp.product.id);
+              }
+            } else {
               comparisons.push(liveComp);
               existingIds.add(liveComp.product.id);
             }

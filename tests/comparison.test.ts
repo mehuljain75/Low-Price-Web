@@ -146,6 +146,24 @@ describe("Repository Brand Search & Filtering", () => {
         comp.product.title.toLowerCase().includes("apple");
       expect(match).toBe(true);
     }
+
+    const nikeProducts = await repository.getProducts({ brand: "Nike" });
+    expect(nikeProducts.length).toBeGreaterThan(0);
+    for (const comp of nikeProducts) {
+      const match =
+        comp.product.brand.toLowerCase().includes("nike") ||
+        comp.product.title.toLowerCase().includes("nike");
+      expect(match).toBe(true);
+    }
+
+    const traseProducts = await repository.getProducts({ brand: "TRASE" });
+    expect(traseProducts.length).toBeGreaterThan(0);
+    for (const comp of traseProducts) {
+      const match =
+        comp.product.brand.toLowerCase().includes("trase") ||
+        comp.product.title.toLowerCase().includes("trase");
+      expect(match).toBe(true);
+    }
   });
 });
 

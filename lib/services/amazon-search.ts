@@ -26,8 +26,22 @@ function detectCategory(query: string, title: string): Category {
     text.includes("sandal") ||
     text.includes("shoe") ||
     text.includes("sneaker") ||
+    text.includes("boot") ||
+    text.includes("footwear") ||
+    text.includes("nike") ||
+    text.includes("puma") ||
+    text.includes("adidas") ||
+    text.includes("trase") ||
+    text.includes("theater") ||
+    text.includes("shoetopia") ||
+    text.includes("eridani") ||
+    text.includes("red tape") ||
     text.includes("kurta") ||
     text.includes("saree") ||
+    text.includes("ethnic") ||
+    text.includes("manyavar") ||
+    text.includes("biba") ||
+    text.includes("fabindia") ||
     text.includes("jeans") ||
     text.includes("shirt") ||
     text.includes("t-shirt") ||
@@ -136,8 +150,17 @@ export function parseAmazonSearchHtml(html: string, query: string): LiveSearchRe
 
     seenAsins.add(asin);
 
-    // Brand heuristic: first word or two of title
-    const brand = title.split(" ")[0] || "Amazon";
+    // Brand heuristic: first word or two of title, avoiding generic tokens
+    let brand = query;
+    const words = title.split(/\s+/);
+    if (words.length > 0) {
+      const first = words[0].replace(/['":,.]/g, "");
+      if (!["men", "mens", "women", "womens", "unisex", "kids", "boys", "girls"].includes(first.toLowerCase())) {
+        brand = first;
+      } else if (words.length > 1) {
+        brand = words[1].replace(/['":,.]/g, "");
+      }
+    }
     const category = detectCategory(query, title);
 
     const productId = `prod_amz_${asin}`;
@@ -429,7 +452,23 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
     ratingCount: number;
   }[];
 
-  if (lower.includes("heel") || lower.includes("sandal") || lower.includes("stiletto")) {
+  const ALL_CURATED = [
+    ...HEEL_PRODUCTS,
+    ...FOOTWEAR_PRODUCTS,
+    ...ETHNIC_FASHION_PRODUCTS,
+    ...WATCH_PRODUCTS,
+  ];
+
+  const brandMatches = ALL_CURATED.filter(
+    (item) =>
+      item.brand.toLowerCase() === lower ||
+      item.brand.toLowerCase().includes(lower) ||
+      item.title.toLowerCase().includes(lower)
+  );
+
+  if (brandMatches.length > 0) {
+    selectedItems = brandMatches;
+  } else if (lower.includes("heel") || lower.includes("sandal") || lower.includes("stiletto")) {
     selectedItems = HEEL_PRODUCTS;
   } else if (lower.includes("watch") || lower.includes("smartwatch") || lower.includes("band")) {
     selectedItems = WATCH_PRODUCTS;
@@ -453,6 +492,7 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
   }
 
   return selectedItems.map((item) => {
+    const itemCat = detectCategory(item.title, item.brand);
     const productId = `prod_amz_${item.asin}`;
     const offerId = `off_amz_${item.asin}`;
 
@@ -461,7 +501,7 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
       title: item.title,
       slug: `amazon-${item.asin}`,
       brand: item.brand,
-      categoryId: category.id,
+      categoryId: itemCat.id,
       description: `${item.title}. Available on Amazon India with fast doorstep delivery, verified merchant warranty, and customer reviews.`,
       imageUrl: item.imageUrl,
       attributes: {},
