@@ -34,13 +34,21 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   const categories = await repository.getCategories();
   const retailers = await repository.getRetailers();
-  const brands = await repository.getBrands();
+  const brands = await repository.getBrands(categorySlug);
+
+  // If a category is selected and the active brand does not belong to that category, reset it
+  const effectiveBrand =
+    brandQuery && categorySlug && categorySlug !== "all"
+      ? brands.some((b) => b.toLowerCase() === brandQuery.toLowerCase())
+        ? brandQuery
+        : undefined
+      : brandQuery;
 
   const comparisons = await repository.getProducts({
     searchQuery,
     categorySlug,
     retailerSlug,
-    brand: brandQuery,
+    brand: effectiveBrand,
     minPrice,
     maxPrice,
     sortBy,
@@ -73,7 +81,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             {searchQuery && <input type="hidden" name="search" value={searchQuery} />}
             {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
             {retailerSlug && <input type="hidden" name="retailer" value={retailerSlug} />}
-            {brandQuery && <input type="hidden" name="brand" value={brandQuery} />}
+            {effectiveBrand && <input type="hidden" name="brand" value={effectiveBrand} />}
             {minPrice !== undefined && <input type="hidden" name="minPrice" value={minPrice} />}
             {maxPrice !== undefined && <input type="hidden" name="maxPrice" value={maxPrice} />}
             {inStockOnly && <input type="hidden" name="inStock" value="true" />}
@@ -100,7 +108,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       </div>
 
       {/* Active Filter Badges */}
-      {(searchQuery || brandQuery || activeCategory || activeRetailer || minPrice !== undefined || maxPrice !== undefined || inStockOnly) && (
+      {(searchQuery || effectiveBrand || activeCategory || activeRetailer || minPrice !== undefined || maxPrice !== undefined || inStockOnly) && (
         <div className="flex items-center gap-2 flex-wrap text-xs">
           <span className="text-slate-400 font-medium">Active filters:</span>
           {searchQuery && (
@@ -108,9 +116,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               Query: &quot;{searchQuery}&quot;
             </span>
           )}
-          {brandQuery && (
+          {effectiveBrand && (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-semibold">
-              Brand: {brandQuery}
+              Brand: {effectiveBrand}
             </span>
           )}
           {activeCategory && (
@@ -152,7 +160,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             brands={brands}
             currentCategory={categorySlug}
             currentRetailer={retailerSlug}
-            currentBrand={brandQuery}
+            currentBrand={effectiveBrand}
             currentMinPrice={minPrice}
             currentMaxPrice={maxPrice}
             currentInStock={inStockOnly}

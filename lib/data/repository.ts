@@ -27,6 +27,106 @@ export interface ProductQueryFilters {
   inStockOnly?: boolean;
 }
 
+export const CATEGORY_BRANDS: Record<string, string[]> = {
+  mobiles: [
+    "Apple",
+    "Google Pixel",
+    "iQOO",
+    "Motorola",
+    "Nothing",
+    "OnePlus",
+    "Oppo",
+    "POCO",
+    "Realme",
+    "Samsung",
+    "Vivo",
+    "Xiaomi",
+  ],
+  laptops: [
+    "Acer",
+    "Apple",
+    "ASUS",
+    "Dell",
+    "HP",
+    "Lenovo",
+    "MSI",
+    "Samsung",
+  ],
+  audio: [
+    "Apple",
+    "boAt",
+    "Boult",
+    "Fire-Boltt",
+    "JBL",
+    "Noise",
+    "OnePlus",
+    "Realme",
+    "Sennheiser",
+    "Sony",
+  ],
+  fashion: [
+    "Adidas",
+    "Allen Solly",
+    "Asian",
+    "Bata",
+    "BIBA",
+    "Campus",
+    "Crocs",
+    "ERIDANI",
+    "FabIndia",
+    "Flying Machine",
+    "Levi's",
+    "Libas",
+    "Manyavar",
+    "Nike",
+    "Peter England",
+    "Puma",
+    "Red Tape",
+    "Shoetopia",
+    "Sparx",
+    "Spykar",
+    "Theater",
+    "TRASE",
+    "Van Heusen",
+    "W for Woman",
+    "Woodland",
+    "Zara",
+  ],
+  appliances: [
+    "Bajaj",
+    "Bosch",
+    "Crompton",
+    "Eureka Forbes",
+    "Havells",
+    "IFB",
+    "Kent",
+    "LG",
+    "Morphy Richards",
+    "Panasonic",
+    "Philips",
+    "Prestige",
+    "Samsung",
+    "Voltas",
+    "Whirlpool",
+  ],
+  beauty: [
+    "Biotique",
+    "Bombay Shaving Company",
+    "Forest Essentials",
+    "Garnier",
+    "L'Oreal",
+    "Mamaearth",
+    "mCaffeine",
+    "Minimalist",
+    "Nivea",
+    "Philips",
+    "Plum",
+    "The Derma Co",
+    "Vega",
+    "Wow Skin Science",
+  ],
+};
+
 export class ProductRepository {
   /**
    * Retrieves all product categories
@@ -58,21 +158,41 @@ export class ProductRepository {
   }
 
   /**
-   * Retrieves all unique brands across all products and categories
+   * Retrieves brands relevant to a specific category or across all categories
    */
-  async getBrands(): Promise<string[]> {
+  async getBrands(categorySlug?: string): Promise<string[]> {
     const brandsSet = new Set<string>();
-    for (const p of demoProducts) {
-      if (p.brand) brandsSet.add(p.brand);
+
+    if (categorySlug && categorySlug !== "all") {
+      const cat = categories.find((c) => c.slug === categorySlug);
+      // Collect brands from catalog products belonging to this category
+      if (cat) {
+        for (const p of demoProducts) {
+          if (p.categoryId === cat.id && p.brand) {
+            brandsSet.add(p.brand);
+          }
+        }
+      }
+      // Collect curated popular brands for this category
+      const categoryBrands = CATEGORY_BRANDS[categorySlug];
+      if (categoryBrands) {
+        for (const b of categoryBrands) {
+          brandsSet.add(b);
+        }
+      }
+    } else {
+      // All categories: collect from all products
+      for (const p of demoProducts) {
+        if (p.brand) brandsSet.add(p.brand);
+      }
+      // Collect from all category lists
+      for (const list of Object.values(CATEGORY_BRANDS)) {
+        for (const b of list) {
+          brandsSet.add(b);
+        }
+      }
     }
-    const popularBrands = [
-      "Apple", "Samsung", "Sony", "OnePlus", "boAt", "Nike", "Puma", 
-      "Levi's", "TRASE", "Theater", "Shoetopia", "ERIDANI", "Noise", 
-      "Fire-Boltt", "Manyavar", "BIBA", "FabIndia", "Prestige", "Philips"
-    ];
-    for (const b of popularBrands) {
-      brandsSet.add(b);
-    }
+
     return Array.from(brandsSet).sort((a, b) => a.localeCompare(b));
   }
 

@@ -42,6 +42,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     } else {
       params.delete(key);
     }
+    // When changing category, clear the active brand to keep brands relevant to the category
+    if (key === "category") {
+      params.delete("brand");
+      setBrandSearch("");
+    }
     router.push(`/products?${params.toString()}`);
   };
 
@@ -135,7 +140,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         <div className="relative">
           <input
             type="text"
-            placeholder="Search brands (e.g. Apple, Nike, Sony)..."
+            placeholder={
+              currentCategory && currentCategory !== "all"
+                ? `Search ${categories.find((c) => c.slug === currentCategory)?.name || ""} brands...`
+                : "Search brands (e.g. Apple, Nike, Sony)..."
+            }
             value={brandSearch}
             onChange={(e) => setBrandSearch(e.target.value)}
             className="w-full text-xs pl-7 pr-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500 placeholder:text-slate-400"

@@ -129,10 +129,43 @@ describe("Repository Brand Search & Filtering", () => {
     const { repository } = await import("@/lib/data/repository");
     const brands = await repository.getBrands();
 
-    expect(brands.length).toBeGreaterThan(5);
+    expect(brands.length).toBeGreaterThan(15);
     expect(brands).toContain("Apple");
     expect(brands).toContain("Samsung");
     expect(brands).toContain("Nike");
+  });
+
+  it("filters brands by selected category accurately", async () => {
+    const { repository } = await import("@/lib/data/repository");
+    
+    // Fashion category brands
+    const fashionBrands = await repository.getBrands("fashion");
+    expect(fashionBrands).toContain("Nike");
+    expect(fashionBrands).toContain("Puma");
+    expect(fashionBrands).toContain("Levi's");
+    expect(fashionBrands).toContain("BIBA");
+    expect(fashionBrands).toContain("TRASE");
+    // Tech brands MUST NOT be in fashion brands
+    expect(fashionBrands).not.toContain("Apple");
+    expect(fashionBrands).not.toContain("boAt");
+    expect(fashionBrands).not.toContain("Sony");
+
+    // Mobiles category brands
+    const mobileBrands = await repository.getBrands("mobiles");
+    expect(mobileBrands).toContain("Apple");
+    expect(mobileBrands).toContain("Samsung");
+    expect(mobileBrands).toContain("OnePlus");
+    // Fashion brands MUST NOT be in mobile brands
+    expect(mobileBrands).not.toContain("BIBA");
+    expect(mobileBrands).not.toContain("TRASE");
+    expect(mobileBrands).not.toContain("Shoetopia");
+
+    // Audio category brands
+    const audioBrands = await repository.getBrands("audio");
+    expect(audioBrands).toContain("boAt");
+    expect(audioBrands).toContain("Sony");
+    expect(audioBrands).toContain("JBL");
+    expect(audioBrands).not.toContain("Levi's");
   });
 
   it("filters products by brand across all categories", async () => {
