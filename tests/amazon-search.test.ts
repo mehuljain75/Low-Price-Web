@@ -54,6 +54,26 @@ describe("Live Amazon Search & Parser", () => {
     expect(results[0].comparison.lowestOffer?.price).toBeGreaterThan(0);
   });
 
+  it("guarantees results for appliances with live deal flag and correct category", async () => {
+    const results = await searchLiveAmazonIndia("Home Appliances");
+    expect(results.length).toBeGreaterThanOrEqual(8);
+    for (const res of results) {
+      expect(res.product.categoryId).toBe("cat_appliances");
+      expect(res.offers[0].isDemo).toBe(false);
+      expect(res.offers[0].retailerSlug).toBe("amazon");
+      expect(res.offers[0].price).toBeGreaterThan(0);
+    }
+  });
+
+  it("guarantees results for beauty & personal care with live deal flag", async () => {
+    const results = await searchLiveAmazonIndia("Beauty & Personal Care");
+    expect(results.length).toBeGreaterThanOrEqual(8);
+    for (const res of results) {
+      expect(res.product.categoryId).toBe("cat_beauty");
+      expect(res.offers[0].isDemo).toBe(false);
+    }
+  });
+
   it("formats outbound Amazon URLs with the associate partner tag", () => {
     const adapter = new AmazonAdapter();
     const url = adapter.buildAffiliateUrl("https://www.amazon.in/dp/B0DFMGNY45", "df_web");

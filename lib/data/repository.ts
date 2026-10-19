@@ -240,10 +240,20 @@ export class ProductRepository {
       return computeProductComparison(prod, offers, cat);
     });
 
-    // If a search query or specific brand is searched and local matches are scarce,
-    // query live Amazon India search engine
-    const searchIntent = (filters.searchQuery || filters.brand || "").trim();
-    if (searchIntent.length > 0 && comparisons.length < 5) {
+    // If a search query, specific brand, or category browsing is active and local matches are scarce (< 12),
+    // query live Amazon India search engine to hydrate rich, real-time products
+    let searchIntent = (filters.searchQuery || filters.brand || "").trim();
+    if (!searchIntent && filters.categorySlug && filters.categorySlug !== "all") {
+      const cat = categories.find((c) => c.slug === filters.categorySlug);
+      if (cat) {
+        searchIntent = cat.name;
+      }
+    }
+    if (!searchIntent && comparisons.length < 12) {
+      searchIntent = "best deals electronics appliances fashion";
+    }
+
+    if (searchIntent.length > 0 && comparisons.length < 12) {
       try {
         const { searchLiveAmazonIndia } = await import("../services/amazon-search");
         const liveResults = await searchLiveAmazonIndia(searchIntent);

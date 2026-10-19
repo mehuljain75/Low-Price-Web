@@ -215,5 +215,33 @@ describe("Repository Brand Search & Filtering", () => {
       expect(comp.product.brand.toLowerCase()).not.toBe("apple");
     }
   });
+
+  it("hydrates appliances with multiple live deals and zero lone demo cards", async () => {
+    const { repository } = await import("@/lib/data/repository");
+    const applianceDeals = await repository.getProducts({
+      categorySlug: "appliances",
+      retailerSlug: "amazon",
+    });
+
+    expect(applianceDeals.length).toBeGreaterThanOrEqual(8);
+    for (const comp of applianceDeals) {
+      expect(comp.product.categoryId).toBe("cat_appliances");
+      expect(comp.lowestOffer?.isDemo).toBe(false);
+      expect(comp.lowestOffer?.retailerSlug).toBe("amazon");
+    }
+  });
+
+  it("hydrates beauty category with multiple live deals", async () => {
+    const { repository } = await import("@/lib/data/repository");
+    const beautyDeals = await repository.getProducts({
+      categorySlug: "beauty",
+    });
+
+    expect(beautyDeals.length).toBeGreaterThanOrEqual(8);
+    for (const comp of beautyDeals) {
+      expect(comp.product.categoryId).toBe("cat_beauty");
+      expect(comp.lowestOffer?.isDemo).toBe(false);
+    }
+  });
 });
 
