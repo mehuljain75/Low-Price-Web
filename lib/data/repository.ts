@@ -58,6 +58,25 @@ export class ProductRepository {
   }
 
   /**
+   * Retrieves all unique brands across all products and categories
+   */
+  async getBrands(): Promise<string[]> {
+    const brandsSet = new Set<string>();
+    for (const p of demoProducts) {
+      if (p.brand) brandsSet.add(p.brand);
+    }
+    const popularBrands = [
+      "Apple", "Samsung", "Sony", "OnePlus", "boAt", "Nike", "Puma", 
+      "Levi's", "TRASE", "Theater", "Shoetopia", "ERIDANI", "Noise", 
+      "Fire-Boltt", "Manyavar", "BIBA", "FabIndia", "Prestige", "Philips"
+    ];
+    for (const b of popularBrands) {
+      brandsSet.add(b);
+    }
+    return Array.from(brandsSet).sort((a, b) => a.localeCompare(b));
+  }
+
+  /**
    * Searches and filters products with multi-store price comparisons
    */
   async getProducts(filters: ProductQueryFilters = {}): Promise<PriceComparison[]> {
@@ -73,9 +92,14 @@ export class ProductRepository {
     }
 
     // Brand filter
-    if (filters.brand) {
-      const lowerBrand = filters.brand.toLowerCase();
-      products = products.filter((p) => p.brand.toLowerCase() === lowerBrand);
+    if (filters.brand && filters.brand.trim().length > 0) {
+      const lowerBrand = filters.brand.toLowerCase().trim();
+      products = products.filter(
+        (p) =>
+          p.brand.toLowerCase() === lowerBrand ||
+          p.brand.toLowerCase().includes(lowerBrand) ||
+          p.title.toLowerCase().includes(lowerBrand)
+      );
     }
 
     // Search query filter
@@ -96,20 +120,27 @@ export class ProductRepository {
       return computeProductComparison(prod, offers, cat);
     });
 
-    // If a search query is given and local matches are scarce (e.g. searching 'heels' or specific terms),
+    // If a search query or specific brand is searched and local matches are scarce,
     // query live Amazon India search engine
-    if (filters.searchQuery && filters.searchQuery.trim().length > 0) {
+    const searchIntent = (filters.searchQuery || filters.brand || "").trim();
+    if (searchIntent.length > 0 && comparisons.length < 5) {
       try {
         const { searchLiveAmazonIndia } = await import("../services/amazon-search");
-        const liveResults = await searchLiveAmazonIndia(filters.searchQuery.trim());
+        const liveResults = await searchLiveAmazonIndia(searchIntent);
         const liveComparisons = liveResults.map((r) => r.comparison);
 
         // Append live comparisons, avoiding duplicates
         const existingIds = new Set(comparisons.map((c) => c.product.id));
         for (const liveComp of liveComparisons) {
           if (!existingIds.has(liveComp.product.id)) {
-            comparisons.push(liveComp);
-            existingIds.add(liveComp.product.id);
+            if (
+              !filters.brand ||
+              liveComp.product.brand.toLowerCase().includes(filters.brand.toLowerCase()) ||
+              liveComp.product.title.toLowerCase().includes(filters.brand.toLowerCase())
+            ) {
+              comparisons.push(liveComp);
+              existingIds.add(liveComp.product.id);
+            }
           }
         }
       } catch (err) {

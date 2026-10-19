@@ -13,6 +13,7 @@ interface ProductsPageProps {
     search?: string;
     category?: string;
     retailer?: string;
+    brand?: string;
     minPrice?: string;
     maxPrice?: string;
     sortBy?: "price_asc" | "price_desc" | "discount" | "newest";
@@ -25,6 +26,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const searchQuery = resolvedParams.search;
   const categorySlug = resolvedParams.category;
   const retailerSlug = resolvedParams.retailer as RetailerSlug | undefined;
+  const brandQuery = resolvedParams.brand;
   const minPrice = resolvedParams.minPrice ? Number(resolvedParams.minPrice) : undefined;
   const maxPrice = resolvedParams.maxPrice ? Number(resolvedParams.maxPrice) : undefined;
   const sortBy = resolvedParams.sortBy || "discount";
@@ -32,11 +34,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   const categories = await repository.getCategories();
   const retailers = await repository.getRetailers();
+  const brands = await repository.getBrands();
 
   const comparisons = await repository.getProducts({
     searchQuery,
     categorySlug,
     retailerSlug,
+    brand: brandQuery,
     minPrice,
     maxPrice,
     sortBy,
@@ -69,6 +73,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             {searchQuery && <input type="hidden" name="search" value={searchQuery} />}
             {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
             {retailerSlug && <input type="hidden" name="retailer" value={retailerSlug} />}
+            {brandQuery && <input type="hidden" name="brand" value={brandQuery} />}
             {minPrice !== undefined && <input type="hidden" name="minPrice" value={minPrice} />}
             {maxPrice !== undefined && <input type="hidden" name="maxPrice" value={maxPrice} />}
             {inStockOnly && <input type="hidden" name="inStock" value="true" />}
@@ -95,12 +100,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       </div>
 
       {/* Active Filter Badges */}
-      {(searchQuery || activeCategory || activeRetailer || minPrice || maxPrice || inStockOnly) && (
+      {(searchQuery || brandQuery || activeCategory || activeRetailer || minPrice !== undefined || maxPrice !== undefined || inStockOnly) && (
         <div className="flex items-center gap-2 flex-wrap text-xs">
           <span className="text-slate-400 font-medium">Active filters:</span>
           {searchQuery && (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
               Query: &quot;{searchQuery}&quot;
+            </span>
+          )}
+          {brandQuery && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-semibold">
+              Brand: {brandQuery}
             </span>
           )}
           {activeCategory && (
@@ -139,8 +149,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           <FilterSidebar
             categories={categories}
             retailers={retailers}
+            brands={brands}
             currentCategory={categorySlug}
             currentRetailer={retailerSlug}
+            currentBrand={brandQuery}
             currentMinPrice={minPrice}
             currentMaxPrice={maxPrice}
             currentInStock={inStockOnly}

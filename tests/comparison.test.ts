@@ -123,3 +123,29 @@ describe("Cross-Store Price Comparison Engine", () => {
     expect(comparison.savingsAmount).toBe(1000);
   });
 });
+
+describe("Repository Brand Search & Filtering", () => {
+  it("provides available brands list across categories", async () => {
+    const { repository } = await import("@/lib/data/repository");
+    const brands = await repository.getBrands();
+
+    expect(brands.length).toBeGreaterThan(5);
+    expect(brands).toContain("Apple");
+    expect(brands).toContain("Samsung");
+    expect(brands).toContain("Nike");
+  });
+
+  it("filters products by brand across all categories", async () => {
+    const { repository } = await import("@/lib/data/repository");
+    const appleProducts = await repository.getProducts({ brand: "Apple" });
+
+    expect(appleProducts.length).toBeGreaterThan(0);
+    for (const comp of appleProducts) {
+      const match =
+        comp.product.brand.toLowerCase().includes("apple") ||
+        comp.product.title.toLowerCase().includes("apple");
+      expect(match).toBe(true);
+    }
+  });
+});
+

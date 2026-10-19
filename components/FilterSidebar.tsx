@@ -2,14 +2,16 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Filter, RotateCcw } from "lucide-react";
+import { Filter, RotateCcw, Search } from "lucide-react";
 import { Category, Retailer } from "@/lib/types";
 
 interface FilterSidebarProps {
   categories: Category[];
   retailers: Retailer[];
+  brands?: string[];
   currentCategory?: string;
   currentRetailer?: string;
+  currentBrand?: string;
   currentMinPrice?: number;
   currentMaxPrice?: number;
   currentInStock?: boolean;
@@ -18,8 +20,10 @@ interface FilterSidebarProps {
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   categories,
   retailers,
+  brands = [],
   currentCategory,
   currentRetailer,
+  currentBrand,
   currentMinPrice,
   currentMaxPrice,
   currentInStock,
@@ -29,6 +33,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   const [minPrice, setMinPrice] = useState(currentMinPrice?.toString() || "");
   const [maxPrice, setMaxPrice] = useState(currentMaxPrice?.toString() || "");
+  const [brandSearch, setBrandSearch] = useState("");
 
   const updateParam = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -54,8 +59,13 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const resetAll = () => {
     setMinPrice("");
     setMaxPrice("");
+    setBrandSearch("");
     router.push("/products");
   };
+
+  const filteredBrands = brands.filter((b) =>
+    b.toLowerCase().includes(brandSearch.toLowerCase().trim())
+  );
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-6 shadow-xs">
@@ -102,6 +112,67 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <span>{c.name}</span>
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Brand Filter (Across All Categories) */}
+      <div className="space-y-2.5 pt-3 border-t border-slate-100">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+            Brand
+          </label>
+          {currentBrand && (
+            <button
+              onClick={() => updateParam("brand", null)}
+              className="text-[10px] text-orange-600 hover:text-orange-700 font-semibold"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Brand Search Input */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search brands (e.g. Apple, Nike, Sony)..."
+            value={brandSearch}
+            onChange={(e) => setBrandSearch(e.target.value)}
+            className="w-full text-xs pl-7 pr-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500 placeholder:text-slate-400"
+          />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
+        </div>
+
+        {/* Brand List */}
+        <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
+          <button
+            onClick={() => updateParam("brand", null)}
+            className={`w-full text-left text-xs px-2 py-1 rounded-md transition-colors flex items-center justify-between ${
+              !currentBrand
+                ? "bg-orange-50 text-orange-700 font-semibold"
+                : "text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            <span>All Brands</span>
+          </button>
+          {filteredBrands.map((b) => (
+            <button
+              key={b}
+              onClick={() => updateParam("brand", b)}
+              className={`w-full text-left text-xs px-2 py-1 rounded-md transition-colors flex items-center justify-between ${
+                currentBrand?.toLowerCase() === b.toLowerCase()
+                  ? "bg-orange-50 text-orange-700 font-semibold"
+                  : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              <span>{b}</span>
+            </button>
+          ))}
+          {filteredBrands.length === 0 && (
+            <p className="text-[11px] text-slate-400 italic px-2 py-1">
+              No matching brands found
+            </p>
+          )}
         </div>
       </div>
 
