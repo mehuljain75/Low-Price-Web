@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   formatINR,
   calculateDiscount,
+  calculateSavings,
   isOfferStale,
   getRelativeTime,
 } from "@/lib/formatters";
@@ -24,6 +25,13 @@ describe("Price Formatting & Indian Rupee (INR)", () => {
     // No discount if current price >= MRP
     expect(calculateDiscount(5000, 5000)).toBe(0);
     expect(calculateDiscount(5000, 6000)).toBe(0);
+  });
+
+  it("calculates accurate Rupee savings between MRP and discount price", () => {
+    expect(calculateSavings(69900, 54999)).toBe(14901);
+    expect(calculateSavings(5000, 5000)).toBe(0);
+    expect(calculateSavings(5000, 6000)).toBe(0);
+    expect(calculateSavings(0, 100)).toBe(0);
   });
 
   it("detects stale offers older than 24 hours", () => {

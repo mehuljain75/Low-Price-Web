@@ -16,6 +16,7 @@ import {
   Headphones,
   Shirt,
   Refrigerator,
+  Sparkles,
 } from "lucide-react";
 
 export const Navbar: React.FC = () => {
@@ -37,6 +38,7 @@ export const Navbar: React.FC = () => {
     { name: "Audio", slug: "audio", icon: Headphones },
     { name: "Fashion", slug: "fashion", icon: Shirt },
     { name: "Appliances", slug: "appliances", icon: Refrigerator },
+    { name: "Beauty", slug: "beauty", icon: Sparkles },
   ];
 
   return (

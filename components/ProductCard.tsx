@@ -5,8 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink, Tag, Clock, ArrowRight, ShieldAlert } from "lucide-react";
 import { PriceComparison } from "@/lib/types";
-import { formatINR, calculateDiscount, getRelativeTime } from "@/lib/formatters";
+import { formatINR, calculateDiscount, calculateSavings, getRelativeTime } from "@/lib/formatters";
 import { DemoBadge } from "./DemoBadge";
+import { WhatsAppShareButton } from "./WhatsAppShareButton";
 
 interface ProductCardProps {
   comparison: PriceComparison;
@@ -54,8 +55,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ comparison }) => {
             )}
           </div>
 
-          <div className="absolute top-2.5 right-2.5 z-10">
-            <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-200 shadow-xs">
+          <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
+            <WhatsAppShareButton
+              title={product.title}
+              price={lowestOffer.price}
+              originalPrice={lowestOffer.originalPrice}
+              productId={product.id}
+              variant="icon"
+            />
+            <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-200 shadow-2xs">
               {offers.length} {offers.length === 1 ? "Store" : "Stores"}
             </span>
           </div>
@@ -110,13 +118,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ comparison }) => {
             <div className="text-[10px] font-medium text-emerald-700 uppercase tracking-wider">
               Lowest among tracked stores:
             </div>
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-baseline gap-2 flex-wrap">
               <span className="text-xl font-black text-slate-900 tracking-tight">
                 {formatINR(lowestOffer.price)}
               </span>
               {lowestOffer.originalPrice > lowestOffer.price && (
                 <span className="text-xs text-slate-400 line-through">
                   {formatINR(lowestOffer.originalPrice)}
+                </span>
+              )}
+              {lowestOffer.originalPrice > lowestOffer.price && (
+                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                  Save {formatINR(calculateSavings(lowestOffer.originalPrice, lowestOffer.price))}
                 </span>
               )}
             </div>

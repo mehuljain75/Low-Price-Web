@@ -25,6 +25,14 @@ export function calculateDiscount(originalPrice: number, currentPrice: number): 
 }
 
 /**
+ * Calculates Rupee savings amount between MRP and discounted price
+ */
+export function calculateSavings(originalPrice: number, currentPrice: number): number {
+  if (!originalPrice || originalPrice <= currentPrice) return 0;
+  return Math.max(0, originalPrice - currentPrice);
+}
+
+/**
  * Returns human-readable relative time (e.g. "Just now", "25m ago", "2h ago", "1d ago")
  */
 export function getRelativeTime(isoString: string): string {

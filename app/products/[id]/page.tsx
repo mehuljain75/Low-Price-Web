@@ -13,10 +13,12 @@ import {
   Barcode,
 } from "lucide-react";
 import { repository } from "@/lib/data/repository";
-import { formatINR, calculateDiscount } from "@/lib/formatters";
+import { formatINR, calculateDiscount, calculateSavings } from "@/lib/formatters";
 import { PriceComparisonTable } from "@/components/PriceComparisonTable";
 import { ProductCard } from "@/components/ProductCard";
 import { DemoBadge } from "@/components/DemoBadge";
+import { WhatsAppShareButton } from "@/components/WhatsAppShareButton";
+import { MobileStickyBuyBar } from "@/components/MobileStickyBuyBar";
 
 interface ProductDetailsPageProps {
   params: Promise<{
@@ -151,13 +153,13 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
 
           {/* Lowest Tracked Price Highlight Card */}
           {lowestOffer && (
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-5 sm:p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-100 flex items-center gap-1">
                   <Sparkles className="w-4 h-4 text-amber-300" />
                   Lowest Price Among Tracked Stores
                 </span>
-                <div className="flex items-baseline gap-3">
+                <div className="flex items-baseline gap-3 flex-wrap">
                   <span className="text-3xl sm:text-4xl font-black tracking-tight">
                     {formatINR(lowestOffer.price)}
                   </span>
@@ -166,18 +168,31 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
                       MRP: {formatINR(lowestOffer.originalPrice)}
                     </span>
                   )}
+                  {lowestOffer.originalPrice > lowestOffer.price && (
+                    <span className="bg-amber-300 text-amber-950 text-xs font-black px-2.5 py-1 rounded-full shadow-2xs">
+                      Save {formatINR(calculateSavings(lowestOffer.originalPrice, lowestOffer.price))}
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-emerald-100">
                   Available on <strong>{lowestOffer.retailerName}</strong> • {lowestOffer.shippingCost === 0 ? "Free Shipping" : `+₹${lowestOffer.shippingCost} Shipping`}
                 </div>
               </div>
 
-              <div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-shrink-0">
+                <WhatsAppShareButton
+                  title={product.title}
+                  price={lowestOffer.price}
+                  originalPrice={lowestOffer.originalPrice}
+                  productId={product.id}
+                  variant="button"
+                  className="bg-emerald-800/60 hover:bg-emerald-800 text-white border border-emerald-400/30"
+                />
                 <a
                   href={`/api/redirect?offerId=${lowestOffer.id}`}
                   target="_blank"
                   rel="nofollow sponsored noopener"
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-emerald-800 font-extrabold text-sm hover:bg-emerald-50 transition-colors shadow-sm"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-emerald-800 font-extrabold text-sm hover:bg-emerald-50 transition-colors shadow-sm text-center"
                 >
                   Buy for {formatINR(lowestOffer.price)} &rarr;
                 </a>
@@ -235,6 +250,18 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
             ))}
           </div>
         </section>
+      )}
+
+      {/* Sticky Mobile Buy Bar */}
+      {lowestOffer && (
+        <MobileStickyBuyBar
+          title={product.title}
+          price={lowestOffer.price}
+          originalPrice={lowestOffer.originalPrice}
+          retailerName={lowestOffer.retailerName}
+          offerId={lowestOffer.id}
+          inStock={lowestOffer.inStock}
+        />
       )}
     </div>
   );

@@ -4,6 +4,8 @@ import { Search, X, SlidersHorizontal } from "lucide-react";
 import { repository } from "@/lib/data/repository";
 import { ProductCard } from "@/components/ProductCard";
 import { FilterSidebar } from "@/components/FilterSidebar";
+import { SortDropdown } from "@/components/SortDropdown";
+import { MobileFilterDrawer } from "@/components/MobileFilterDrawer";
 import { RetailerSlug } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -72,39 +74,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         </div>
 
         {/* Sorting Dropdown */}
-        <div className="flex items-center gap-2">
-          <label htmlFor="sort" className="text-xs font-semibold text-slate-500 whitespace-nowrap">
-            Sort by:
-          </label>
-          <form method="GET" action="/products" className="inline-block">
-            {/* Preserve existing search params in hidden fields */}
-            {searchQuery && <input type="hidden" name="search" value={searchQuery} />}
-            {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
-            {retailerSlug && <input type="hidden" name="retailer" value={retailerSlug} />}
-            {effectiveBrand && <input type="hidden" name="brand" value={effectiveBrand} />}
-            {minPrice !== undefined && <input type="hidden" name="minPrice" value={minPrice} />}
-            {maxPrice !== undefined && <input type="hidden" name="maxPrice" value={maxPrice} />}
-            {inStockOnly && <input type="hidden" name="inStock" value="true" />}
-
-            <select
-              id="sort"
-              name="sortBy"
-              defaultValue={sortBy}
-              // Automatically submit form on change
-              className="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="discount">Highest Discount %</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="newest">Recently Added</option>
-            </select>
-            <noscript>
-              <button type="submit" className="ml-2 text-xs bg-slate-200 px-2 py-1 rounded">
-                Sort
-              </button>
-            </noscript>
-          </form>
-        </div>
+        <SortDropdown currentSort={sortBy} />
       </div>
 
       {/* Active Filter Badges */}
@@ -150,10 +120,24 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         </div>
       )}
 
+      {/* Mobile Filter Drawer (Bottom Sheet on mobile screens) */}
+      <MobileFilterDrawer
+        categories={categories}
+        retailers={retailers}
+        brands={brands}
+        currentCategory={categorySlug}
+        currentRetailer={retailerSlug}
+        currentBrand={effectiveBrand}
+        currentMinPrice={minPrice}
+        currentMaxPrice={maxPrice}
+        currentInStock={inStockOnly}
+        totalProductsCount={comparisons.length}
+      />
+
       {/* Main Grid: Sidebar + Product Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        {/* Left Column: Filter Sidebar */}
-        <div className="lg:col-span-1 sticky top-24">
+        {/* Left Column: Filter Sidebar (Desktop Only) */}
+        <div className="hidden lg:block lg:col-span-1 sticky top-24">
           <FilterSidebar
             categories={categories}
             retailers={retailers}
