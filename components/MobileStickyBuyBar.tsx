@@ -11,6 +11,7 @@ interface MobileStickyBuyBarProps {
   retailerName: string;
   offerId: string;
   inStock: boolean;
+  productUrl?: string;
 }
 
 export const MobileStickyBuyBar: React.FC<MobileStickyBuyBarProps> = ({
@@ -20,6 +21,7 @@ export const MobileStickyBuyBar: React.FC<MobileStickyBuyBarProps> = ({
   retailerName,
   offerId,
   inStock,
+  productUrl,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -75,7 +77,7 @@ export const MobileStickyBuyBar: React.FC<MobileStickyBuyBarProps> = ({
 
         {/* Right: Primary Action Button */}
         <a
-          href={`/api/redirect?offerId=${offerId}`}
+          href={`/api/redirect?offerId=${offerId}&title=${encodeURIComponent(title)}${productUrl ? `&url=${encodeURIComponent(productUrl)}` : ""}`}
           target="_blank"
           rel="nofollow sponsored noopener"
           className="flex-shrink-0 flex items-center gap-1.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold text-xs px-5 py-2.5 rounded-full shadow-md active:scale-95 transition-all"

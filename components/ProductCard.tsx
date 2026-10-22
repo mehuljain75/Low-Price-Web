@@ -166,7 +166,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ comparison }) => {
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
         <a
-          href={`/api/redirect?offerId=${lowestOffer.id}`}
+          href={`/api/redirect?offerId=${lowestOffer.id}&title=${encodeURIComponent(product.title)}&url=${encodeURIComponent(lowestOffer.productUrl || "")}`}
           target="_blank"
           rel="nofollow sponsored noopener"
           className="flex items-center justify-center gap-1 py-2 px-3 text-xs font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-xl shadow-xs transition-colors"

@@ -89,12 +89,16 @@ interface BankOfferCalculatorProps {
   basePrice: number;
   retailerName: string;
   offerId: string;
+  productTitle?: string;
+  productUrl?: string;
 }
 
 export const BankOfferCalculator: React.FC<BankOfferCalculatorProps> = ({
   basePrice,
   retailerName,
   offerId,
+  productTitle,
+  productUrl,
 }) => {
   const [selectedCardId, setSelectedCardId] = useState<string>("hdfc");
 
@@ -233,7 +237,7 @@ export const BankOfferCalculator: React.FC<BankOfferCalculatorProps> = ({
         {/* 1-Click Outbound Buy CTA with Applied Card Discount */}
         <div className="flex flex-col sm:flex-row items-stretch md:items-center gap-3 flex-shrink-0">
           <a
-            href={`/api/redirect?offerId=${offerId}`}
+            href={`/api/redirect?offerId=${offerId}${productTitle ? `&title=${encodeURIComponent(productTitle)}` : ""}${productUrl ? `&url=${encodeURIComponent(productUrl)}` : ""}`}
             target="_blank"
             rel="nofollow sponsored noopener"
             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-sm transition-all shadow-md text-center group"

@@ -162,7 +162,7 @@ export const PriceComparisonTable: React.FC<PriceComparisonTableProps> = ({ offe
                 </div>
 
                 <a
-                  href={`/api/redirect?offerId=${offer.id}`}
+                  href={`/api/redirect?offerId=${offer.id}&title=${encodeURIComponent(offer.title)}&url=${encodeURIComponent(offer.productUrl || "")}`}
                   target="_blank"
                   rel="nofollow sponsored noopener"
                   className={`inline-flex items-center justify-center gap-1.5 py-2.5 px-5 rounded-xl font-bold text-xs shadow-sm transition-all text-white ${

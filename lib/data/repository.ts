@@ -416,7 +416,7 @@ export class ProductRepository {
             retailerSlug: "flipkart",
             retailerProductId: `fk_${asin}`,
             title: reconstructedProduct.title,
-            productUrl: `https://www.flipkart.com/search?q=${encodeURIComponent(asin)}`,
+            productUrl: `https://www.flipkart.com/search?q=${encodeURIComponent(reconstructedProduct.title)}`,
             price: 1049,
             originalPrice: 1499,
             currency: "INR",

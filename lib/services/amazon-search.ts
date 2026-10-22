@@ -203,7 +203,7 @@ function createCompanionOffers(
       retailerSlug: "myntra",
       retailerProductId: `myntra_${asin}`,
       title,
-      productUrl: `https://www.myntra.com/${encodeURIComponent(title.toLowerCase().replace(/[^a-z0-9]+/g, "-"))}`,
+      productUrl: `https://www.myntra.com/search?rawQuery=${encodeURIComponent(title)}`,
       price: myntraPrice,
       originalPrice: mrp > myntraPrice ? mrp : Math.round(myntraPrice * 1.3),
       currency: "INR",
@@ -976,6 +976,25 @@ const AUDIO_PRODUCTS = [
   },
 ];
 
+export const ALL_CURATED = [
+  ...HEEL_PRODUCTS,
+  ...FOOTWEAR_PRODUCTS,
+  ...ETHNIC_FASHION_PRODUCTS,
+  ...WATCH_PRODUCTS,
+  ...APPLIANCE_PRODUCTS,
+  ...BEAUTY_PRODUCTS,
+  ...MOBILE_PRODUCTS,
+  ...LAPTOP_PRODUCTS,
+  ...AUDIO_PRODUCTS,
+];
+
+/**
+ * Lookup curated product by ASIN
+ */
+export function findCuratedItemByAsin(asin: string) {
+  return ALL_CURATED.find((item) => item.asin === asin) || null;
+}
+
 /**
  * Fallback generator with authentic real product photos from Amazon India
  * Guarantees zero blank/placeholder images across all categories
@@ -994,18 +1013,6 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
     rating: number;
     ratingCount: number;
   }[];
-
-  const ALL_CURATED = [
-    ...HEEL_PRODUCTS,
-    ...FOOTWEAR_PRODUCTS,
-    ...ETHNIC_FASHION_PRODUCTS,
-    ...WATCH_PRODUCTS,
-    ...APPLIANCE_PRODUCTS,
-    ...BEAUTY_PRODUCTS,
-    ...MOBILE_PRODUCTS,
-    ...LAPTOP_PRODUCTS,
-    ...AUDIO_PRODUCTS,
-  ];
 
   // 1. Check direct brand match
   const brandMatches = ALL_CURATED.filter(

@@ -282,5 +282,100 @@ describe("Repository Brand Search & Filtering", () => {
     expect(outboundUrl).toContain("affid=");
     expect(outboundUrl).toContain("affExtParam1=df_web");
   });
+
+  describe("Retailer Redirect Route & Search URL Integrity", () => {
+    it("redirects Flipkart demo offer to live Flipkart search", async () => {
+      const { GET } = await import("@/app/api/redirect/route");
+      const { NextRequest } = await import("next/server");
+      const req = new NextRequest("http://localhost:3000/api/redirect?offerId=off_iphone_15_128_fk");
+      const res = await GET(req);
+
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toContain("flipkart.com/search");
+      expect(location).toContain("Apple+iPhone+15");
+      expect(location).toContain("affid=");
+    });
+
+    it("redirects Myntra demo offer to live Myntra search", async () => {
+      const { GET } = await import("@/app/api/redirect/route");
+      const { NextRequest } = await import("next/server");
+      const req = new NextRequest("http://localhost:3000/api/redirect?offerId=off_levis_myntra");
+      const res = await GET(req);
+
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toContain("myntra.com/search?rawQuery=");
+      expect(location).toContain("Levis");
+    });
+
+    it("redirects AJIO demo offer to live AJIO search", async () => {
+      const { GET } = await import("@/app/api/redirect/route");
+      const { NextRequest } = await import("next/server");
+      const req = new NextRequest("http://localhost:3000/api/redirect?offerId=off_libas_ajio");
+      const res = await GET(req);
+
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toContain("ajio.com/search/?text=");
+      expect(location).toContain("Libas");
+    });
+
+    it("redirects Meesho demo offer to live Meesho search", async () => {
+      const { GET } = await import("@/app/api/redirect/route");
+      const { NextRequest } = await import("next/server");
+      const req = new NextRequest("http://localhost:3000/api/redirect?offerId=off_libas_meesho");
+      const res = await GET(req);
+
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toContain("meesho.com/search?q=");
+      expect(location).toContain("Libas");
+    });
+
+    it("resolves cold worker companion Flipkart offer using title rather than raw ASIN", async () => {
+      const { GET } = await import("@/app/api/redirect/route");
+      const { NextRequest } = await import("next/server");
+      const req = new NextRequest(
+        "http://localhost:3000/api/redirect?offerId=off_fk_B09XYZ9999&title=Theater%20Kitten%20Heels"
+      );
+      const res = await GET(req);
+
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toContain("flipkart.com/search?q=");
+      expect(location).toMatch(/Theater(\+|\%20)Kitten(\+|\%20)Heels/);
+      expect(location).not.toContain("search?q=B09XYZ9999");
+    });
+
+    it("resolves cold worker companion Myntra offer to search query with title", async () => {
+      const { GET } = await import("@/app/api/redirect/route");
+      const { NextRequest } = await import("next/server");
+      const req = new NextRequest(
+        "http://localhost:3000/api/redirect?offerId=off_myntra_B09XYZ9999&title=Theater%20Kitten%20Heels"
+      );
+      const res = await GET(req);
+
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toContain("myntra.com/search?rawQuery=Theater%20Kitten%20Heels");
+    });
+
+    it("attaches affiliate params when explicit retailer URL is passed", async () => {
+      const { GET } = await import("@/app/api/redirect/route");
+      const { NextRequest } = await import("next/server");
+      const target = "https://www.flipkart.com/search?q=Sony+Headphones";
+      const req = new NextRequest(
+        `http://localhost:3000/api/redirect?offerId=off_fk_custom&url=${encodeURIComponent(target)}`
+      );
+      const res = await GET(req);
+
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toContain("flipkart.com/search?q=Sony+Headphones");
+      expect(location).toContain("affid=dealfinder");
+    });
+  });
 });
+
 

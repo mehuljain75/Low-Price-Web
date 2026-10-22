@@ -274,7 +274,7 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
                   className="bg-emerald-800/60 hover:bg-emerald-800 text-white border border-emerald-400/30"
                 />
                 <a
-                  href={`/api/redirect?offerId=${lowestOffer.id}`}
+                  href={`/api/redirect?offerId=${lowestOffer.id}&title=${encodeURIComponent(product.title)}&url=${encodeURIComponent(lowestOffer.productUrl || "")}`}
                   target="_blank"
                   rel="nofollow sponsored noopener"
                   className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-emerald-800 font-extrabold text-sm hover:bg-emerald-50 transition-colors shadow-sm text-center"
@@ -320,6 +320,8 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
           basePrice={lowestOffer.price}
           retailerName={lowestOffer.retailerName}
           offerId={lowestOffer.id}
+          productTitle={product.title}
+          productUrl={lowestOffer.productUrl}
         />
       )}
 
@@ -364,6 +366,7 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
           retailerName={lowestOffer.retailerName}
           offerId={lowestOffer.id}
           inStock={lowestOffer.inStock}
+          productUrl={lowestOffer.productUrl}
         />
       )}
     </div>
