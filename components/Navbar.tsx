@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -17,16 +17,69 @@ import {
   Shirt,
   Refrigerator,
   Sparkles,
+  ArrowRight,
 } from "lucide-react";
+import { formatINR } from "@/lib/formatters";
+
+interface SearchSuggestionProduct {
+  id: string;
+  title: string;
+  brand: string;
+  price: number;
+  originalPrice: number;
+  imageUrl: string;
+  categorySlug: string;
+  storeCount: number;
+}
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState<{
+    products: SearchSuggestionProduct[];
+    categories: Array<{ name: string; slug: string }>;
+  }>({ products: [], categories: [] });
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSuggestions({ products: [], categories: [] });
+      setShowDropdown(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSuggestions(data);
+          setShowDropdown(true);
+        }
+      } catch (err) {
+        console.warn("Search autocomplete fetch failed:", err);
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setShowDropdown(false);
       router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setMobileMenuOpen(false);
     }
@@ -84,28 +137,100 @@ export const Navbar: React.FC = () => {
             </div>
           </Link>
 
-          {/* Search Form */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden md:flex flex-1 max-w-xl relative items-center"
-          >
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Search iPhone 15, Samsung Galaxy, MacBooks, Earbuds, Kurta..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-24 py-2 text-sm bg-slate-50 border border-slate-300 rounded-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all placeholder:text-slate-400"
-              />
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <button
-                type="submit"
-                className="absolute right-1 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-medium text-xs px-4 py-1.5 rounded-full transition-colors shadow-sm"
-              >
-                Compare
-              </button>
-            </div>
-          </form>
+          {/* Search Form with Live Autocomplete */}
+          <div ref={searchContainerRef} className="hidden md:flex flex-1 max-w-xl relative items-center">
+            <form onSubmit={handleSearch} className="w-full relative">
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  placeholder="Search iPhone 15, Samsung Galaxy, MacBooks, Earbuds, Kurta..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    if (suggestions.products.length > 0 || suggestions.categories.length > 0) {
+                      setShowDropdown(true);
+                    }
+                  }}
+                  className="w-full pl-10 pr-24 py-2 text-sm bg-slate-50 border border-slate-300 rounded-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all placeholder:text-slate-400"
+                />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <button
+                  type="submit"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-medium text-xs px-4 py-1.5 rounded-full transition-colors shadow-sm"
+                >
+                  Compare
+                </button>
+              </div>
+            </form>
+
+            {/* Live Autocomplete Dropdown */}
+            {showDropdown && (suggestions.products.length > 0 || suggestions.categories.length > 0) && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50">
+                {suggestions.categories.length > 0 && (
+                  <div className="p-2 border-b border-slate-100 bg-slate-50 flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 pl-2">
+                      Categories:
+                    </span>
+                    {suggestions.categories.map((c) => (
+                      <button
+                        key={c.slug}
+                        type="button"
+                        onClick={() => {
+                          setShowDropdown(false);
+                          router.push(`/products?category=${c.slug}`);
+                        }}
+                        className="text-xs bg-white hover:bg-orange-50 hover:text-orange-600 text-slate-700 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition-colors"
+                      >
+                        {c.name} &rarr;
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+                  {suggestions.products.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        setShowDropdown(false);
+                        router.push(`/products/${p.id}`);
+                      }}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-orange-50/50 transition-colors text-left group"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 p-1 flex-shrink-0 flex items-center justify-center">
+                        <img src={p.imageUrl} alt={p.title} className="w-full h-full object-contain" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] text-orange-600 font-bold uppercase tracking-wider">
+                          {p.brand}
+                        </div>
+                        <div className="text-xs font-semibold text-slate-900 truncate group-hover:text-orange-600">
+                          {p.title}
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-xs font-black text-slate-900">
+                          {formatINR(p.price)}
+                        </div>
+                        <div className="text-[10px] text-emerald-600 font-bold">
+                          {p.storeCount} Stores
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  className="w-full py-2.5 px-4 text-xs font-bold text-center bg-slate-50 hover:bg-slate-100 text-orange-600 transition-colors border-t border-slate-100 block"
+                >
+                  View all results for &ldquo;{searchQuery}&rdquo; &rarr;
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-6">
@@ -151,13 +276,18 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Mobile Search Input */}
-        <div className="md:hidden pb-3">
+        <div className="md:hidden pb-3 relative">
           <form onSubmit={handleSearch} className="relative">
             <input
               type="text"
               placeholder="Search mobiles, laptops, fashion..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => {
+                if (suggestions.products.length > 0 || suggestions.categories.length > 0) {
+                  setShowDropdown(true);
+                }
+              }}
               className="w-full pl-9 pr-20 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -168,6 +298,36 @@ export const Navbar: React.FC = () => {
               Search
             </button>
           </form>
+
+          {/* Mobile Live Autocomplete Dropdown */}
+          {showDropdown && (suggestions.products.length > 0 || suggestions.categories.length > 0) && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+              <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+                {suggestions.products.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setShowDropdown(false);
+                      router.push(`/products/${p.id}`);
+                    }}
+                    className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-orange-50/50 transition-colors text-left"
+                  >
+                    <div className="w-8 h-8 rounded bg-white border border-slate-200 p-0.5 flex-shrink-0 flex items-center justify-center">
+                      <img src={p.imageUrl} alt={p.title} className="w-full h-full object-contain" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] text-orange-600 font-bold uppercase">{p.brand}</div>
+                      <div className="text-xs font-medium text-slate-900 truncate">{p.title}</div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-xs font-black text-slate-900">{formatINR(p.price)}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

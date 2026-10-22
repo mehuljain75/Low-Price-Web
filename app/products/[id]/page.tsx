@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,6 +20,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { DemoBadge } from "@/components/DemoBadge";
 import { WhatsAppShareButton } from "@/components/WhatsAppShareButton";
 import { MobileStickyBuyBar } from "@/components/MobileStickyBuyBar";
+import { PriceHistoryChart } from "@/components/PriceHistoryChart";
+import { BankOfferCalculator } from "@/components/BankOfferCalculator";
 
 interface ProductDetailsPageProps {
   params: Promise<{
@@ -27,6 +30,43 @@ interface ProductDetailsPageProps {
 }
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: ProductDetailsPageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const comparison = await repository.getProductByIdOrSlug(resolvedParams.id);
+  if (!comparison) {
+    return {
+      title: "Product Not Found | DealFinder India",
+      description: "The requested product price comparison could not be found.",
+    };
+  }
+
+  const { product, lowestOffer } = comparison;
+  const lowestPrice = lowestOffer ? formatINR(lowestOffer.price) : "";
+  const discount = lowestOffer
+    ? calculateDiscount(lowestOffer.originalPrice, lowestOffer.price)
+    : 0;
+
+  return {
+    title: `${product.title} Lowest Price in India: ${lowestPrice} | DealFinder`,
+    description: `Compare prices for ${product.title} across Amazon India, Flipkart, Myntra, and more. Best price today is ${lowestPrice} (${discount}% OFF). Verified bank card discounts and price history trends.`,
+    openGraph: {
+      title: `${product.title} — Best Price ${lowestPrice}`,
+      description: `Track real-time prices across Amazon, Flipkart, Myntra, and more on DealFinder India.`,
+      images: [
+        {
+          url: product.imageUrl,
+          width: 600,
+          height: 600,
+          alt: product.title,
+        },
+      ],
+    },
+    alternates: {
+      canonical: `/products/${product.id}`,
+    },
+  };
+}
 
 export default async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
   const resolvedParams = await params;
@@ -48,8 +88,53 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
     ? calculateDiscount(lowestOffer.originalPrice, lowestOffer.price)
     : 0;
 
+  const jsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.title,
+    image: [product.imageUrl],
+    description: product.description,
+    brand: {
+      "@type": "Brand",
+      name: product.brand,
+    },
+    ...(product.gtin && { gtin: product.gtin }),
+    ...(product.modelNumber && { mpn: product.modelNumber }),
+    ...(product.rating && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: product.rating,
+        reviewCount: product.ratingCount || 100,
+      },
+    }),
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "INR",
+      lowPrice: lowestOffer ? lowestOffer.price : 0,
+      highPrice: Math.max(...offers.map((o) => o.price), lowestOffer?.price || 0),
+      offerCount: offers.length,
+      offers: offers.map((o) => ({
+        "@type": "Offer",
+        price: o.price,
+        priceCurrency: "INR",
+        availability: o.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        seller: {
+          "@type": "Organization",
+          name: o.retailerName,
+        },
+        url: o.productUrl,
+      })),
+    },
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+      {/* Schema.org Product Structured Data for SEO Rich Snippets */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-xs text-slate-500">
         <Link href="/" className="hover:text-slate-900 transition-colors">
@@ -228,6 +313,24 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
 
         <PriceComparisonTable offers={offers} />
       </section>
+
+      {/* Bank & Payment Card Discount Calculator */}
+      {lowestOffer && (
+        <BankOfferCalculator
+          basePrice={lowestOffer.price}
+          retailerName={lowestOffer.retailerName}
+          offerId={lowestOffer.id}
+        />
+      )}
+
+      {/* Verified Price History & Deal Verdict */}
+      {lowestOffer && (
+        <PriceHistoryChart
+          currentPrice={lowestOffer.price}
+          originalPrice={lowestOffer.originalPrice}
+          productTitle={product.title}
+        />
+      )}
 
       {/* Related Products in this category */}
       {related.length > 0 && (

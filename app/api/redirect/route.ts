@@ -49,7 +49,37 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // 3. Look up offer in demo catalog
+  // 3. Direct ASIN / query fallback for Flipkart offers (e.g. off_fk_B0DFMGNY45)
+  if (offerId.startsWith("off_fk_")) {
+    const asinOrQuery = offerId.replace("off_fk_", "");
+    const targetUrl = `https://www.flipkart.com/search?q=${encodeURIComponent(asinOrQuery)}`;
+    const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("flipkart", targetUrl, subId);
+    return NextResponse.redirect(finalAffiliateUrl, {
+      status: 307,
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+        "X-Affiliate-Redirect": "true",
+        "X-Retailer": "flipkart",
+      },
+    });
+  }
+
+  // 4. Direct ASIN / query fallback for Myntra offers (e.g. off_myntra_B0DFMGNY45)
+  if (offerId.startsWith("off_myntra_")) {
+    const asinOrQuery = offerId.replace("off_myntra_", "");
+    const targetUrl = `https://www.myntra.com/${encodeURIComponent(asinOrQuery.toLowerCase().replace(/[^a-z0-9]+/g, "-"))}`;
+    const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("myntra", targetUrl, subId);
+    return NextResponse.redirect(finalAffiliateUrl, {
+      status: 307,
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+        "X-Affiliate-Redirect": "true",
+        "X-Retailer": "myntra",
+      },
+    });
+  }
+
+  // 5. Look up offer in demo catalog
   const offer = demoOffers.find((o) => o.id === offerId);
 
   if (!offer) {

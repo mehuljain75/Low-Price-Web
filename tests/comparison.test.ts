@@ -251,5 +251,36 @@ describe("Repository Brand Search & Filtering", () => {
       expect(comp.lowestOffer?.isDemo).toBe(false);
     }
   });
+
+  it("generates companion multi-store offers (Amazon + Flipkart) for live products", async () => {
+    const { repository } = await import("@/lib/data/repository");
+    const comparison = await repository.getProductByIdOrSlug("prod_amz_B0CHX1W1XY");
+
+    expect(comparison).not.toBeNull();
+    if (comparison) {
+      // Must contain at least Amazon and Flipkart offers
+      expect(comparison.offers.length).toBeGreaterThanOrEqual(2);
+      const retailers = comparison.offers.map((o) => o.retailerSlug);
+      expect(retailers).toContain("amazon");
+      expect(retailers).toContain("flipkart");
+
+      // Verify trackedStoresCount matches
+      expect(comparison.trackedStoresCount).toBeGreaterThanOrEqual(2);
+      expect(comparison.lowestOffer).not.toBeNull();
+    }
+  });
+
+  it("constructs valid Flipkart affiliate search URLs", async () => {
+    const { adapterRegistry } = await import("@/lib/adapters/registry");
+    const outboundUrl = adapterRegistry.buildOutboundUrl(
+      "flipkart",
+      "https://www.flipkart.com/search?q=iPhone+15",
+      "df_web"
+    );
+
+    expect(outboundUrl).toContain("flipkart.com/search");
+    expect(outboundUrl).toContain("affid=");
+    expect(outboundUrl).toContain("affExtParam1=df_web");
+  });
 });
 

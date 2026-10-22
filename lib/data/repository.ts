@@ -295,9 +295,12 @@ export class ProductRepository {
 
     // Retailer filter
     if (filters.retailerSlug && filters.retailerSlug !== "all") {
-      comparisons = comparisons.filter((comp) =>
-        comp.offers.some((o) => o.retailerSlug === filters.retailerSlug)
-      );
+      comparisons = comparisons
+        .filter((comp) => comp.offers.some((o) => o.retailerSlug === filters.retailerSlug))
+        .map((comp) => {
+          const filteredOffers = comp.offers.filter((o) => o.retailerSlug === filters.retailerSlug);
+          return computeProductComparison(comp.product, filteredOffers, comp.category);
+        });
     }
 
     // In-stock only filter
@@ -361,13 +364,12 @@ export class ProductRepository {
     // Check live Amazon products
     if (idOrSlug.startsWith("prod_amz_") || idOrSlug.startsWith("amazon-")) {
       try {
-        const { getLiveProductById, getLiveOfferById } = await import("../services/amazon-search");
+        const { getLiveProductById, getLiveOffersByProductId } = await import("../services/amazon-search");
         const liveProd = getLiveProductById(idOrSlug);
         if (liveProd) {
-          const asin = liveProd.id.replace("prod_amz_", "");
-          const liveOffer = getLiveOfferById(`off_amz_${asin}`);
+          const liveOffers = getLiveOffersByProductId(liveProd.id);
           const cat = categories.find((c) => c.id === liveProd.categoryId);
-          return computeProductComparison(liveProd, liveOffer ? [liveOffer] : [], cat);
+          return computeProductComparison(liveProd, liveOffers, cat);
         }
 
         // Reconstruct from ASIN if accessed directly
@@ -403,8 +405,31 @@ export class ProductRepository {
             isStale: false,
             isDemo: false,
             dataSource: "api",
+            deliveryTimeEstimate: "2-3 business days (Prime)",
+            bankOffersDescription: "10% Instant Discount on Card Payments",
           };
-          return computeProductComparison(reconstructedProduct, [reconstructedOffer], categories[0]);
+          const fkOffer: Offer = {
+            id: `off_fk_${asin}`,
+            productId: reconstructedProduct.id,
+            retailerId: "ret_flipkart",
+            retailerName: "Flipkart",
+            retailerSlug: "flipkart",
+            retailerProductId: `fk_${asin}`,
+            title: reconstructedProduct.title,
+            productUrl: `https://www.flipkart.com/search?q=${encodeURIComponent(asin)}`,
+            price: 1049,
+            originalPrice: 1499,
+            currency: "INR",
+            inStock: true,
+            shippingCost: 0,
+            lastCheckedAt: new Date().toISOString(),
+            isStale: false,
+            isDemo: false,
+            dataSource: "api",
+            deliveryTimeEstimate: "2-4 business days (Flipkart Plus)",
+            bankOffersDescription: "10% Instant Discount on HDFC & SBI Bank Cards",
+          };
+          return computeProductComparison(reconstructedProduct, [reconstructedOffer, fkOffer], categories[0]);
         }
       } catch (err) {
         console.warn("[Repository] Error resolving live product:", err);
