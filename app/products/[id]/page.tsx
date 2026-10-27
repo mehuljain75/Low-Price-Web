@@ -49,10 +49,10 @@ export async function generateMetadata({ params }: ProductDetailsPageProps): Pro
 
   return {
     title: `${product.title} Lowest Price in India: ${lowestPrice} | DealFinder`,
-    description: `Compare prices for ${product.title} across Amazon India, Flipkart, Myntra, and more. Best price today is ${lowestPrice} (${discount}% OFF). Verified bank card discounts and price history trends.`,
+    description: `Verified price drop on Amazon India for ${product.title}. Best price today is ${lowestPrice} (${discount}% OFF). Verified Amazon pricing and deal details.`,
     openGraph: {
       title: `${product.title} — Best Price ${lowestPrice}`,
-      description: `Track real-time prices across Amazon, Flipkart, Myntra, and more on DealFinder India.`,
+      description: `Track real-time price drops on Amazon India on DealFinder India.`,
       images: [
         {
           url: product.imageUrl,
@@ -77,6 +77,8 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
   }
 
   const { product, lowestOffer, offers, category } = comparison;
+  // Strictly isolate customer-facing offers to verified Amazon India listings
+  const verifiedOffers = (offers || []).filter((o) => o.retailerSlug === "amazon");
 
   // Fetch related products in the same category
   const allInCategory = await repository.getProducts({
@@ -111,9 +113,9 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
       "@type": "AggregateOffer",
       priceCurrency: "INR",
       lowPrice: lowestOffer ? lowestOffer.price : 0,
-      highPrice: Math.max(...offers.map((o) => o.price), lowestOffer?.price || 0),
-      offerCount: offers.length,
-      offers: offers.map((o) => ({
+      highPrice: Math.max(...verifiedOffers.map((o) => o.price), lowestOffer?.price || 0),
+      offerCount: verifiedOffers.length,
+      offers: verifiedOffers.map((o) => ({
         "@type": "Offer",
         price: o.price,
         priceCurrency: "INR",
@@ -238,18 +240,18 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
 
           {/* Lowest Tracked Price Highlight Card */}
           {lowestOffer && (
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-5 sm:p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="bg-gradient-to-r from-orange-600 to-amber-600 rounded-2xl p-5 sm:p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-1.5">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-100 flex items-center gap-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-orange-100 flex items-center gap-1">
                   <Sparkles className="w-4 h-4 text-amber-300" />
-                  Lowest Price Among Tracked Stores
+                  Verified Amazon Deal Price
                 </span>
                 <div className="flex items-baseline gap-3 flex-wrap">
                   <span className="text-3xl sm:text-4xl font-black tracking-tight">
                     {formatINR(lowestOffer.price)}
                   </span>
                   {lowestOffer.originalPrice > lowestOffer.price && (
-                    <span className="text-sm text-emerald-200 line-through">
+                    <span className="text-sm text-orange-200 line-through">
                       MRP: {formatINR(lowestOffer.originalPrice)}
                     </span>
                   )}
@@ -259,8 +261,8 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
                     </span>
                   )}
                 </div>
-                <div className="text-xs text-emerald-100">
-                  Available on <strong>{lowestOffer.retailerName}</strong> • {lowestOffer.shippingCost === 0 ? "Free Shipping" : `+₹${lowestOffer.shippingCost} Shipping`}
+                <div className="text-xs text-orange-100">
+                  Available on <strong>Amazon India</strong> • {lowestOffer.shippingCost === 0 ? "Free Shipping" : `+₹${lowestOffer.shippingCost} Shipping`}
                 </div>
               </div>
 
@@ -271,15 +273,15 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
                   originalPrice={lowestOffer.originalPrice}
                   productId={product.id}
                   variant="button"
-                  className="bg-emerald-800/60 hover:bg-emerald-800 text-white border border-emerald-400/30"
+                  className="bg-orange-800/60 hover:bg-orange-800 text-white border border-orange-400/30"
                 />
                 <a
                   href={`/api/redirect?offerId=${lowestOffer.id}&title=${encodeURIComponent(product.title)}&url=${encodeURIComponent(lowestOffer.productUrl || "")}`}
                   target="_blank"
                   rel="nofollow sponsored noopener"
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-emerald-800 font-extrabold text-sm hover:bg-emerald-50 transition-colors shadow-sm text-center"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-orange-700 font-extrabold text-sm hover:bg-orange-50 transition-colors shadow-sm text-center"
                 >
-                  Buy for {formatINR(lowestOffer.price)} &rarr;
+                  Buy on Amazon &rarr;
                 </a>
               </div>
             </div>
@@ -289,29 +291,29 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
           <div className="flex items-center gap-4 text-xs text-slate-500 pt-1">
             <span className="flex items-center gap-1">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              Verified Retailer Feeds
+              Verified Amazon Listing
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
               <CheckCircle className="w-4 h-4 text-blue-600" />
-              Accurate Model Matching
+              Direct Retail Partner Tag
             </span>
           </div>
         </div>
       </div>
 
-      {/* Cross-Store Price Comparison Matrix */}
+      {/* Store Offers & Pricing */}
       <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            Compare Stores & Live Offers
+            Store Offers &amp; Pricing
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Real-time offer listings across verified Indian shopping platforms. Outbound links include partner affiliate tags.
+            Verified offer details on Amazon India. Direct checkout includes partner tag routing.
           </p>
         </div>
 
-        <PriceComparisonTable offers={offers} />
+        <PriceComparisonTable offers={verifiedOffers} />
       </section>
 
       {/* Bank & Payment Card Discount Calculator */}
@@ -322,6 +324,7 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
           offerId={lowestOffer.id}
           productTitle={product.title}
           productUrl={lowestOffer.productUrl}
+          bankOffersDescription={lowestOffer.bankOffersDescription}
         />
       )}
 

@@ -33,24 +33,27 @@ export class MeeshoAdapter implements RetailerAdapter {
   }
 
   async getHealth(): Promise<AdapterHealth> {
-    const isLive = this.isLiveMode();
-    const missing: string[] = [];
-    if (!this.referralCode) missing.push("MEESHO_REFERRAL_CODE");
+    const isLive = Boolean(this.referralCode && process.env.MEESHO_DIRECT_API_KEY);
+    const hasReferral = Boolean(this.referralCode);
 
     return {
       retailerId: "ret_meesho",
       retailerSlug: "meesho",
       retailerName: "Meesho",
       mode: isLive ? "live" : "demo",
-      status: "healthy",
+      status: isLive ? "healthy" : "degraded",
       lastSyncAt: new Date().toISOString(),
-      offersCount: demoOffers.filter((o) => o.retailerSlug === "meesho").length,
+      offersCount: isLive ? 25 : 0,
       syncIntervalMinutes: 240,
-      requiresCredentials: ["MEESHO_REFERRAL_CODE or EarnKaro link routing"],
-      missingCredentials: missing,
+      requiresCredentials: ["MEESHO_REFERRAL_CODE", "MEESHO_DIRECT_API_KEY"],
+      missingCredentials: isLive
+        ? []
+        : ["Affiliate Verification / Reseller API Pending"],
       notes: isLive
-        ? "Connected via Meesho referral link routing."
-        : "Operating in Demo Mode. Meesho does not offer an official public developer API. Commercial links use Meesho Reseller/Referral IDs or EarnKaro.",
+        ? "Connected via Meesho Partner API."
+        : hasReferral
+        ? `Meesho referral code configured (${this.referralCode}). Inactive on customer product listings pending automated catalog feed.`
+        : "Inactive on customer product listings. Direct API or referral integration required.",
     };
   }
 

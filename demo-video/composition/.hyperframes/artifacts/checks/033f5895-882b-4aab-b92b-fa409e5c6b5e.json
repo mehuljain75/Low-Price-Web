@@ -1,0 +1,3105 @@
+{
+  "ok": false,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "composition_file_too_large",
+        "severity": "warning",
+        "message": "This HTML composition file has 1309 lines. Smaller sub-compositions are easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "/Users/admin/Documents/mehul workspaace/demo-video/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Split coherent scenes or layers into separate .html files under compositions/, then mount them from the parent with data-composition-src so each file stays small enough to inspect, revise, and validate independently."
+      }
+    ],
+    "filesScanned": 1
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "duration": 210,
+    "samples": [
+      11.667,
+      35,
+      58.333,
+      81.667,
+      105,
+      128.333,
+      151.667,
+      175,
+      198.333
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 0,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": false,
+    "errorCount": 1,
+    "warningCount": 16,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "contrast_aa_failure",
+        "severity": "error",
+        "message": "Contrast is 4.21:1; WCAG AA requires 4.5:1.",
+        "text": "LIVE ENGINE",
+        "fg": "rgb(234,88,12)",
+        "bg": "rgb(58,32,24)",
+        "ratio": 4.21,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(235,99,28)",
+        "large": false,
+        "selector": "div:nth-of-type(3) > div:nth-of-type(1) > span:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 241.796875,
+          "y": 40.5,
+          "width": 84.546875,
+          "height": 19
+        },
+        "time": 11.667,
+        "times": [
+          11.667,
+          58.333,
+          105,
+          151.667
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.92:1; WCAG AA requires 4.5:1.",
+        "text": "5 Tracked Stores · Mobiles Category",
+        "fg": "rgb(148,163,184)",
+        "bg": "rgb(98,55,33)",
+        "ratio": 3.92,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(161,175,193)",
+        "large": false,
+        "selector": "div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 624,
+          "y": 480,
+          "width": 242.109375,
+          "height": 15
+        },
+        "time": 58.333,
+        "times": [
+          58.333
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.97:1; WCAG AA requires 4.5:1.",
+        "text": "₹65,999 - ₹69,999",
+        "fg": "rgb(16,185,129)",
+        "bg": "rgb(98,55,33)",
+        "ratio": 3.97,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(53,196,148)",
+        "large": false,
+        "selector": "div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1194.296875,
+          "y": 460,
+          "width": 161.703125,
+          "height": 21
+        },
+        "time": 58.333,
+        "times": [
+          58.333
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.59:1; WCAG AA requires 4.5:1.",
+        "text": "Save up to ₹13,901 (17%)",
+        "fg": "rgb(249,115,22)",
+        "bg": "rgb(98,55,33)",
+        "ratio": 3.59,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(250,148,77)",
+        "large": false,
+        "selector": "div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1194.296875,
+          "y": 481,
+          "width": 161.703125,
+          "height": 13
+        },
+        "time": 58.333,
+        "times": [
+          58.333
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.76:1; WCAG AA requires 4.5:1.",
+        "text": "4 Tracked Stores · High Demand",
+        "fg": "rgb(100,116,139)",
+        "bg": "rgb(17,23,38)",
+        "ratio": 3.76,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(114,129,149)",
+        "large": false,
+        "selector": "div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 623,
+          "y": 554,
+          "width": 329.0625,
+          "height": 15
+        },
+        "time": 58.333,
+        "times": [
+          58.333
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.76:1; WCAG AA requires 4.5:1.",
+        "text": "5 Tracked Stores",
+        "fg": "rgb(100,116,139)",
+        "bg": "rgb(17,23,38)",
+        "ratio": 3.76,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(114,129,149)",
+        "large": false,
+        "selector": "div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 623,
+          "y": 626,
+          "width": 248.578125,
+          "height": 15
+        },
+        "time": 58.333,
+        "times": [
+          58.333
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.33:1; WCAG AA requires 4.5:1.",
+        "text": "★",
+        "fg": "rgb(234,88,12)",
+        "bg": "rgb(48,33,29)",
+        "ratio": 4.33,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(235,94,21)",
+        "large": false,
+        "selector": "div:nth-of-type(8) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 998,
+          "y": 926.625,
+          "width": 32,
+          "height": 32
+        },
+        "time": 58.333,
+        "times": [
+          58.333
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.47:1; WCAG AA requires 4.5:1.",
+        "text": "10% INSTANT",
+        "fg": "rgb(248,250,252)",
+        "bg": "rgb(81,130,239)",
+        "ratio": 3.47,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(31,31,32)",
+        "large": false,
+        "selector": "div:nth-of-type(10) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 339.6199951171875,
+          "y": 343.94000244140625,
+          "width": 80.77874755859375,
+          "height": 16.6400146484375
+        },
+        "time": 105,
+        "times": [
+          105
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.24:1; WCAG AA requires 4.5:1.",
+        "text": "Max ₹1,500 Off",
+        "fg": "rgb(219,234,254)",
+        "bg": "rgb(37,99,235)",
+        "ratio": 4.24,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(230,241,254)",
+        "large": false,
+        "selector": "div:nth-of-type(10) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 339.6199951171875,
+          "y": 390.739990234375,
+          "width": 175.760009765625,
+          "height": 13.52001953125
+        },
+        "time": 105,
+        "times": [
+          105
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.33:1; WCAG AA requires 4.5:1.",
+        "text": "★",
+        "fg": "rgb(234,88,12)",
+        "bg": "rgb(48,33,29)",
+        "ratio": 4.33,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(235,94,21)",
+        "large": false,
+        "selector": "div:nth-of-type(10) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 998,
+          "y": 926.625,
+          "width": 32,
+          "height": 32
+        },
+        "time": 105,
+        "times": [
+          105
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.47:1; WCAG AA requires 4.5:1.",
+        "text": "🔥",
+        "fg": "rgb(248,250,252)",
+        "bg": "rgb(225,31,70)",
+        "ratio": 4.47,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(249,251,252)",
+        "large": false,
+        "selector": "div:nth-of-type(13) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div > span:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 351,
+          "y": 261,
+          "width": 22,
+          "height": 29
+        },
+        "time": 151.667,
+        "times": [
+          151.667
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.49:1; WCAG AA requires 4.5:1.",
+        "text": "VERIFIED PRICE DROPS",
+        "fg": "rgb(248,250,252)",
+        "bg": "rgb(232,79,104)",
+        "ratio": 3.49,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(31,31,32)",
+        "large": false,
+        "selector": "div:nth-of-type(13) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div > span:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 381,
+          "y": 266,
+          "width": 152.34375,
+          "height": 19
+        },
+        "time": 151.667,
+        "times": [
+          151.667
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.08:1; WCAG AA requires 4.5:1.",
+        "text": "Monitored in Real-Time ●",
+        "fg": "rgb(255,228,230)",
+        "bg": "rgb(233,82,17)",
+        "ratio": 3.08,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(32,29,29)",
+        "large": false,
+        "selector": "div:nth-of-type(13) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1407.375,
+          "y": 280.5,
+          "width": 161.625,
+          "height": 16
+        },
+        "time": 151.667,
+        "times": [
+          151.667
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.06:1; WCAG AA requires 4.5:1.",
+        "text": "Refreshed Every 15 Minutes",
+        "fg": "rgb(255,228,230)",
+        "bg": "rgb(233,83,17)",
+        "ratio": 3.06,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(32,29,29)",
+        "large": false,
+        "selector": "div:nth-of-type(13) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1407.375,
+          "y": 296.5,
+          "width": 161.625,
+          "height": 13
+        },
+        "time": 151.667,
+        "times": [
+          151.667
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.56:1; WCAG AA requires 4.5:1.",
+        "text": "≥ 40% OFF 🔥",
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(234,88,12)",
+        "ratio": 3.56,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(33,33,33)",
+        "large": false,
+        "selector": "#deal-tab-40",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 537.514404296875,
+          "y": 367.44000244140625,
+          "width": 138.40869140625,
+          "height": 42.1199951171875
+        },
+        "time": 151.667,
+        "times": [
+          151.667
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 4.33:1; WCAG AA requires 4.5:1.",
+        "text": "★",
+        "fg": "rgb(234,88,12)",
+        "bg": "rgb(48,33,29)",
+        "ratio": 4.33,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(235,94,21)",
+        "large": false,
+        "selector": "div:nth-of-type(13) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 998,
+          "y": 944.8125,
+          "width": 32,
+          "height": 32
+        },
+        "time": 151.667,
+        "times": [
+          151.667
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.98:1; WCAG AA requires 3:1.",
+        "text": "💬",
+        "fg": "rgb(255,255,255)",
+        "bg": "rgb(37,211,102)",
+        "ratio": 1.98,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(99,99,99)",
+        "large": true,
+        "selector": "div:nth-of-type(15) > div:nth-of-type(1) > div > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 630,
+          "y": 318.5,
+          "width": 37.875,
+          "height": 48
+        },
+        "time": 198.333,
+        "times": [
+          198.333
+        ]
+      }
+    ],
+    "enabled": true,
+    "samples": [
+      11.667,
+      58.333,
+      105,
+      151.667,
+      198.333
+    ],
+    "checked": 144,
+    "passed": 124
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 23,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "film_silent",
+        "severity": "warning",
+        "message": "This 210 s film has no sound source (no <audio>, no <video> with sound): add a music bed and sounds on the visible actions unless the person asked for silence; see references/sound.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 10.17 s (5.61–15.78 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 5.609,
+        "seconds": 10.167,
+        "floorSeconds": 3,
+        "until": 15.776
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 6.66 s (16.13–22.79 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 16.127,
+        "seconds": 6.661,
+        "floorSeconds": 3,
+        "until": 22.788
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 269 text elements stay under it for 0.5 s or more, the smallest \"FESTIVE 2026\" at 9 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "FESTIVE 2026",
+        "selector": "div.window-viewport > div:nth-of-type(1) > span:nth-of-type(1) > span:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 343.48,
+          "y": 253.28,
+          "width": 60.01,
+          "height": 11.05
+        },
+        "time": 24.541,
+        "times": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1.753,
+          2.104,
+          2.454,
+          2.805,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          24.541,
+          26.995,
+          26.995,
+          26.995,
+          26.995,
+          26.995,
+          26.995,
+          26.995,
+          26.995,
+          26.995,
+          27.346,
+          27.346,
+          27.346,
+          27.346,
+          27.346,
+          27.346,
+          34.357,
+          34.357,
+          34.357,
+          34.357,
+          34.357,
+          34.357,
+          34.357,
+          45.225,
+          45.225,
+          45.225,
+          45.225,
+          45.225,
+          45.225,
+          45.225,
+          45.225,
+          45.225,
+          45.225,
+          50.134,
+          50.134,
+          50.134,
+          50.134,
+          50.134,
+          50.134,
+          50.134,
+          50.134,
+          50.134,
+          50.134,
+          50.134,
+          50.134,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          64.858,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          86.244,
+          96.411,
+          96.411,
+          96.411,
+          96.411,
+          96.411,
+          96.411,
+          96.411,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          108.681,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          128.314,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.194,
+          146.544,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          163.372,
+          182.304,
+          182.304,
+          182.304,
+          182.304
+        ],
+        "fontPx": 9,
+        "floorPx": 28,
+        "seconds": 19.633,
+        "elements": [
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > span:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "FESTIVE 2026",
+            "fontPx": 9,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "#deal-verdict-banner > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "AUTHENTIC DROP",
+            "fontPx": 9.81,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#row-flipkart > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "LOWEST AMONG TRACKED STORES ✓",
+            "fontPx": 10,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#card-btn-hdfc > div:nth-of-type(1)",
+            "text": "10% INSTANT",
+            "fontPx": 10,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#card-btn-sbi > div:nth-of-type(1)",
+            "text": "10% INSTANT",
+            "fontPx": 10,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#card-btn-icici > div:nth-of-type(1)",
+            "text": "10% INSTANT",
+            "fontPx": 10,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(4) > div:nth-of-type(1)",
+            "text": "5% UNLIMITED",
+            "fontPx": 10,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(5) > div:nth-of-type(1)",
+            "text": "10% INSTANT",
+            "fontPx": 10,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(6) > div:nth-of-type(1)",
+            "text": "FLAT ₹1,000",
+            "fontPx": 10,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#chart-tooltip > div:nth-of-type(1)",
+            "text": "Today: All-Time Low",
+            "fontPx": 10,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "26% OFF",
+            "fontPx": 10,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "15% OFF",
+            "fontPx": 10,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.brand-cluster > span:nth-of-type(2)",
+            "text": "LIVE ENGINE",
+            "fontPx": 11,
+            "time": 0,
+            "seconds": 182.304
+          },
+          {
+            "selector": "#chapter-badge",
+            "text": "PRODUCT REVEAL",
+            "fontPx": 11,
+            "time": 0,
+            "seconds": 182.304
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "https://dealfinder.in",
+            "fontPx": 11,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "div.window-header > div:nth-of-type(3)",
+            "text": "SECURE 256-BIT",
+            "fontPx": 11,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "Live Feed Active ●",
+            "fontPx": 11,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Live PA-API ●",
+            "fontPx": 11,
+            "time": 26.995,
+            "seconds": 17.179
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "Live Verified ●",
+            "fontPx": 11,
+            "time": 26.995,
+            "seconds": 17.179
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(3)",
+            "text": "Fashion Aggregator ●",
+            "fontPx": 11,
+            "time": 26.995,
+            "seconds": 17.179
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(4) > div:nth-of-type(3)",
+            "text": "Trends Partner ●",
+            "fontPx": 11,
+            "time": 27.346,
+            "seconds": 16.828
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(5) > div:nth-of-type(3)",
+            "text": "Budget Direct ●",
+            "fontPx": 11,
+            "time": 27.346,
+            "seconds": 16.828
+          },
+          {
+            "selector": "#pitch-bar-scene1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHAT IT DOES",
+            "fontPx": 11,
+            "time": 34.357,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene1 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHY IT MATTERS",
+            "fontPx": 11,
+            "time": 34.357,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#scene-2 > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "https://dealfinder.in/search",
+            "fontPx": 11,
+            "time": 45.225,
+            "seconds": 18.932
+          },
+          {
+            "selector": "#pitch-bar-scene2 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHAT IT DOES",
+            "fontPx": 11,
+            "time": 45.225,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene2 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHY IT MATTERS",
+            "fontPx": 11,
+            "time": 45.225,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#search-opt-1 > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Save up to ₹13,901 (17%)",
+            "fontPx": 11,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#search-dropdown-menu > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "MRP ₹1,34,900",
+            "fontPx": 11,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#search-dropdown-menu > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "MRP ₹89,900",
+            "fontPx": 11,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#scene-3 > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "https://dealfinder.in/products/p_iphone15_128",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "VERIFIED SPECS",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#scene-3 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Lowest Available Price",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-flipkart > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "MRP ₹79,900",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-amazon > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(3)",
+            "text": "+₹4,000 More",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-amazon > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "MRP ₹79,900",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(3)",
+            "text": "+₹1,491 More",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "MRP ₹79,900",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#pitch-bar-scene3 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHAT IT DOES",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#pitch-bar-scene3 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHY IT MATTERS",
+            "fontPx": 11,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#scene-4 > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "https://dealfinder.in/products/p_iphone15_128#bank-calculator",
+            "fontPx": 11,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#card-btn-hdfc > div:nth-of-type(3)",
+            "text": "Max ₹1,500 Off",
+            "fontPx": 11,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#card-btn-sbi > div:nth-of-type(3)",
+            "text": "Max ₹1,750 Off",
+            "fontPx": 11,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#card-btn-icici > div:nth-of-type(3)",
+            "text": "Max ₹1,250 Off",
+            "fontPx": 11,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(4) > div:nth-of-type(3)",
+            "text": "Unlimited 5%",
+            "fontPx": 11,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(5) > div:nth-of-type(3)",
+            "text": "Max ₹1,000 Off",
+            "fontPx": 11,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(6) > div:nth-of-type(3)",
+            "text": "Min ₹8,000",
+            "fontPx": 11,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#bank-result-panel > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Total Savings: ₹15,401 (19% off MRP)",
+            "fontPx": 11,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#pitch-bar-scene4 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHAT IT DOES",
+            "fontPx": 11,
+            "time": 96.411,
+            "seconds": 10.868
+          },
+          {
+            "selector": "#pitch-bar-scene4 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHY IT MATTERS",
+            "fontPx": 11,
+            "time": 96.411,
+            "seconds": 10.868
+          },
+          {
+            "selector": "#scene-5 > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "https://dealfinder.in/products/p_iphone15_128#price-history",
+            "fontPx": 11,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#pitch-bar-scene5 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHAT IT DOES",
+            "fontPx": 11,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#pitch-bar-scene5 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHY IT MATTERS",
+            "fontPx": 11,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "https://dealfinder.in/products?category=laptops&brand=Apple",
+            "fontPx": 11,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "Save ₹29,910 Today",
+            "fontPx": 11,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#pitch-bar-scene6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHAT IT DOES",
+            "fontPx": 11,
+            "time": 128.314,
+            "seconds": 8.765
+          },
+          {
+            "selector": "#pitch-bar-scene6 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHY IT MATTERS",
+            "fontPx": 11,
+            "time": 128.314,
+            "seconds": 8.765
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "https://dealfinder.in/deals?minDiscount=40",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "43% OFF",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "Verified Drop",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "MRP ₹34,990 (Save ₹10,000)",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "67% OFF",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "Verified Drop",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "MRP ₹4,490 (Save ₹2,991)",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "48% OFF",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "Verified Drop",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "MRP ₹10,995 (Save ₹5,296)",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#pitch-bar-scene7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHAT IT DOES",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#pitch-bar-scene7 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHY IT MATTERS",
+            "fontPx": 11,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Refreshed Every 15 Minutes",
+            "fontPx": 11,
+            "time": 146.544,
+            "seconds": 15.076
+          },
+          {
+            "selector": "#scene-8 > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "https://dealfinder.in/sales",
+            "fontPx": 11,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#scene-8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "FESTIVE PLAYBOOK 2026",
+            "fontPx": 11,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "October 2026",
+            "fontPx": 11,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "October 2026",
+            "fontPx": 11,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "October 2026",
+            "fontPx": 11,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#pitch-bar-scene8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHAT IT DOES",
+            "fontPx": 11,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#pitch-bar-scene8 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "WHY IT MATTERS",
+            "fontPx": 11,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#deal-verdict-banner > div:nth-of-type(2)",
+            "text": "VERIFIED GENUINE DEAL ✓",
+            "fontPx": 11.77,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#scene-0 > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "The Hidden Shopper Tax",
+            "fontPx": 12,
+            "time": 0,
+            "seconds": 23.49
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "Tracking live price drops across Amazon, Flipkart, Myntra, AJIO & Meesho in Real-time.",
+            "fontPx": 12,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "✨ Smart Indian Price Comparison Engine",
+            "fontPx": 12,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "#scene-2 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Dual-Engine Typeahead",
+            "fontPx": 12,
+            "time": 45.225,
+            "seconds": 18.932
+          },
+          {
+            "selector": "#search-opt-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "5 Tracked Stores · Mobiles Category",
+            "fontPx": 12,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#search-dropdown-menu > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "4 Tracked Stores · High Demand",
+            "fontPx": 12,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#search-dropdown-menu > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "5 Tracked Stores",
+            "fontPx": 12,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#row-flipkart > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(3)",
+            "text": "In Stock",
+            "fontPx": 12,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-flipkart > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Free Delivery · Fast Dispatch · Bank Offers Available",
+            "fontPx": 12,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-amazon > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "In Stock",
+            "fontPx": 12,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-amazon > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Prime One-Day Free Delivery",
+            "fontPx": 12,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "In Stock",
+            "fontPx": 12,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Festive Fashion Special",
+            "fontPx": 12,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#scene-4 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "ACTIVE FESTIVE OFFERS ✨",
+            "fontPx": 12,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#bank-result-panel > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Selected: HDFC Bank Credit Card (Flipkart)",
+            "fontPx": 12,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#bank-result-panel > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Base Price:",
+            "fontPx": 12,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#bank-result-panel > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "₹65,999",
+            "fontPx": 12,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1)",
+            "text": "30 Days",
+            "fontPx": 12,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(2)",
+            "text": "90 Days",
+            "fontPx": 12,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "Reset All",
+            "fontPx": 12,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Category",
+            "fontPx": 12,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1)",
+            "text": "Brand Selection",
+            "fontPx": 12,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Sorted by Highest Discount %",
+            "fontPx": 12,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Sort: Highest Discount % ▾",
+            "fontPx": 12,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Tracked across Amazon, Flipkart · Space Gray",
+            "fontPx": 12,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "MRP ₹1,14,900",
+            "fontPx": 12,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Tracked across Amazon, Flipkart · Space Black",
+            "fontPx": 12,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "MRP ₹1,89,900",
+            "fontPx": 12,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "VERIFIED PRICE DROPS",
+            "fontPx": 12,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Amazon India · Midnight Black",
+            "fontPx": 12,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Flipkart · Active Noise Cancellation",
+            "fontPx": 12,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Amazon India · Rapid Air Tech 4.1L",
+            "fontPx": 12,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "FLIPKART",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+            "text": "Up to 80% off on flagship smartphones, laptops & electronics.",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#scene-8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "💳 10% Instant",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > strong:nth-of-type(1)",
+            "text": "Axis & ICICI",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "⚡ 24h Early Access",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Flipkart Plus:",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "AMAZON",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(1)",
+            "text": "Mega blockbuster deals on electronics, audio & smart TVs.",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#scene-8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "💳 10% Off",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > strong:nth-of-type(1)",
+            "text": "SBI & Amazon ICICI",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#scene-8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "⚡ 24h Early Bird Window",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Prime:",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "MYNTRA",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > p:nth-of-type(1)",
+            "text": "50% to 90% off premium apparel, footwear & festive luxury.",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#scene-8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "💳 Extra 10% Off",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > strong:nth-of-type(1)",
+            "text": "Kotak & HDFC",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#scene-8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "⚡ 12h Early Passes",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Insider VIP:",
+            "fontPx": 12,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#outro-share-card > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "One-Click WhatsApp Deal Share",
+            "fontPx": 12,
+            "time": 182.304,
+            "seconds": 27.696
+          },
+          {
+            "selector": "#outro-share-card > span:nth-of-type(1)",
+            "text": "SHARED ✓",
+            "fontPx": 12,
+            "time": 182.304,
+            "seconds": 27.696
+          },
+          {
+            "selector": "#deal-verdict-banner > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Today's price of is the lowest recorded in 90 days. You are saving below the 90-day baseline.",
+            "fontPx": 12.75,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#deal-verdict-banner > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "₹65,999",
+            "fontPx": 12.75,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#deal-verdict-banner > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(2)",
+            "text": "₹4,200",
+            "fontPx": 12.75,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#chapter-title",
+            "text": "Meet DealFinder India",
+            "fontPx": 13,
+            "time": 0,
+            "seconds": 182.304
+          },
+          {
+            "selector": "#hook-loss-ticker > div:nth-of-type(1)",
+            "text": "Average Festive Season Loss",
+            "fontPx": 13,
+            "time": 0,
+            "seconds": 23.49
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(4) > span:nth-of-type(1)",
+            "text": "⚡ Tracked Electronics",
+            "fontPx": 13,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(4) > span:nth-of-type(1) > strong:nth-of-type(1)",
+            "text": "32,000+",
+            "fontPx": 13,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(4) > span:nth-of-type(3)",
+            "text": "🛡️ Zero Inflated MRP Guarantee",
+            "fontPx": 13,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(4) > span:nth-of-type(3) > strong:nth-of-type(1)",
+            "text": "100%",
+            "fontPx": 13,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(4) > span:nth-of-type(5)",
+            "text": "💳 Indian Bank Cards Integrated",
+            "fontPx": 13,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(4) > span:nth-of-type(5) > strong:nth-of-type(1)",
+            "text": "6 Major",
+            "fontPx": 13,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "#pitch-bar-scene1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Continuously ingests, verifies, and indexes real prices across Amazon, Flipkart, Myntra, AJIO, and Meesho.",
+            "fontPx": 13,
+            "time": 34.357,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Multi-Store Unified Catalog",
+            "fontPx": 13,
+            "time": 34.357,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene1 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Eliminates fake sale claims, reveals true merchant stock, and guarantees you never overpay a single Rupee.",
+            "fontPx": 13,
+            "time": 34.357,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene1 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Total Market Transparency",
+            "fontPx": 13,
+            "time": 34.357,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene2 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Blends local catalog caching with live store search to show real variant prices as you type.",
+            "fontPx": 13,
+            "time": 45.225,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene2 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Instant Autocomplete Typeahead",
+            "fontPx": 13,
+            "time": 45.225,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene2 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Find the exact variant and its full cross-store price spectrum in under two seconds with zero tab-switching.",
+            "fontPx": 13,
+            "time": 45.225,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene2 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Saves 20 Minutes per Search",
+            "fontPx": 13,
+            "time": 45.225,
+            "seconds": 9.817
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "128GB Storage · A16 Bionic · 48MP Main Camera · USB-C · Official MRP ₹79,900",
+            "fontPx": 13,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-flipkart > div:nth-of-type(2) > button:nth-of-type(1)",
+            "text": "Go to Deal →",
+            "fontPx": 13,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-amazon > div:nth-of-type(2) > button:nth-of-type(1)",
+            "text": "View Store →",
+            "fontPx": 13,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > button:nth-of-type(1)",
+            "text": "View Store →",
+            "fontPx": 13,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#pitch-bar-scene3 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Compares live merchant listings, estimated delivery fees, and stock status side by side.",
+            "fontPx": 13,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#pitch-bar-scene3 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Side-by-Side Comparison Matrix",
+            "fontPx": 13,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#pitch-bar-scene3 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Saves ₹4,000 on this phone alone by revealing that Flipkart is currently cheaper than Amazon.",
+            "fontPx": 13,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#pitch-bar-scene3 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Certifies Genuine Low Price",
+            "fontPx": 13,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#bank-result-panel > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Eligible for No-Cost EMI: (6 Months)",
+            "fontPx": 13,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#bank-result-panel > div:nth-of-type(1) > div:nth-of-type(3) > strong:nth-of-type(1)",
+            "text": "₹10,750 / month",
+            "fontPx": 13,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#pitch-bar-scene4 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Calculates card-specific percentage discounts, maximum caps, and minimum purchase rules in real time.",
+            "fontPx": 13,
+            "time": 96.411,
+            "seconds": 10.868
+          },
+          {
+            "selector": "#pitch-bar-scene4 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Automated Card Discount Logic",
+            "fontPx": 13,
+            "time": 96.411,
+            "seconds": 10.868
+          },
+          {
+            "selector": "#pitch-bar-scene4 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Shows your true checkout total before you enter payment details, saving you another ₹1,500 instantly.",
+            "fontPx": 13,
+            "time": 96.411,
+            "seconds": 10.868
+          },
+          {
+            "selector": "#pitch-bar-scene4 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Unlocks Hidden ₹1,500 Savings",
+            "fontPx": 13,
+            "time": 96.411,
+            "seconds": 10.868
+          },
+          {
+            "selector": "#scene-5 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+            "text": "Exposing fake discount tricks with true historical merchant pricing",
+            "fontPx": 13,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#pitch-bar-scene5 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Plots day-by-day historical sale prices across all sellers to evaluate deal authenticity.",
+            "fontPx": 13,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#pitch-bar-scene5 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "90-Day Real Price Trajectory",
+            "fontPx": 13,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#pitch-bar-scene5 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Never fall for fake 50% discounts. Know instantly if a deal is an authentic all-time low.",
+            "fontPx": 13,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#pitch-bar-scene5 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Exposes Inflated MRP Tricks",
+            "fontPx": 13,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "📱 Mobiles & Tablets",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(2)",
+            "text": "(142)",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#filter-cat-laptops > span:nth-of-type(1)",
+            "text": "💻 Laptops",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#filter-cat-laptops > span:nth-of-type(2)",
+            "text": "(86) ✓",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "🎧 Audio & Headphones",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(2)",
+            "text": "(64)",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#filter-brand-apple > span:nth-of-type(2)",
+            "text": "Apple",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(2)",
+            "text": "Dell",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(2)",
+            "text": "HP",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#pitch-bar-scene6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Filter catalog inventory by store, category, brand, and exact price slider simultaneously.",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 8.765
+          },
+          {
+            "selector": "#pitch-bar-scene6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Dynamic Multi-Store Filtering",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 8.765
+          },
+          {
+            "selector": "#pitch-bar-scene6 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Find top-rated tech and fashion deals matched to your exact wallet budget in three fast clicks.",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 8.765
+          },
+          {
+            "selector": "#pitch-bar-scene6 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Zero Clutter Discovery",
+            "fontPx": 13,
+            "time": 128.314,
+            "seconds": 8.765
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Monitored in Real-Time ●",
+            "fontPx": 13,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "All Deals",
+            "fontPx": 13,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "≥ 20% OFF",
+            "fontPx": 13,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#deal-tab-40",
+            "text": "≥ 40% OFF 🔥",
+            "fontPx": 13,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(4)",
+            "text": "≥ 60% MEGA DEALS",
+            "fontPx": 13,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#pitch-bar-scene7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Filters thousands of live products by steep discount tiers (≥20%, ≥40%, ≥60%) in real time.",
+            "fontPx": 13,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#pitch-bar-scene7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Curated Verified Drops Feed",
+            "fontPx": 13,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#pitch-bar-scene7 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Grab lightning price cuts the moment they happen before stock runs out across all stores.",
+            "fontPx": 13,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#pitch-bar-scene7 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "First to Flash Sales",
+            "fontPx": 13,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#scene-8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Target Discounts & Early-Access Prep",
+            "fontPx": 13,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#pitch-bar-scene8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Tracks confirmed dates, partner bank cards, and VIP early access windows for major sales.",
+            "fontPx": 13,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#pitch-bar-scene8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Mega-Sale Intelligence Calendar",
+            "fontPx": 13,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#pitch-bar-scene8 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "— Prepare cards and alerts ahead of time so you secure VIP access before high-demand items sell out.",
+            "fontPx": 13,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#pitch-bar-scene8 > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Strategic Festive Planning",
+            "fontPx": 13,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#scene-0 > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Amazon: ₹69,999 (MRP ₹79,900)",
+            "fontPx": 13.97,
+            "time": 1.753,
+            "seconds": 21.737
+          },
+          {
+            "selector": "#hook-loss-ticker > div:nth-of-type(3)",
+            "text": "Lost in fake discounts, inflated MRPs & missed bank offers",
+            "fontPx": 14,
+            "time": 0,
+            "seconds": 23.49
+          },
+          {
+            "selector": "#scene-0 > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "Flipkart: ₹65,999 (Sale Price)",
+            "fontPx": 14,
+            "time": 2.104,
+            "seconds": 21.386
+          },
+          {
+            "selector": "#scene-0 > div:nth-of-type(2) > div:nth-of-type(4)",
+            "text": "Myntra: ₹67,490 (Discount Applied)",
+            "fontPx": 14,
+            "time": 2.454,
+            "seconds": 21.036
+          },
+          {
+            "selector": "#scene-0 > div:nth-of-type(2) > div:nth-of-type(5)",
+            "text": "⚠️ Fake Inflated MRP Trick!",
+            "fontPx": 14,
+            "time": 2.805,
+            "seconds": 20.685
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Amazon India",
+            "fontPx": 14,
+            "time": 26.995,
+            "seconds": 17.179
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "Flipkart",
+            "fontPx": 14,
+            "time": 26.995,
+            "seconds": 17.179
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(2)",
+            "text": "Myntra",
+            "fontPx": 14,
+            "time": 26.995,
+            "seconds": 17.179
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(4) > div:nth-of-type(2)",
+            "text": "AJIO",
+            "fontPx": 14,
+            "time": 27.346,
+            "seconds": 16.828
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(5) > div:nth-of-type(2)",
+            "text": "Meesho",
+            "fontPx": 14,
+            "time": 27.346,
+            "seconds": 16.828
+          },
+          {
+            "selector": "#pitch-bar-scene1 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "01",
+            "fontPx": 14,
+            "time": 34.357,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#pitch-bar-scene2 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "02",
+            "fontPx": 14,
+            "time": 45.225,
+            "seconds": 9.817
+          },
+          {
+            "selector": "#row-amazon > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "AMZ",
+            "fontPx": 14,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#scene-3 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "MYN",
+            "fontPx": 14,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#pitch-bar-scene3 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "03",
+            "fontPx": 14,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#scene-4 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+            "text": "Select your credit or debit card to reveal your true checkout price",
+            "fontPx": 14,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#bank-result-panel > div:nth-of-type(2) > button:nth-of-type(1)",
+            "text": "Claim Deal at ₹64,499 →",
+            "fontPx": 14,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#pitch-bar-scene4 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "04",
+            "fontPx": 14,
+            "time": 96.411,
+            "seconds": 10.868
+          },
+          {
+            "selector": "#pitch-bar-scene5 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "05",
+            "fontPx": 14,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#pitch-bar-scene6 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "06",
+            "fontPx": 14,
+            "time": 128.314,
+            "seconds": 8.765
+          },
+          {
+            "selector": "#pitch-bar-scene7 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "07",
+            "fontPx": 14,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#pitch-bar-scene8 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "08",
+            "fontPx": 14,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#subtitle-text",
+            "text": "Between inflated MRPs and hidden bank card offers, the average shopper overpays by thousands of Rupees every year.",
+            "fontPx": 15,
+            "time": 0,
+            "seconds": 210
+          },
+          {
+            "selector": "#search-dropdown-menu > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Apple iPhone 15 Pro (128GB, Natural Titanium)",
+            "fontPx": 15,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#search-dropdown-menu > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "₹1,27,990",
+            "fontPx": 15,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#search-dropdown-menu > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Apple iPhone 15 Plus (128GB, Blue)",
+            "fontPx": 15,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#search-dropdown-menu > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "₹79,990",
+            "fontPx": 15,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#row-flipkart > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "FK",
+            "fontPx": 15,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#card-btn-hdfc > div:nth-of-type(2)",
+            "text": "HDFC Bank",
+            "fontPx": 15,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#card-btn-sbi > div:nth-of-type(2)",
+            "text": "SBI Card",
+            "fontPx": 15,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#card-btn-icici > div:nth-of-type(2)",
+            "text": "ICICI Bank",
+            "fontPx": 15,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(4) > div:nth-of-type(2)",
+            "text": "Amazon ICICI",
+            "fontPx": 15,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(5) > div:nth-of-type(2)",
+            "text": "Axis Bank",
+            "fontPx": 15,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(6) > div:nth-of-type(2)",
+            "text": "OneCard",
+            "fontPx": 15,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "#outro-share-card > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "\"Bhai, check this: iPhone 15 at ₹64,499 on Flipkart with HDFC offer! Save ₹4,000 vs Amazon\"",
+            "fontPx": 15,
+            "time": 182.304,
+            "seconds": 27.696
+          },
+          {
+            "selector": "div.brand-cluster > span:nth-of-type(1)",
+            "text": "DealFinder 🇮🇳",
+            "fontPx": 16,
+            "time": 0,
+            "seconds": 182.304
+          },
+          {
+            "selector": "div.brand-cluster > span:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "IN",
+            "fontPx": 16,
+            "time": 0,
+            "seconds": 182.304
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > p:nth-of-type(1)",
+            "text": "Instantly compare live and verified offers across Amazon India, Flipkart, Myntra, AJIO, and Meesho. Never miss genuine price drops or bank card discounts.",
+            "fontPx": 16,
+            "time": 24.541,
+            "seconds": 19.633
+          },
+          {
+            "selector": "#search-opt-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Apple iPhone 15 (128GB, Black)",
+            "fontPx": 16,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#search-opt-1 > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "₹65,999 - ₹69,999",
+            "fontPx": 16,
+            "time": 50.134,
+            "seconds": 14.023
+          },
+          {
+            "selector": "#row-flipkart > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "Flipkart",
+            "fontPx": 16,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-amazon > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "Amazon India",
+            "fontPx": 16,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "Myntra",
+            "fontPx": 16,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#chart-tooltip > div:nth-of-type(2)",
+            "text": "₹65,999",
+            "fontPx": 16,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "Filter Products",
+            "fontPx": 16,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > h4:nth-of-type(1)",
+            "text": "Sony WH-1000XM5 ANC",
+            "fontPx": 16,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > h4:nth-of-type(1)",
+            "text": "boAt Airdopes 141 ANC",
+            "fontPx": 16,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(1) > h4:nth-of-type(1)",
+            "text": "Philips Digital Air Fryer",
+            "fontPx": 16,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#deal-verdict-banner > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "ALL-TIME LOW DETECTED!",
+            "fontPx": 17.65,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "amz",
+            "fontPx": 18,
+            "time": 26.995,
+            "seconds": 17.179
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "fk",
+            "fontPx": 18,
+            "time": 26.995,
+            "seconds": 17.179
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(1)",
+            "text": "my",
+            "fontPx": 18,
+            "time": 26.995,
+            "seconds": 17.179
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(4) > div:nth-of-type(1)",
+            "text": "aj",
+            "fontPx": 18,
+            "time": 27.346,
+            "seconds": 16.828
+          },
+          {
+            "selector": "#scene-1 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(5) > div:nth-of-type(1)",
+            "text": "ms",
+            "fontPx": 18,
+            "time": 27.346,
+            "seconds": 16.828
+          },
+          {
+            "selector": "#bank-result-panel > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "10% Instant Discount Applied (-₹1,500)",
+            "fontPx": 18,
+            "time": 86.244,
+            "seconds": 21.035
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "Showing 12 Laptops for \"Apple\"",
+            "fontPx": 18,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > h4:nth-of-type(1)",
+            "text": "Apple MacBook Air M2 (8GB RAM, 256GB SSD)",
+            "fontPx": 18,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > h4:nth-of-type(1)",
+            "text": "Apple MacBook Pro M3 (18GB RAM, 512GB SSD)",
+            "fontPx": 18,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > h4:nth-of-type(1)",
+            "text": "Big Billion Days",
+            "fontPx": 18,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > h4:nth-of-type(1)",
+            "text": "Great Indian Festival",
+            "fontPx": 18,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > h4:nth-of-type(1)",
+            "text": "Big Fashion Festival",
+            "fontPx": 18,
+            "time": 163.372,
+            "seconds": 17.53
+          },
+          {
+            "selector": "#search-typing-text",
+            "text": "i",
+            "fontPx": 20,
+            "time": 45.225,
+            "seconds": 18.932
+          },
+          {
+            "selector": "#row-amazon > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "₹69,999",
+            "fontPx": 20,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "₹67,490",
+            "fontPx": 20,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#outro-brand-block > p:nth-of-type(1)",
+            "text": "Stop Overpaying. Stop Wasting Time Across Endless Tabs. Compare Smarter.",
+            "fontPx": 21.6,
+            "time": 182.304,
+            "seconds": 27.696
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > h3:nth-of-type(1)",
+            "text": "Apple iPhone 15 (128GB, Black)",
+            "fontPx": 22,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#row-flipkart > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "₹65,999",
+            "fontPx": 22,
+            "time": 64.858,
+            "seconds": 20.334
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "₹84,990",
+            "fontPx": 24,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#scene-6 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "₹1,54,900",
+            "fontPx": 24,
+            "time": 128.314,
+            "seconds": 16.127
+          },
+          {
+            "selector": "#scene-7 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "₹24,990",
+            "fontPx": 24,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "₹1,499",
+            "fontPx": 24,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "div.window-viewport > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "₹5,699",
+            "fontPx": 24,
+            "time": 146.194,
+            "seconds": 15.426
+          },
+          {
+            "selector": "#scene-5 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > h3:nth-of-type(1)",
+            "text": "90-Day Verified Price History & Trajectory",
+            "fontPx": 26,
+            "time": 108.681,
+            "seconds": 18.582
+          },
+          {
+            "selector": "#scene-8 > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > h3:nth-of-type(1)",
+            "text": "Upcoming Indian E-Commerce Mega Sales",
+            "fontPx": 26,
+            "time": 163.372,
+            "seconds": 17.53
+          }
+        ]
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 4.91 s (28.75–33.66 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 28.748,
+        "seconds": 4.908,
+        "floorSeconds": 3,
+        "until": 33.656
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 3.16 s (34.71–37.86 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 34.708,
+        "seconds": 3.155,
+        "floorSeconds": 3,
+        "until": 37.863
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 5.61 s (38.21–43.82 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 38.214,
+        "seconds": 5.609,
+        "floorSeconds": 3,
+        "until": 43.823
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 4.91 s (57.85–62.76 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 57.846,
+        "seconds": 4.909,
+        "floorSeconds": 3,
+        "until": 62.755
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 7.71 s (69.06–76.78 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 69.065,
+        "seconds": 7.713,
+        "floorSeconds": 3,
+        "until": 76.778
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 7.36 s (77.13–84.49 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 77.129,
+        "seconds": 7.362,
+        "floorSeconds": 3,
+        "until": 84.491
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 3.16 s (86.59–89.75 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 86.594,
+        "seconds": 3.156,
+        "floorSeconds": 3,
+        "until": 89.75
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 8.06 s (98.16–106.23 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 98.164,
+        "seconds": 8.063,
+        "floorSeconds": 3,
+        "until": 106.227
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 3.51 s (109.03–112.54 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 109.032,
+        "seconds": 3.506,
+        "floorSeconds": 3,
+        "until": 112.538
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 3.51 s (114.29–117.80 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 114.29,
+        "seconds": 3.506,
+        "floorSeconds": 3,
+        "until": 117.796
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 5.26 s (120.60–125.86 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 120.601,
+        "seconds": 5.259,
+        "floorSeconds": 3,
+        "until": 125.86
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 5.61 s (137.78–143.39 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 137.78,
+        "seconds": 5.609,
+        "floorSeconds": 3,
+        "until": 143.389
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 3.51 s (150.40–153.91 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 150.401,
+        "seconds": 3.506,
+        "floorSeconds": 3,
+        "until": 153.907
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 4.56 s (155.66–160.22 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 155.659,
+        "seconds": 4.558,
+        "floorSeconds": 3,
+        "until": 160.217
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 3.15 s (163.72–166.88 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 163.723,
+        "seconds": 3.155,
+        "floorSeconds": 3,
+        "until": 166.878
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 3.86 s (167.93–171.79 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 167.93,
+        "seconds": 3.856,
+        "floorSeconds": 3,
+        "until": 171.786
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 6.31 s (173.19–179.50 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 173.189,
+        "seconds": 6.31,
+        "floorSeconds": 3,
+        "until": 179.499
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 3.51 s (188.97–192.47 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 188.965,
+        "seconds": 3.506,
+        "floorSeconds": 3,
+        "until": 192.471
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 14.02 s (192.82–206.84 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 192.821,
+        "seconds": 14.024,
+        "floorSeconds": 3,
+        "until": 206.845
+      }
+    ],
+    "enabled": true,
+    "step": 0.3509999999999991,
+    "samples": 599
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

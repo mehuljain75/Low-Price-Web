@@ -91,6 +91,7 @@ interface BankOfferCalculatorProps {
   offerId: string;
   productTitle?: string;
   productUrl?: string;
+  bankOffersDescription?: string;
 }
 
 export const BankOfferCalculator: React.FC<BankOfferCalculatorProps> = ({
@@ -99,8 +100,50 @@ export const BankOfferCalculator: React.FC<BankOfferCalculatorProps> = ({
   offerId,
   productTitle,
   productUrl,
+  bankOffersDescription,
 }) => {
   const [selectedCardId, setSelectedCardId] = useState<string>("hdfc");
+
+  // If no verified bank offer exists for this product, render an honest informational note
+  if (!bankOffersDescription) {
+    return (
+      <div className="bg-white rounded-3xl border border-blue-200/80 p-6 sm:p-8 space-y-4 shadow-xs relative overflow-hidden">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+            <CreditCard className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">
+              Bank Offers &amp; Payment Discounts
+            </h3>
+            <p className="text-xs text-slate-500">
+              Save more with partner cards and EMI on Amazon India
+            </p>
+          </div>
+        </div>
+
+        <div className="p-5 bg-blue-50/50 border border-blue-100 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h4 className="text-sm font-bold text-slate-900">
+              Check Amazon checkout for eligible bank cards and EMI offers
+            </h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Instant card discounts (HDFC, SBI, ICICI, Axis) and No-Cost EMI plans vary depending on active bank campaigns and seller eligibility. Check payment options at Amazon checkout for available savings on this item.
+            </p>
+          </div>
+          <a
+            href={`/api/redirect?offerId=${offerId}${productTitle ? `&title=${encodeURIComponent(productTitle)}` : ""}${productUrl ? `&url=${encodeURIComponent(productUrl)}` : ""}`}
+            target="_blank"
+            rel="nofollow sponsored noopener"
+            className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors shadow-sm flex-shrink-0"
+          >
+            <span>View Amazon Offers</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   const selectedCard = useMemo(
     () => INDIAN_BANK_OFFERS.find((c) => c.id === selectedCardId) || INDIAN_BANK_OFFERS[0],

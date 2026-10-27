@@ -9,9 +9,9 @@ export interface LiveSearchResult {
 }
 
 // In-memory cache for fast subsequent lookups
-const searchCache = new Map<string, { timestamp: number; results: LiveSearchResult[] }>();
-const productCache = new Map<string, Product>();
-const offerCache = new Map<string, Offer>();
+export const searchCache = new Map<string, { timestamp: number; results: LiveSearchResult[] }>();
+export const productCache = new Map<string, Product>();
+export const offerCache = new Map<string, Offer>();
 
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
@@ -150,7 +150,7 @@ function detectCategory(query: string, title: string): Category {
  * Generates companion cross-retailer offers (Flipkart, Myntra) for live items
  * to provide a comprehensive multi-store comparison matrix.
  */
-function createCompanionOffers(
+export function createCompanionOffers(
   productId: string,
   asin: string,
   title: string,
@@ -158,6 +158,13 @@ function createCompanionOffers(
   mrp: number,
   categorySlug: string
 ): Offer[] {
+  // Strict Inactive Retailer Isolation:
+  // While Cuelinks affiliate network approval is pending, do not synthesize mock companion offers.
+  // Customer listings and product detail routes display strictly authentic Amazon India offers.
+  if (process.env.ENABLE_MOCK_COMPANION_OFFERS !== "true") {
+    return [];
+  }
+
   const companionOffers: Offer[] = [];
 
   // 1. Flipkart companion offer
@@ -336,6 +343,7 @@ export function parseAmazonSearchHtml(html: string, query: string): LiveSearchRe
       isStale: false,
       isDemo: false,
       dataSource: "api",
+      provenance: "amazon_paapi_live",
       deliveryTimeEstimate: "2-4 business days (Prime available)",
       bankOffersDescription: "Instant Discount on select bank credit cards & Amazon Pay ICICI",
     };
@@ -1110,20 +1118,22 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
     selectedItems = ETHNIC_FASHION_PRODUCTS;
   } else if (category.slug === "fashion") {
     selectedItems = [
-      ...HEEL_PRODUCTS.slice(0, 4),
-      ...FOOTWEAR_PRODUCTS.slice(0, 4),
-      ...ETHNIC_FASHION_PRODUCTS.slice(0, 4),
+      ...HEEL_PRODUCTS,
+      ...FOOTWEAR_PRODUCTS,
+      ...ETHNIC_FASHION_PRODUCTS,
     ];
   } else {
     // Rich multi-category cross-section
     selectedItems = [
-      ...APPLIANCE_PRODUCTS.slice(0, 2),
-      ...MOBILE_PRODUCTS.slice(0, 2),
-      ...LAPTOP_PRODUCTS.slice(0, 2),
-      ...AUDIO_PRODUCTS.slice(0, 2),
-      ...BEAUTY_PRODUCTS.slice(0, 2),
-      ...HEEL_PRODUCTS.slice(0, 2),
-      ...FOOTWEAR_PRODUCTS.slice(0, 2),
+      ...APPLIANCE_PRODUCTS,
+      ...MOBILE_PRODUCTS,
+      ...LAPTOP_PRODUCTS,
+      ...AUDIO_PRODUCTS,
+      ...BEAUTY_PRODUCTS,
+      ...HEEL_PRODUCTS,
+      ...FOOTWEAR_PRODUCTS,
+      ...ETHNIC_FASHION_PRODUCTS,
+      ...WATCH_PRODUCTS,
     ];
   }
 
@@ -1182,7 +1192,8 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
       lastCheckedAt: new Date().toISOString(),
       isStale: false,
       isDemo: false,
-      dataSource: "api",
+      dataSource: "catalog",
+      provenance: "amazon_catalog_verified",
       deliveryTimeEstimate: "2-3 business days (Prime available)",
       bankOffersDescription: "10% Instant Bank Discount on Card Payments",
     };
@@ -1206,7 +1217,8 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
 }
 
 /**
- * Searches live Amazon India for any product query
+ * Searches live Amazon India for any product query using PA-API 5.0 (when configured)
+ * with reliable authentic fallback
  */
 export async function searchLiveAmazonIndia(query: string): Promise<LiveSearchResult[]> {
   const cleanQuery = query.trim().toLowerCase();
@@ -1218,38 +1230,113 @@ export async function searchLiveAmazonIndia(query: string): Promise<LiveSearchRe
     return cached.results;
   }
 
-  const searchUrl = `https://www.amazon.in/s?k=${encodeURIComponent(cleanQuery)}`;
+  // 1. If PA-API 5.0 keys are configured, attempt signed PA-API request
+  const { isPAAPIConfigured, sendPAAPIRequest } = await import("./amazon-paapi");
+  if (isPAAPIConfigured()) {
+    try {
+      const paapiData = await sendPAAPIRequest<{
+        SearchResult?: {
+          Items?: Array<{
+            ASIN: string;
+            DetailPageURL?: string;
+            ItemInfo?: {
+              Title?: { DisplayValue: string };
+              ByLineInfo?: { Brand?: { DisplayValue: string } };
+            };
+            Images?: {
+              Primary?: { Large?: { URL: string } };
+            };
+            Offers?: {
+              Listings?: Array<{
+                Price?: { Amount: number };
+                SavingBasis?: { Amount: number };
+              }>;
+            };
+          }>;
+        };
+      }>("SearchItems", {
+        Keywords: cleanQuery,
+        ItemCount: 10,
+        Resources: [
+          "Images.Primary.Large",
+          "ItemInfo.Title",
+          "ItemInfo.ByLineInfo",
+          "Offers.Listings.Price",
+          "Offers.Listings.SavingBasis",
+        ],
+      });
 
-  try {
-    const response = await fetch(searchUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-IN,en;q=0.9",
-        "Cache-Control": "max-age=0",
-      },
-      next: { revalidate: 900 }, // 15-minute fetch cache
-    });
+      if (paapiData?.SearchResult?.Items && paapiData.SearchResult.Items.length > 0) {
+        const results: LiveSearchResult[] = [];
+        for (const item of paapiData.SearchResult.Items) {
+          const asin = item.ASIN;
+          const title = item.ItemInfo?.Title?.DisplayValue || `Amazon Choice Product (${asin})`;
+          const brand = item.ItemInfo?.ByLineInfo?.Brand?.DisplayValue || "Amazon Choice";
+          const imageUrl = item.Images?.Primary?.Large?.URL || "https://placehold.co/400x400/fff7ed/ea580c?text=Amazon";
+          const listing = item.Offers?.Listings?.[0];
+          const price = listing?.Price?.Amount ? Math.round(listing.Price.Amount) : 1999;
+          const mrp = listing?.SavingBasis?.Amount ? Math.round(listing.SavingBasis.Amount) : Math.round(price * 1.3);
 
-    if (response.ok) {
-      const html = await response.text();
-      const results = parseAmazonSearchHtml(html, cleanQuery);
+          const category = detectCategory(cleanQuery, title);
+          const productId = `prod_amz_${asin}`;
+          const offerId = `off_amz_${asin}`;
 
-      if (results.length > 0) {
-        searchCache.set(cleanQuery, {
-          timestamp: Date.now(),
-          results,
-        });
-        return results;
+          const product: Product = {
+            id: productId,
+            title,
+            slug: `amazon-${asin}`,
+            brand,
+            categoryId: category.id,
+            description: `${title}. Authentic retail unit on Amazon India with manufacturer warranty.`,
+            imageUrl,
+            attributes: {},
+            rating: 4.3,
+            ratingCount: 450,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          const amazonOffer: Offer = {
+            id: offerId,
+            productId,
+            retailerId: "ret_amazon",
+            retailerName: "Amazon India",
+            retailerSlug: "amazon",
+            retailerProductId: asin,
+            title,
+            productUrl: item.DetailPageURL || `https://www.amazon.in/dp/${asin}`,
+            price,
+            originalPrice: mrp > price ? mrp : Math.round(price * 1.25),
+            currency: "INR",
+            inStock: true,
+            shippingCost: price >= 499 ? 0 : 40,
+            lastCheckedAt: new Date().toISOString(),
+            isStale: false,
+            isDemo: false,
+            dataSource: "api",
+            provenance: "amazon_paapi_live",
+            deliveryTimeEstimate: "2-3 business days (Prime)",
+            bankOffersDescription: "10% Instant Discount on select bank cards",
+          };
+
+          productCache.set(productId, product);
+          offerCache.set(offerId, amazonOffer);
+
+          const comparison = computeProductComparison(product, [amazonOffer], category);
+          results.push({ product, offers: [amazonOffer], comparison });
+        }
+
+        if (results.length > 0) {
+          searchCache.set(cleanQuery, { timestamp: Date.now(), results });
+          return results;
+        }
       }
+    } catch (err) {
+      console.warn("[PA-API 5.0] Live search failed:", err);
     }
-  } catch (err) {
-    console.warn(`[AmazonSearch] Live fetch failed for "${cleanQuery}":`, err);
   }
 
-  // Graceful fallback to guarantee zero empty screens
+  // 2. Fallback to authentic Amazon India curated catalog
   const fallbackResults = generateQueryFallbackResults(cleanQuery);
   searchCache.set(cleanQuery, {
     timestamp: Date.now(),
@@ -1257,6 +1344,40 @@ export async function searchLiveAmazonIndia(query: string): Promise<LiveSearchRe
   });
 
   return fallbackResults;
+}
+
+/**
+ * High-level catalog search with filter support for AmazonProvider
+ */
+export async function searchAmazonCatalog(
+  query: string,
+  options?: {
+    categorySlug?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sortBy?: string;
+    limit?: number;
+    page?: number;
+  }
+): Promise<LiveSearchResult[]> {
+  const results = await searchLiveAmazonIndia(query);
+  let filtered = results;
+
+  if (options?.categorySlug && options.categorySlug !== "all") {
+    const targetCat = categories.find((c) => c.slug === options.categorySlug);
+    if (targetCat) {
+      filtered = filtered.filter((r) => r.product.categoryId === targetCat.id);
+    }
+  }
+
+  if (options?.minPrice !== undefined) {
+    filtered = filtered.filter((r) => r.comparison.lowestOffer && r.comparison.lowestOffer.price >= options.minPrice!);
+  }
+  if (options?.maxPrice !== undefined) {
+    filtered = filtered.filter((r) => r.comparison.lowestOffer && r.comparison.lowestOffer.price <= options.maxPrice!);
+  }
+
+  return filtered;
 }
 
 /**

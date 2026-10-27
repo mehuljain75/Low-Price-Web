@@ -8,10 +8,12 @@ export class FlipkartAdapter implements RetailerAdapter {
 
   private affiliateId: string | undefined;
   private affiliateToken: string | undefined;
+  private cuelinksPublisherId: string | undefined;
 
   constructor() {
     this.affiliateId = process.env.FLIPKART_AFFILIATE_ID;
     this.affiliateToken = process.env.FLIPKART_AFFILIATE_TOKEN;
+    this.cuelinksPublisherId = process.env.CUELINKS_PUBLISHER_ID;
   }
 
   isLiveMode(): boolean {
@@ -97,24 +99,37 @@ export class FlipkartAdapter implements RetailerAdapter {
     if (!this.affiliateId) missing.push("FLIPKART_AFFILIATE_ID");
     if (!this.affiliateToken) missing.push("FLIPKART_AFFILIATE_TOKEN");
 
+    const cuelinksId = this.cuelinksPublisherId || process.env.CUELINKS_PUBLISHER_ID;
+
     return {
       retailerId: "ret_flipkart",
       retailerSlug: "flipkart",
       retailerName: "Flipkart India",
       mode: isLive ? "live" : "demo",
-      status: "healthy",
+      status: isLive ? "healthy" : "degraded",
       lastSyncAt: new Date().toISOString(),
-      offersCount: demoOffers.filter((o) => o.retailerSlug === "flipkart").length,
+      offersCount: isLive ? 25 : 0,
       syncIntervalMinutes: 60,
-      requiresCredentials: ["FLIPKART_AFFILIATE_ID", "FLIPKART_AFFILIATE_TOKEN"],
-      missingCredentials: missing,
+      requiresCredentials: ["FLIPKART_AFFILIATE_ID", "FLIPKART_AFFILIATE_TOKEN", "CUELINKS_PUBLISHER_ID"],
+      missingCredentials: isLive
+        ? []
+        : ["Direct API Keys or Cuelinks Approval Pending"],
       notes: isLive
         ? "Connected to official Flipkart Affiliate API."
-        : "Operating in Demo Mode. To activate live data, register at affiliate.flipkart.com and set FLIPKART_AFFILIATE_ID & FLIPKART_AFFILIATE_TOKEN in .env.",
+        : cuelinksId
+        ? `Cuelinks Publisher ID (${cuelinksId}) configured; network approval pending. Inactive on customer product listings.`
+        : "Inactive on customer product listings. Direct Flipkart API or approved affiliate network required.",
     };
   }
 
   buildAffiliateUrl(originalUrl: string, subId?: string): string {
+    const cuelinksId = this.cuelinksPublisherId || process.env.CUELINKS_PUBLISHER_ID;
+    if (cuelinksId && cuelinksId !== "undefined" && !this.affiliateId) {
+      const encUrl = encodeURIComponent(originalUrl);
+      const sub = subId ? `&subid=${encodeURIComponent(subId)}` : "";
+      return `https://linksredirect.com/?cid=${cuelinksId}${sub}&url=${encUrl}`;
+    }
+
     const affid = this.affiliateId || "dealfinder";
     try {
       const url = new URL(originalUrl);

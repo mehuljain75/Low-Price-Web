@@ -28,6 +28,8 @@ function inferRetailerSlug(offerId: string, urlStr?: string): RetailerSlug {
   return "amazon";
 }
 
+import { isAllowedTargetUrl } from "@/lib/redirect-security";
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const offerId = searchParams.get("offerId");
@@ -39,8 +41,12 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Missing offerId or url parameter", { status: 400 });
   }
 
-  // 1. If explicit valid retailer URL is provided, build outbound affiliate URL and redirect
-  if (passedUrl && (passedUrl.startsWith("http://") || passedUrl.startsWith("https://"))) {
+  // 1. If explicit URL is provided, strictly validate against trusted retailer domain whitelist
+  if (passedUrl) {
+    if (!isAllowedTargetUrl(passedUrl)) {
+      return new NextResponse("Invalid or untrusted redirect target domain", { status: 400 });
+    }
+
     const slug = inferRetailerSlug(offerId || "", passedUrl);
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(slug, passedUrl, subId);
     return NextResponse.redirect(finalAffiliateUrl, {

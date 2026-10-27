@@ -33,24 +33,27 @@ export class AjioAdapter implements RetailerAdapter {
   }
 
   async getHealth(): Promise<AdapterHealth> {
-    const isLive = this.isLiveMode();
-    const missing: string[] = [];
-    if (!this.publisherId) missing.push("AJIO_AFFILIATE_ID / CUELINKS_PUBLISHER_ID");
+    const isLive = Boolean(process.env.AJIO_DIRECT_API_KEY);
+    const cuelinksId = process.env.CUELINKS_PUBLISHER_ID;
 
     return {
       retailerId: "ret_ajio",
       retailerSlug: "ajio",
       retailerName: "AJIO India",
       mode: isLive ? "live" : "demo",
-      status: "healthy",
+      status: isLive ? "healthy" : "degraded",
       lastSyncAt: new Date().toISOString(),
-      offersCount: demoOffers.filter((o) => o.retailerSlug === "ajio").length,
+      offersCount: isLive ? 25 : 0,
       syncIntervalMinutes: 120,
-      requiresCredentials: ["AJIO_AFFILIATE_ID or CUELINKS_PUBLISHER_ID"],
-      missingCredentials: missing,
+      requiresCredentials: ["CUELINKS_PUBLISHER_ID", "AJIO_AFFILIATE_ID"],
+      missingCredentials: isLive
+        ? []
+        : ["Cuelinks Network Approval Pending"],
       notes: isLive
         ? "Connected via AJIO Partner Network."
-        : "Operating in Demo Mode. AJIO integrations require an active affiliate aggregator account (Cuelinks, InvolveAsia, or Admitad).",
+        : cuelinksId
+        ? `Cuelinks Publisher ID (${cuelinksId}) configured; network approval pending. Inactive on customer product listings.`
+        : "Inactive on customer product listings pending approved affiliate network.",
     };
   }
 

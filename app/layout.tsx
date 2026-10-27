@@ -27,6 +27,9 @@ export const metadata: Metadata = {
       { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
+  other: {
+    "cuelinks:publisher": "281629",
+  },
 };
 
 export default function RootLayout({

@@ -252,21 +252,19 @@ describe("Repository Brand Search & Filtering", () => {
     }
   });
 
-  it("generates companion multi-store offers (Amazon + Flipkart) for live products", async () => {
+  it("strictly isolates live products to verified Amazon India offers while Cuelinks is pending", async () => {
     const { repository } = await import("@/lib/data/repository");
     const comparison = await repository.getProductByIdOrSlug("prod_amz_B0CHX1W1XY");
 
     expect(comparison).not.toBeNull();
     if (comparison) {
-      // Must contain at least Amazon and Flipkart offers
-      expect(comparison.offers.length).toBeGreaterThanOrEqual(2);
+      // Must contain verified Amazon offer and zero inactive retailer companion offers
+      expect(comparison.offers.length).toBeGreaterThanOrEqual(1);
       const retailers = comparison.offers.map((o) => o.retailerSlug);
       expect(retailers).toContain("amazon");
-      expect(retailers).toContain("flipkart");
-
-      // Verify trackedStoresCount matches
-      expect(comparison.trackedStoresCount).toBeGreaterThanOrEqual(2);
+      expect(retailers).not.toContain("flipkart");
       expect(comparison.lowestOffer).not.toBeNull();
+      expect(comparison.lowestOffer?.retailerSlug).toBe("amazon");
     }
   });
 
@@ -281,6 +279,32 @@ describe("Repository Brand Search & Filtering", () => {
     expect(outboundUrl).toContain("flipkart.com/search");
     expect(outboundUrl).toContain("affid=");
     expect(outboundUrl).toContain("affExtParam1=df_web");
+  });
+
+  it("constructs valid Cuelinks redirect URLs when CUELINKS_PUBLISHER_ID is set", async () => {
+    const { FlipkartAdapter } = await import("@/lib/adapters/flipkart");
+    const { MyntraAdapter } = await import("@/lib/adapters/myntra");
+
+    const prevId = process.env.CUELINKS_PUBLISHER_ID;
+    process.env.CUELINKS_PUBLISHER_ID = "281629";
+
+    const fkAdapter = new FlipkartAdapter();
+    const fkUrl = fkAdapter.buildAffiliateUrl("https://www.flipkart.com/search?q=iPhone+15", "sub_test");
+    expect(fkUrl).toContain("https://linksredirect.com/?cid=281629");
+    expect(fkUrl).toContain("&subid=sub_test");
+    expect(fkUrl).toContain("flipkart.com");
+
+    const myntraAdapter = new MyntraAdapter();
+    const myntraUrl = myntraAdapter.buildAffiliateUrl("https://www.myntra.com/shoes", "sub_test");
+    expect(myntraUrl).toContain("https://linksredirect.com/?cid=281629");
+    expect(myntraUrl).toContain("&subid=sub_test");
+    expect(myntraUrl).toContain("myntra.com");
+
+    if (prevId !== undefined) {
+      process.env.CUELINKS_PUBLISHER_ID = prevId;
+    } else {
+      delete process.env.CUELINKS_PUBLISHER_ID;
+    }
   });
 
   describe("Retailer Redirect Route & Search URL Integrity", () => {

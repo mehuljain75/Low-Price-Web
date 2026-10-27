@@ -35,24 +35,27 @@ export class MyntraAdapter implements RetailerAdapter {
   }
 
   async getHealth(): Promise<AdapterHealth> {
-    const isLive = this.isLiveMode();
-    const missing: string[] = [];
-    if (!this.networkId) missing.push("CUELINKS_PUBLISHER_ID / MYNTRA_AFFILIATE_ID");
+    const isLive = Boolean(this.feedApiKey);
+    const cuelinksId = process.env.CUELINKS_PUBLISHER_ID;
 
     return {
       retailerId: "ret_myntra",
       retailerSlug: "myntra",
       retailerName: "Myntra",
       mode: isLive ? "live" : "demo",
-      status: "healthy",
+      status: isLive ? "healthy" : "degraded",
       lastSyncAt: new Date().toISOString(),
-      offersCount: demoOffers.filter((o) => o.retailerSlug === "myntra").length,
+      offersCount: isLive ? 25 : 0,
       syncIntervalMinutes: 120,
-      requiresCredentials: ["CUELINKS_PUBLISHER_ID or MYNTRA_FEED_KEY"],
-      missingCredentials: missing,
+      requiresCredentials: ["CUELINKS_PUBLISHER_ID", "MYNTRA_FEED_KEY"],
+      missingCredentials: isLive
+        ? []
+        : ["Cuelinks Network Approval Pending"],
       notes: isLive
-        ? "Connected via Affiliate Aggregator Feed."
-        : "Operating in Demo Mode. Myntra does not provide a public direct API; publishers connect via affiliate networks like Cuelinks, EarnKaro, or vCommission.",
+        ? "Connected via Myntra API Feed."
+        : cuelinksId
+        ? `Cuelinks Publisher ID (${cuelinksId}) configured; network approval pending. Inactive on customer product listings.`
+        : "Inactive on customer product listings pending approved affiliate network.",
     };
   }
 

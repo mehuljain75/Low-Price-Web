@@ -8,7 +8,7 @@
     "build": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion",
     "build:worker": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion",
     "start": "next start",
-    "deploy": "opennextjs-cloudflare deploy --dangerouslyUseUnsupportedNextVersion",
+    "deploy": "opennextjs-cloudflare deploy",
     "preview": "opennextjs-cloudflare preview",
     "lint": "next lint",
     "test": "vitest run"

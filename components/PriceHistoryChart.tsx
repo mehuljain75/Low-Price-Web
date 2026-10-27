@@ -8,6 +8,7 @@ interface PriceHistoryChartProps {
   currentPrice: number;
   originalPrice: number;
   productTitle?: string;
+  priceHistory?: PricePoint[];
 }
 
 interface PricePoint {
@@ -19,54 +20,59 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
   currentPrice,
   originalPrice,
   productTitle = "Product",
+  priceHistory = [],
 }) => {
   const [timeframe, setTimeframe] = useState<30 | 90>(90);
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null);
 
-  // Generate realistic historical pricing data points tailored to the current and original price
-  const historyData = useMemo(() => {
-    const points: PricePoint[] = [];
-    const days = timeframe;
-    const steps = days === 30 ? 6 : 9;
-    const intervalDays = Math.floor(days / (steps - 1));
+  // If no continuous historical observations exist, display honest tracking status
+  // without mathematical mock curves or fabricated 'All-Time Low' badges
+  if (!priceHistory || priceHistory.length < 2) {
+    return (
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-orange-600" />
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Verified Price History &amp; Trend
+            </h2>
+          </div>
+          <span className="self-start sm:self-auto text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+            Observation In Progress
+          </span>
+        </div>
 
-    // Base fluctuations: MRP anchor, festive dips, and recent trajectory
-    const charCodeSeed = productTitle.charCodeAt(0) || 42;
-    const baseline = Math.max(currentPrice * 1.08, currentPrice + 500);
+        <div className="p-5 sm:p-6 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="p-3 bg-orange-100 text-orange-600 rounded-2xl flex-shrink-0">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <div className="space-y-1.5 flex-1">
+            <h4 className="text-sm font-bold text-slate-900">
+              Price History Tracking Active
+            </h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              DealFinder India is continuously observing Amazon India price fluctuations for {productTitle}. Verified historical price trends and genuine deal drop verdicts will be published once continuous observation records sufficient verified price points.
+            </p>
+            <div className="flex items-center gap-3 text-xs pt-1">
+              <span className="text-slate-500">
+                Current verified price: <strong className="text-slate-900">{formatINR(currentPrice)}</strong>
+              </span>
+              {originalPrice > currentPrice && (
+                <>
+                  <span className="text-slate-300">&bull;</span>
+                  <span className="text-slate-500">
+                    MRP: <span className="line-through">{formatINR(originalPrice)}</span>
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-    const now = new Date();
-
-    for (let i = steps - 1; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i * intervalDays);
-
-      let priceVal: number;
-      if (i === 0) {
-        // Today is always exact currentPrice
-        priceVal = currentPrice;
-      } else if (i === 1) {
-        // 1 step ago: beginning of recent drop
-        priceVal = Math.round(currentPrice * 1.03);
-      } else if (i === Math.floor(steps / 2)) {
-        // Midpoint: occasional flash sale dip
-        const dipFactor = (charCodeSeed % 3 === 0) ? 0.98 : 1.06;
-        priceVal = Math.round(currentPrice * dipFactor);
-      } else {
-        // Normal past price points
-        const variance = ((i * charCodeSeed) % 9 - 4) * 0.015;
-        priceVal = Math.round(baseline * (1 + variance));
-      }
-
-      // Constrain within realistic range: never above originalPrice/MRP, never below 85% of current
-      priceVal = Math.min(priceVal, originalPrice > 0 ? originalPrice : Math.round(currentPrice * 1.3));
-      priceVal = Math.max(priceVal, Math.round(currentPrice * 0.88));
-
-      const monthName = d.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
-      points.push({ date: monthName, price: priceVal });
-    }
-
-    return points;
-  }, [currentPrice, originalPrice, productTitle, timeframe]);
+  const historyData = priceHistory;
 
   const prices = historyData.map((p) => p.price);
   const lowestPrice = Math.min(...prices);

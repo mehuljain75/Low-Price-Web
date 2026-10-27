@@ -18,8 +18,8 @@ export class AmazonAdapter implements RetailerAdapter {
   }
 
   isLiveMode(): boolean {
-    // With Live Search Engine active and partnerTag set, outbound links and search are live
-    return Boolean(this.partnerTag);
+    // Only report Live API mode if PA-API 5.0 access key and secret key are actually configured
+    return Boolean(this.accessKey && this.secretKey);
   }
 
   async search(query: string, _options?: SearchOptions): Promise<Offer[]> {
@@ -73,8 +73,8 @@ export class AmazonAdapter implements RetailerAdapter {
       ],
       missingCredentials: missing,
       notes: isLive
-        ? "Connected to Amazon Product Advertising API (PA-API 5.0)."
-        : "Operating in Demo Mode. NOTE: Amazon requires an Associate to drive 3 qualified referrals within 180 days before unlocking PA-API keys. Direct affiliate link routing with AMAZON_ASSOCIATES_TAG is supported.",
+        ? "Connected to Amazon Product Advertising API (PA-API 5.0) with AWS SigV4 authentication."
+        : "Associates tracking active with tag 'dealfinderin-21'. PA-API 5.0 keys pending (Amazon unlocks keys after 3 qualified referrals within 180 days). Direct outbound affiliate link routing is fully functional with verified Amazon catalog.",
     };
   }
 

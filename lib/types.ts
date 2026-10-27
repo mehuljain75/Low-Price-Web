@@ -51,6 +51,8 @@ export interface Product {
   updatedAt: string;
 }
 
+export type DataProvenance = 'amazon_paapi_live' | 'amazon_catalog_verified' | 'dev_fixture';
+
 export interface Offer {
   id: string;
   productId: string;
@@ -68,7 +70,8 @@ export interface Offer {
   lastCheckedAt: string; // ISO 8601
   isStale: boolean; // Flagged if older than threshold (e.g. 24h)
   isDemo: boolean; // Explicit flag for fictional demo data
-  dataSource: 'demo' | 'api' | 'feed' | 'manual';
+  dataSource: 'demo' | 'api' | 'feed' | 'manual' | 'catalog';
+  provenance?: DataProvenance;
   deliveryTimeEstimate?: string;
   bankOffersDescription?: string;
 }

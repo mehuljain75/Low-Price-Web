@@ -90,7 +90,7 @@ export function computeProductComparison(
   offers: Offer[],
   category?: Category
 ): PriceComparison {
-  const productOffers = offers.filter((o) => o.productId === product.id);
+  const productOffers = (offers || []).filter((o) => o.productId === product.id);
 
   // Update staleness
   const processedOffers = productOffers.map((o) => ({

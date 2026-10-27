@@ -1,58 +1,59 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Filter, X, RotateCcw, Check, Search, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Filter, X, RotateCcw, Check, Search, SlidersHorizontal, Star } from "lucide-react";
 import { Category, Retailer } from "@/lib/types";
 
 interface MobileFilterDrawerProps {
   categories: Category[];
-  retailers: Retailer[];
+  retailers?: Retailer[];
   brands?: string[];
   currentCategory?: string;
   currentRetailer?: string;
   currentBrand?: string;
   currentMinPrice?: number;
   currentMaxPrice?: number;
+  currentMinRating?: number;
   currentInStock?: boolean;
-  totalProductsCount: number;
+  totalProductsCount: number | string;
 }
 
 export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   categories,
-  retailers,
   brands = [],
   currentCategory,
-  currentRetailer,
   currentBrand,
   currentMinPrice,
   currentMaxPrice,
+  currentMinRating,
   currentInStock,
   totalProductsCount,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   // Local state inside drawer until user clicks "Apply"
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(currentCategory);
-  const [selectedRetailer, setSelectedRetailer] = useState<string | undefined>(currentRetailer);
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>(currentBrand);
   const [minPrice, setMinPrice] = useState(currentMinPrice?.toString() || "");
   const [maxPrice, setMaxPrice] = useState(currentMaxPrice?.toString() || "");
+  const [selectedMinRating, setSelectedMinRating] = useState<number | undefined>(currentMinRating);
   const [inStockOnly, setInStockOnly] = useState(Boolean(currentInStock));
   const [brandSearch, setBrandSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<"category" | "brand" | "retailer" | "price">("category");
+  const [activeTab, setActiveTab] = useState<"category" | "brand" | "rating" | "price">("category");
 
   // Sync state when props change
   useEffect(() => {
     setSelectedCategory(currentCategory);
-    setSelectedRetailer(currentRetailer);
     setSelectedBrand(currentBrand);
     setMinPrice(currentMinPrice?.toString() || "");
     setMaxPrice(currentMaxPrice?.toString() || "");
+    setSelectedMinRating(currentMinRating);
     setInStockOnly(Boolean(currentInStock));
-  }, [currentCategory, currentRetailer, currentBrand, currentMinPrice, currentMaxPrice, currentInStock]);
+  }, [currentCategory, currentBrand, currentMinPrice, currentMaxPrice, currentMinRating, currentInStock]);
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -69,42 +70,56 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   // Calculate active filter count
   let activeFilterCount = 0;
   if (currentCategory && currentCategory !== "all") activeFilterCount++;
-  if (currentRetailer && currentRetailer !== "all") activeFilterCount++;
   if (currentBrand) activeFilterCount++;
   if (currentMinPrice || currentMaxPrice) activeFilterCount++;
+  if (currentMinRating) activeFilterCount++;
   if (currentInStock) activeFilterCount++;
+
+  const getBasePath = (catSlug?: string) => {
+    if (catSlug && catSlug !== "all") {
+      return `/category/${catSlug}`;
+    }
+    if (pathname.startsWith("/category/") || pathname.startsWith("/search")) {
+      return pathname;
+    }
+    return "/products";
+  };
 
   const applyFilters = () => {
     const params = new URLSearchParams(searchParams.toString());
+    params.delete("page"); // Reset pagination
 
     if (selectedCategory && selectedCategory !== "all") params.set("category", selectedCategory);
     else params.delete("category");
 
-    if (selectedRetailer && selectedRetailer !== "all") params.set("retailer", selectedRetailer);
-    else params.delete("retailer");
-
     if (selectedBrand) params.set("brand", selectedBrand);
     else params.delete("brand");
 
-    if (minPrice) params.set("minPrice", minPrice);
+    const minNum = minPrice.trim() ? Number(minPrice) : undefined;
+    const maxNum = maxPrice.trim() ? Number(maxPrice) : undefined;
+
+    if (minNum !== undefined && !isNaN(minNum)) params.set("minPrice", String(minNum));
     else params.delete("minPrice");
 
-    if (maxPrice) params.set("maxPrice", maxPrice);
+    if (maxNum !== undefined && !isNaN(maxNum)) params.set("maxPrice", String(maxNum));
     else params.delete("maxPrice");
+
+    if (selectedMinRating) params.set("minRating", String(selectedMinRating));
+    else params.delete("minRating");
 
     if (inStockOnly) params.set("inStock", "true");
     else params.delete("inStock");
 
-    router.push(`/products?${params.toString()}`);
+    router.push(`${getBasePath(selectedCategory)}?${params.toString()}`);
     setIsOpen(false);
   };
 
   const resetAll = () => {
     setSelectedCategory(undefined);
-    setSelectedRetailer(undefined);
     setSelectedBrand(undefined);
     setMinPrice("");
     setMaxPrice("");
+    setSelectedMinRating(undefined);
     setInStockOnly(false);
     setBrandSearch("");
     router.push("/products");
@@ -122,10 +137,10 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
         <button
           onClick={() => setIsOpen(true)}
           type="button"
-          className="pointer-events-auto bg-slate-900 hover:bg-black text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-2.5 font-bold text-xs tracking-wide active:scale-95 transition-all border border-slate-700 backdrop-blur-sm"
+          className="pointer-events-auto bg-slate-900 hover:bg-black text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-2.5 font-bold text-xs tracking-wide active:scale-95 transition-all border border-slate-700 backdrop-blur-sm cursor-pointer"
         >
           <SlidersHorizontal className="w-4 h-4 text-orange-400" />
-          <span>Filters & Categories</span>
+          <span>Filters &amp; Categories</span>
           {activeFilterCount > 0 && (
             <span className="w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] flex items-center justify-center font-black">
               {activeFilterCount}
@@ -149,7 +164,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-orange-600" />
                 <h2 id="mobile-filter-title" className="font-bold text-sm text-slate-900">
-                  Filters & Categories
+                  Filters &amp; Categories
                 </h2>
                 {activeFilterCount > 0 && (
                   <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">
@@ -161,7 +176,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                 <button
                   onClick={resetAll}
                   type="button"
-                  className="text-xs text-slate-500 hover:text-slate-800 font-medium flex items-center gap-1"
+                  className="text-xs text-slate-500 hover:text-slate-800 font-medium flex items-center gap-1 cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Reset</span>
@@ -169,7 +184,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                 <button
                   onClick={() => setIsOpen(false)}
                   type="button"
-                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800"
+                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -178,7 +193,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
 
             {/* Split View Content: Vertical Tabs on Left, Options on Right */}
             <div className="flex-1 flex overflow-hidden">
-              {/* Category Nav Tabs */}
+              {/* Nav Tabs */}
               <div className="w-1/3 bg-slate-50 border-r border-slate-200 overflow-y-auto py-2">
                 <button
                   type="button"
@@ -191,21 +206,6 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                 >
                   <span>Category</span>
                   {selectedCategory && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("retailer")}
-                  className={`w-full text-left px-3.5 py-3 text-xs font-semibold flex items-center justify-between transition-colors ${
-                    activeTab === "retailer"
-                      ? "bg-white text-orange-600 border-l-3 border-orange-500 shadow-2xs"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`}
-                >
-                  <span>Store</span>
-                  {selectedRetailer && (
                     <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                   )}
                 </button>
@@ -234,8 +234,23 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                       : "text-slate-600 hover:bg-slate-100"
                   }`}
                 >
-                  <span>Price & Stock</span>
+                  <span>Price &amp; Stock</span>
                   {(minPrice || maxPrice || inStockOnly) && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("rating")}
+                  className={`w-full text-left px-3.5 py-3 text-xs font-semibold flex items-center justify-between transition-colors ${
+                    activeTab === "rating"
+                      ? "bg-white text-orange-600 border-l-3 border-orange-500 shadow-2xs"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Rating</span>
+                  {selectedMinRating && (
                     <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                   )}
                 </button>
@@ -284,88 +299,46 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                   </div>
                 )}
 
-                {/* 2. Retailer Tab */}
-                {activeTab === "retailer" && (
-                  <div className="space-y-2">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedRetailer(undefined)}
-                      className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between border ${
-                        !selectedRetailer
-                          ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
-                          : "bg-white border-slate-200 text-slate-700"
-                      }`}
-                    >
-                      <span>All Tracked Stores</span>
-                      {!selectedRetailer && <Check className="w-4 h-4 text-orange-600" />}
-                    </button>
-                    {retailers.map((r) => (
-                      <button
-                        key={r.id}
-                        type="button"
-                        onClick={() => setSelectedRetailer(r.slug)}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between border ${
-                          selectedRetailer === r.slug
-                            ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
-                            : "bg-white border-slate-200 text-slate-700"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="w-2.5 h-2.5 rounded-full"
-                            style={{ backgroundColor: r.color }}
-                          />
-                          <span>{r.name}</span>
-                        </div>
-                        {selectedRetailer === r.slug && (
-                          <Check className="w-4 h-4 text-orange-600" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* 3. Brand Tab */}
+                {/* 2. Brand Tab */}
                 {activeTab === "brand" && (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="relative">
-                      <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="text"
                         placeholder="Search brands..."
                         value={brandSearch}
                         onChange={(e) => setBrandSearch(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        className="w-full text-xs pl-7 pr-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
                       />
+                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setSelectedBrand(undefined)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between border ${
-                        !selectedBrand
-                          ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
-                          : "bg-white border-slate-200 text-slate-700"
-                      }`}
-                    >
-                      <span>All Brands</span>
-                      {!selectedBrand && <Check className="w-4 h-4 text-orange-600" />}
-                    </button>
-
-                    <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
-                      {filteredBrands.map((brand) => (
+                    <div className="space-y-1.5 max-h-[55vh] overflow-y-auto">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedBrand(undefined)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between border ${
+                          !selectedBrand
+                            ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
+                            : "bg-white border-slate-200 text-slate-700"
+                        }`}
+                      >
+                        <span>All Brands</span>
+                        {!selectedBrand && <Check className="w-4 h-4 text-orange-600" />}
+                      </button>
+                      {filteredBrands.map((b) => (
                         <button
-                          key={brand}
+                          key={b}
                           type="button"
-                          onClick={() => setSelectedBrand(brand)}
+                          onClick={() => setSelectedBrand(b)}
                           className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between border ${
-                            selectedBrand?.toLowerCase() === brand.toLowerCase()
+                            selectedBrand?.toLowerCase() === b.toLowerCase()
                               ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
                               : "bg-white border-slate-200 text-slate-700"
                           }`}
                         >
-                          <span>{brand}</span>
-                          {selectedBrand?.toLowerCase() === brand.toLowerCase() && (
+                          <span>{b}</span>
+                          {selectedBrand?.toLowerCase() === b.toLowerCase() && (
                             <Check className="w-4 h-4 text-orange-600" />
                           )}
                         </button>
@@ -374,84 +347,113 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                   </div>
                 )}
 
-                {/* 4. Price & Stock Tab */}
+                {/* 3. Price & Stock Tab */}
                 {activeTab === "price" && (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <span className="text-xs font-bold text-slate-700 block">Price Range (₹)</span>
+                      <label className="text-xs font-bold text-slate-700 block">
+                        Custom Price Range (₹)
+                      </label>
                       <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="number"
-                          placeholder="Min (₹)"
-                          value={minPrice}
-                          onChange={(e) => setMinPrice(e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                        />
-                        <input
-                          type="number"
-                          placeholder="Max (₹)"
-                          value={maxPrice}
-                          onChange={(e) => setMaxPrice(e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                        />
+                        <div>
+                          <input
+                            type="number"
+                            placeholder="Min ₹"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            className="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-orange-500"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="number"
+                            placeholder="Max ₹"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            className="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-orange-500"
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <span className="text-[11px] font-semibold text-slate-500">Popular Quick Filters:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {[
-                          { label: "Under ₹1k", min: "", max: "1000" },
-                          { label: "Under ₹5k", min: "", max: "5000" },
-                          { label: "Under ₹20k", min: "", max: "20000" },
-                          { label: "Under ₹50k", min: "", max: "50000" },
-                        ].map((preset) => (
-                          <button
-                            key={preset.label}
-                            type="button"
-                            onClick={() => {
-                              setMinPrice(preset.min);
-                              setMaxPrice(preset.max);
-                            }}
-                            className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-orange-100 text-[11px] font-medium text-slate-700 transition-colors"
-                          >
-                            {preset.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-200">
-                      <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800">
+                    <div className="pt-2 border-t border-slate-100">
+                      <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-800 select-none">
                         <input
                           type="checkbox"
                           checked={inStockOnly}
                           onChange={(e) => setInStockOnly(e.target.checked)}
-                          className="rounded border-slate-300 text-orange-600 focus:ring-orange-500 w-4 h-4"
+                          className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                         />
-                        <span>In-Stock Only</span>
+                        <span>In Stock Only</span>
                       </label>
                     </div>
+                  </div>
+                )}
+
+                {/* 4. Rating Tab */}
+                {activeTab === "rating" && (
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMinRating(undefined)}
+                      className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between border ${
+                        !selectedMinRating
+                          ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
+                          : "bg-white border-slate-200 text-slate-700"
+                      }`}
+                    >
+                      <span>All Ratings</span>
+                      {!selectedMinRating && <Check className="w-4 h-4 text-orange-600" />}
+                    </button>
+                    {[4, 3].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setSelectedMinRating(star)}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between border ${
+                          selectedMinRating === star
+                            ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
+                            : "bg-white border-slate-200 text-slate-700"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <div className="flex text-amber-500">
+                            {Array.from({ length: star }).map((_, i) => (
+                              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            ))}
+                          </div>
+                          <span>&amp; above</span>
+                        </div>
+                        {selectedMinRating === star && (
+                          <Check className="w-4 h-4 text-orange-600" />
+                        )}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Footer Action Buttons */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+            {/* Bottom Actions Bar */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center gap-3">
               <button
                 type="button"
                 onClick={resetAll}
-                className="w-1/3 py-2.5 px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 font-bold text-xs text-slate-700 transition-colors"
+                className="w-1/3 py-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 transition-colors"
               >
                 Clear All
               </button>
               <button
                 type="button"
                 onClick={applyFilters}
-                className="w-2/3 py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-700 font-bold text-xs text-white shadow-md transition-colors"
+                className="w-2/3 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-black shadow-md transition-colors flex items-center justify-center gap-2"
               >
-                Apply Filters ({totalProductsCount})
+                <span>Apply Filters</span>
+                {totalProductsCount && (
+                  <span className="text-[10px] font-normal opacity-90">
+                    ({totalProductsCount} items)
+                  </span>
+                )}
               </button>
             </div>
           </div>

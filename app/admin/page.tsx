@@ -13,6 +13,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { adapterRegistry } from "@/lib/adapters/registry";
+import { providerRegistry } from "@/lib/providers/retailer-provider";
 import { repository } from "@/lib/data/repository";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
@@ -21,6 +22,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const healthList = await adapterRegistry.getAllHealth();
   const stats = await repository.getCatalogStats();
+  const providers = providerRegistry.getAllProviders();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -29,14 +31,14 @@ export default async function AdminPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Data Sources & Health Monitor
+              Data Sources & Retailer Architecture
             </h1>
             <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">
               Admin
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Real-time status of retailer adapters, API quota limits, and database connectivity.
+            Real-time status of Amazon PA-API 5.0, pending Cuelinks affiliate integrations, and database feeds.
           </p>
         </div>
 
@@ -58,40 +60,40 @@ export default async function AdminPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 text-xs">
-            <span>Canonical Products</span>
-            <Layers className="w-4 h-4 text-slate-400" />
+            <span>Primary Provider</span>
+            <Layers className="w-4 h-4 text-orange-500" />
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">
-            {stats.totalProducts}
+          <div className="text-xl font-black text-slate-900 mt-2">
+            Amazon India
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            Normalized catalog items
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 text-xs">
-            <span>Tracked Retailer Offers</span>
-            <Database className="w-4 h-4 text-slate-400" />
-          </div>
-          <div className="text-2xl font-black text-slate-900 mt-2">
-            {stats.totalOffers}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            Across {stats.trackedRetailersCount} store feeds
+          <div className="text-[11px] text-emerald-600 font-medium mt-1">
+            Active on Customer Listings
           </div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 text-xs">
-            <span>Stale Offers (&gt;24h)</span>
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
+            <span>Pending Networks</span>
+            <Database className="w-4 h-4 text-amber-500" />
           </div>
-          <div className="text-2xl font-black text-amber-600 mt-2">
-            {stats.staleOffersCount}
+          <div className="text-xl font-black text-slate-900 mt-2">
+            4 Stores
+          </div>
+          <div className="text-[11px] text-amber-600 font-medium mt-1">
+            Cuelinks Approval Pending
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="flex items-center justify-between text-slate-500 text-xs">
+            <span>Associates Tag</span>
+            <Key className="w-4 h-4 text-blue-500" />
+          </div>
+          <div className="text-base font-black text-blue-600 mt-2 font-mono">
+            dealfinderin-21
           </div>
           <div className="text-[11px] text-slate-400 mt-1">
-            Flagged for price refresh
+            Direct monetized routing
           </div>
         </div>
 
@@ -107,24 +109,30 @@ export default async function AdminPage() {
               </span>
             ) : (
               <span className="text-slate-600 flex items-center gap-1">
-                Demo Provider
+                Local / Edge Store
               </span>
             )}
           </div>
           <div className="text-[11px] text-slate-400 mt-1">
-            {isSupabaseConfigured ? "PostgreSQL Active" : "Local Mock Active"}
+            {isSupabaseConfigured ? "PostgreSQL Active" : "Edge Memory Active"}
           </div>
         </div>
       </div>
 
-      {/* Connected Retailer Adapters Matrix */}
+      {/* Customer-Facing Retailer Provider Architecture */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900">
-          Retailer Integration Adapters & API Credentials
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-slate-900">
+            Retailer Integration Architecture & Live Status
+          </h2>
+          <span className="text-xs text-slate-500 font-medium">
+            Strict isolation: Inactive feeds hidden from customers
+          </span>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {healthList.map((adapter) => {
+            const isAmazon = adapter.retailerSlug === "amazon";
             const isLive = adapter.mode === "live";
 
             return (
@@ -134,33 +142,36 @@ export default async function AdminPage() {
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-bold text-base text-slate-900">
-                      {adapter.retailerName}
+                    <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
+                      <span>{adapter.retailerName}</span>
+                      {isAmazon && (
+                        <span className="text-[10px] font-bold bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full border border-orange-200">
+                          Active Store
+                        </span>
+                      )}
                     </h3>
                     <span className="text-xs text-slate-400">
                       Slug: <code className="font-mono text-slate-600">{adapter.retailerSlug}</code>
                     </span>
                   </div>
 
-                  <span
-                    className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      isLive
-                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                        : "bg-amber-100 text-amber-800 border border-amber-300"
-                    }`}
-                  >
-                    {isLive ? (
-                      <>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Live API Mode</span>
-                      </>
-                    ) : (
-                      <>
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                        <span>Demo Mode</span>
-                      </>
-                    )}
-                  </span>
+                  {isAmazon ? (
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${
+                        isLive
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          : "bg-blue-100 text-blue-800 border border-blue-300"
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>{isLive ? "Live PA-API 5.0" : "Tag Active (dealfinderin-21)"}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Pending Cuelinks (Inactive)</span>
+                    </span>
+                  )}
                 </div>
 
                 <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -171,13 +182,13 @@ export default async function AdminPage() {
                 <div className="space-y-2 text-xs">
                   <div className="font-semibold text-slate-700 flex items-center gap-1.5">
                     <Key className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Configuration Status:</span>
+                    <span>Configuration & Approval Status:</span>
                   </div>
 
                   {adapter.missingCredentials.length > 0 ? (
                     <div className="bg-amber-50/80 p-2.5 rounded-lg border border-amber-200 space-y-1">
                       <span className="text-[11px] font-semibold text-amber-800 block">
-                        Missing in .env.local:
+                        Action Required:
                       </span>
                       <ul className="list-disc list-inside space-y-0.5 text-amber-900 font-mono text-[11px]">
                         {adapter.missingCredentials.map((key) => (
@@ -188,13 +199,13 @@ export default async function AdminPage() {
                   ) : (
                     <div className="text-emerald-700 font-medium flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      All necessary credentials configured.
+                      Integration active and verified.
                     </div>
                   )}
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-100">
-                  <span>Offers in Catalog: {adapter.offersCount}</span>
+                  <span>Customer Listings: {isAmazon ? "Active (Endless Catalog)" : "Hidden (No fake offers)"}</span>
                   <span>Sync cadence: Every {adapter.syncIntervalMinutes}m</span>
                 </div>
               </div>
@@ -235,12 +246,12 @@ AMAZON_SECRET_KEY=your_secret`}
           </div>
 
           <div className="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-            <h4 className="font-bold text-slate-900 text-sm">3. Myntra & AJIO via Cuelinks / EarnKaro</h4>
+            <h4 className="font-bold text-slate-900 text-sm">3. Flipkart, Myntra & AJIO via Cuelinks</h4>
             <p className="leading-relaxed">
-              Myntra and AJIO do not provide direct public individual APIs. Publishers sign up on affiliate networks like <strong>Cuelinks.com</strong> or <strong>EarnKaro.com</strong> to get automated sub-ID redirection:
+              Stores like Myntra, AJIO, and Flipkart can be monetized via affiliate aggregators like <strong>Cuelinks.com</strong> with automated link redirection:
             </p>
             <pre className="bg-slate-900 text-slate-200 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
-{`CUELINKS_PUBLISHER_ID=your_cuelinks_id`}
+{`CUELINKS_PUBLISHER_ID=281629`}
             </pre>
           </div>
 

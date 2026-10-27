@@ -1,0 +1,9 @@
+{
+  "name": "dealfinder-video-composition",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "hyperframes check",
+    "render": "hyperframes render"
+  }
+}
