@@ -12,6 +12,9 @@
     "AMAZON_ASSOCIATES_TAG": "dealfinderin-21",
     "CUELINKS_PUBLISHER_ID": "281629"
   },
+  "build": {
+    "command": "npm run build"
+  },
   "observability": {
     "enabled": true
   }
