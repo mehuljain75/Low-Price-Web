@@ -12,6 +12,9 @@ interface InfiniteProductGridProps {
     categorySlug?: string;
     retailerSlug?: string;
     brand?: string;
+    shoeType?: string;
+    gender?: string;
+    size?: string;
     minPrice?: number;
     maxPrice?: number;
     minRating?: number;
@@ -21,14 +24,56 @@ interface InfiniteProductGridProps {
   totalProductsCount?: number | string;
 }
 
+function deduplicateProductList(items: PriceComparison[]): PriceComparison[] {
+  const seenIds = new Set<string>();
+  const seenAsins = new Set<string>();
+  const seenTitles = new Set<string>();
+
+  return items.filter((item) => {
+    if (seenIds.has(item.product.id)) return false;
+    seenIds.add(item.product.id);
+
+    const amz = item.offers.find((o) => o.retailerSlug === "amazon");
+    const asin = (amz?.retailerProductId || "").toUpperCase().trim();
+    if (asin && /^B0[A-Z0-9]{8}$/.test(asin)) {
+      if (seenAsins.has(asin)) return false;
+      seenAsins.add(asin);
+    }
+
+    const titleNorm = item.product.title
+      .replace(/\s*\([^)]*\)\s*$/g, "")
+      .replace(/[^a-zA-Z0-9\s]/g, " ")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+    if (titleNorm) {
+      if (seenTitles.has(titleNorm)) return false;
+      seenTitles.add(titleNorm);
+    }
+
+    return true;
+  });
+}
+
 export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
   initialComparisons,
   filters,
   totalProductsCount,
 }) => {
-  const [products, setProducts] = useState<PriceComparison[]>(initialComparisons);
+  const numericTotal =
+    totalProductsCount !== undefined && !isNaN(Number(totalProductsCount))
+      ? Number(totalProductsCount)
+      : undefined;
+
+  const [products, setProducts] = useState<PriceComparison[]>(() => deduplicateProductList(initialComparisons));
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(initialComparisons.length >= 24);
+  const [hasMore, setHasMore] = useState(() => {
+    const clean = deduplicateProductList(initialComparisons);
+    if (numericTotal !== undefined) {
+      return clean.length < numericTotal;
+    }
+    return initialComparisons.length >= 24;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -45,6 +90,9 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
       filters.categorySlug || "",
       filters.retailerSlug || "",
       filters.brand || "",
+      filters.shoeType || "",
+      filters.gender || "",
+      filters.size || "",
       filters.minPrice ?? "",
       filters.maxPrice ?? "",
       filters.minRating ?? "",
@@ -56,6 +104,9 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
     filters.categorySlug,
     filters.retailerSlug,
     filters.brand,
+    filters.shoeType,
+    filters.gender,
+    filters.size,
     filters.minPrice,
     filters.maxPrice,
     filters.minRating,
@@ -73,14 +124,19 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    setProducts(initialComparisons);
+    const cleanInitial = deduplicateProductList(initialComparisons);
+    setProducts(cleanInitial);
     setPage(1);
     pageRef.current = 1;
-    setHasMore(initialComparisons.length >= 24);
+    const canHaveMore =
+      numericTotal !== undefined
+        ? cleanInitial.length < numericTotal
+        : cleanInitial.length >= 24;
+    setHasMore(canHaveMore);
     setIsLoading(false);
     setLoadError(null);
     isFetchingRef.current = false;
-  }, [filterKey, initialComparisons]);
+  }, [filterKey, initialComparisons, numericTotal]);
 
   // Monitor scroll for Back to Top button
   useEffect(() => {
@@ -114,6 +170,9 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
         params.set("retailer", currentFilters.retailerSlug);
       }
       if (currentFilters.brand) params.set("brand", currentFilters.brand);
+      if (currentFilters.shoeType) params.set("shoeType", currentFilters.shoeType);
+      if (currentFilters.gender) params.set("gender", currentFilters.gender);
+      if (currentFilters.size) params.set("size", currentFilters.size);
       if (currentFilters.minPrice !== undefined) params.set("minPrice", String(currentFilters.minPrice));
       if (currentFilters.maxPrice !== undefined) params.set("maxPrice", String(currentFilters.maxPrice));
       if (currentFilters.minRating !== undefined) params.set("minRating", String(currentFilters.minRating));
@@ -133,12 +192,51 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
         if (newItems.length > 0) {
           setProducts((prev) => {
             const existingIds = new Set(prev.map((p) => p.product.id));
-            const unique = newItems.filter((item) => !existingIds.has(item.product.id));
-            return [...prev, ...unique];
+            const existingAsins = new Set(
+              prev
+                .map((p) => {
+                  const amz = p.offers.find((o) => o.retailerSlug === "amazon");
+                  return (amz?.retailerProductId || "").toUpperCase();
+                })
+                .filter((a) => /^B0[A-Z0-9]{8}$/.test(a))
+            );
+            const existingTitles = new Set(
+              prev.map((p) =>
+                p.product.title
+                  .replace(/\s*\([^)]*\)\s*$/g, "")
+                  .replace(/[^a-zA-Z0-9\s]/g, " ")
+                  .toLowerCase()
+                  .replace(/\s+/g, " ")
+                  .trim()
+              )
+            );
+
+            const unique = newItems.filter((item) => {
+              if (existingIds.has(item.product.id)) return false;
+              const amz = item.offers.find((o) => o.retailerSlug === "amazon");
+              const asin = (amz?.retailerProductId || "").toUpperCase();
+              if (asin && /^B0[A-Z0-9]{8}$/.test(asin) && existingAsins.has(asin)) return false;
+              const titleNorm = item.product.title
+                .replace(/\s*\([^)]*\)\s*$/g, "")
+                .replace(/[^a-zA-Z0-9\s]/g, " ")
+                .toLowerCase()
+                .replace(/\s+/g, " ")
+                .trim();
+              if (titleNorm && existingTitles.has(titleNorm)) return false;
+              return true;
+            });
+            const combined = [...prev, ...unique];
+            const moreAvailable =
+              data.hasMore !== undefined
+                ? data.hasMore
+                : numericTotal !== undefined
+                ? combined.length < numericTotal
+                : newItems.length >= 24;
+            setHasMore(moreAvailable && unique.length > 0);
+            return combined;
           });
           setPage(nextPage);
           pageRef.current = nextPage;
-          setHasMore(data.hasMore !== undefined ? data.hasMore : newItems.length >= 24);
         } else {
           setHasMore(false);
         }
@@ -182,14 +280,14 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
 
   if (products.length === 0 && !isLoading) {
     return (
-      <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-orange-50 text-orange-500 mx-auto flex items-center justify-center">
-          <Search className="w-8 h-8" />
+      <div className="bg-white rounded-xl border border-[#E5E7EB] p-12 sm:p-16 text-center space-y-4 shadow-card">
+        <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-[#E5E7EB] text-[#111827] mx-auto flex items-center justify-center">
+          <Search className="w-6 h-6 text-gray-500" />
         </div>
-        <div className="space-y-1">
-          <h3 className="text-lg font-bold text-slate-900">No matching Amazon products found</h3>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
-            Try loosening your price filters, selecting a different brand, or clearing search keywords.
+        <div className="space-y-1.5 max-w-md mx-auto">
+          <h3 className="text-lg font-bold text-[#111827]">No matching Amazon products found</h3>
+          <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed">
+            Try loosening your price filters, selecting a different brand, or searching with broader keywords.
           </p>
         </div>
       </div>
@@ -198,14 +296,14 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Amazon-First Results Status Banner */}
-      <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-xs">
-        <span className="text-slate-600 font-medium">
-          Showing <strong>1–{products.length}</strong> {totalProductsCount ? `of ${totalProductsCount}` : ""} Amazon products
+      {/* Results Status Banner */}
+      <div className="flex items-center justify-between bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-xs shadow-card">
+        <span className="text-[#6B7280] font-medium">
+          Showing <strong className="text-[#111827]">1–{products.length}</strong> {totalProductsCount ? `of ${totalProductsCount}` : ""} products
         </span>
-        <span className="inline-flex items-center gap-1.5 text-orange-800 font-bold bg-orange-100/70 px-2.5 py-0.5 rounded-full border border-orange-200 text-[11px]">
-          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-          <span>Amazon India Verified Catalog</span>
+        <span className="inline-flex items-center gap-1.5 text-amber-900 font-bold bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200 text-[11px]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>
+          <span>Verified Catalog</span>
         </span>
       </div>
 
@@ -220,19 +318,29 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
           [1, 2, 3, 4, 5, 6].map((n) => (
             <div
               key={`skeleton-${n}`}
-              className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3 animate-pulse shadow-xs"
+              className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden animate-pulse shadow-card flex flex-col justify-between"
             >
-              <div className="aspect-square w-full bg-slate-100 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-slate-200" />
+              <div>
+                <div className="aspect-square w-full bg-gray-50 border-b border-[#E5E7EB] flex items-center justify-center p-6">
+                  <div className="w-16 h-16 rounded-xl bg-gray-200/60" />
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="h-3 w-16 bg-gray-200 rounded" />
+                    <div className="h-3 w-10 bg-gray-100 rounded" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="h-4 w-full bg-gray-200 rounded" />
+                    <div className="h-4 w-3/4 bg-gray-200 rounded" />
+                  </div>
+                  <div className="pt-2 flex items-baseline gap-2">
+                    <div className="h-6 w-24 bg-gray-200 rounded" />
+                    <div className="h-4 w-16 bg-gray-100 rounded" />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="h-3 w-16 bg-orange-100 rounded" />
-                <div className="h-4 w-3/4 bg-slate-200 rounded" />
-                <div className="h-3 w-1/2 bg-slate-100 rounded" />
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                <div className="h-5 w-20 bg-slate-200 rounded" />
-                <div className="h-4 w-16 bg-emerald-100 rounded" />
+              <div className="p-4 pt-0">
+                <div className="h-9 w-full bg-gray-200/70 rounded-lg" />
               </div>
             </div>
           ))}
@@ -241,20 +349,20 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
       {/* Bottom Sentinel & Control Bar */}
       <div ref={sentinelRef} className="pt-6 pb-12 flex flex-col items-center justify-center gap-4">
         {isLoading ? (
-          <div className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-xs font-bold shadow-xs">
-            <Loader2 className="w-4 h-4 animate-spin text-orange-600" />
+          <div className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white border border-[#E5E7EB] text-[#111827] text-xs font-bold shadow-card">
+            <Loader2 className="w-4 h-4 animate-spin text-[#F59E0B]" />
             <span>Loading more Amazon India products...</span>
           </div>
         ) : loadError ? (
           <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2 text-xs font-semibold text-rose-600 bg-rose-50 px-4 py-2 rounded-xl border border-rose-200">
-              <AlertCircle className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs font-semibold text-[#B91C1C] bg-red-50 px-4 py-2.5 rounded-lg border border-red-200">
+              <AlertCircle className="w-4 h-4 text-[#B91C1C]" />
               <span>{loadError}</span>
             </div>
             <button
               type="button"
               onClick={loadMore}
-              className="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-lg bg-[#111827] hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Retry Loading</span>
@@ -264,16 +372,18 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
           <button
             type="button"
             onClick={loadMore}
-            className="group px-6 py-2.5 rounded-full bg-white hover:bg-orange-500 hover:text-white border border-slate-300 hover:border-orange-500 text-slate-800 text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center gap-2 cursor-pointer"
+            className="group px-6 py-2.5 rounded-lg bg-white hover:bg-gray-50 border border-[#E5E7EB] hover:border-gray-300 text-[#111827] text-xs font-bold shadow-xs hover:shadow-card transition-colors flex items-center gap-2 cursor-pointer"
           >
             <span>Load More Products</span>
-            <span className="text-[10px] text-slate-400 group-hover:text-orange-100">
+            <span className="text-[10px] text-[#6B7280]">
               (Scroll down to auto-load)
             </span>
           </button>
         ) : (
-          <div className="text-center py-4 text-xs font-semibold text-slate-400">
-            You&apos;ve reached the end of the results.
+          <div className="text-center py-6 text-xs font-medium text-[#6B7280] flex items-center justify-center gap-3">
+            <span className="h-px w-10 bg-gray-200"></span>
+            <span>You&apos;ve reached the end of results</span>
+            <span className="h-px w-10 bg-gray-200"></span>
           </div>
         )}
       </div>
@@ -284,7 +394,7 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
           type="button"
           onClick={scrollToTop}
           aria-label="Back to top"
-          className="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-slate-900/90 text-white shadow-xl hover:bg-orange-600 hover:scale-110 transition-all duration-200 backdrop-blur-xs flex items-center justify-center cursor-pointer"
+          className="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-[#111827] text-white shadow-xl hover:bg-[#F59E0B] hover:text-[#111827] transition-all duration-150 flex items-center justify-center cursor-pointer"
         >
           <ArrowUp className="w-5 h-5" />
         </button>

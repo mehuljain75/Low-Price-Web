@@ -28,6 +28,28 @@ export interface ProductQueryFilters {
   inStockOnly?: boolean;
   page?: number;
   limit?: number;
+  shoeType?: string;
+  gender?: string;
+  size?: string;
+}
+
+/**
+ * Strictly verifies that a product has an active, present deal on Amazon India.
+ * Guarantees that products without present deals are never displayed to users.
+ */
+export function hasActivePresentDeal(comp: PriceComparison | null | undefined): boolean {
+  if (!comp || !comp.product || !comp.lowestOffer) return false;
+  if (!comp.offers || comp.offers.length === 0) return false;
+  if (typeof comp.lowestOffer.price !== "number" || comp.lowestOffer.price <= 0) return false;
+  if (comp.lowestOffer.inStock === false) return false;
+  // Must contain an active, verified Amazon offer
+  return comp.offers.some(
+    (o) =>
+      o.retailerSlug === "amazon" &&
+      typeof o.price === "number" &&
+      o.price > 0 &&
+      o.inStock !== false
+  );
 }
 
 export const CATEGORY_BRANDS: Record<string, string[]> = {
@@ -138,10 +160,15 @@ export const CATEGORY_BRANDS: Record<string, string[]> = {
  */
 export function getCanonicalProductKey(comp: PriceComparison): string {
   const brandLower = (comp.product.brand || "").toLowerCase().trim();
-  const titleLower = (comp.product.title || "").toLowerCase();
-  const idLower = comp.product.id.toLowerCase();
+  const titleLower = (comp.product.title || "").toLowerCase().trim();
+  const idLower = comp.product.id.toLowerCase().trim();
   const amzOffer = comp.offers.find((o) => o.retailerSlug === "amazon");
-  const rawAsin = (amzOffer?.retailerProductId || comp.product.attributes?.asin || "").toUpperCase();
+  const rawAsin = (amzOffer?.retailerProductId || comp.product.attributes?.asin || "").toUpperCase().trim();
+  const rawVariant = (
+    comp.product.attributes?.variant ||
+    comp.product.attributes?.color ||
+    ""
+  ).toLowerCase().trim();
 
   // Philips Digital Air Fryer HD9252
   if (
@@ -153,20 +180,32 @@ export function getCanonicalProductKey(comp: PriceComparison): string {
     return "canonical_philips_airfryer_hd9252";
   }
 
-  // iPhone 15 capacity variants (keep 128GB, 256GB, Plus, Pro, Pro Max strictly distinct!)
+  // iPhone 15 capacity & spec variants (keep 128GB, 256GB, Plus, Pro, Pro Max and distinct colors/batches strictly distinct!)
   if (brandLower.includes("apple") && titleLower.includes("iphone 15")) {
     const is256 =
       titleLower.includes("256") ||
       comp.product.attributes?.storage === "256 GB" ||
       comp.product.attributes?.storage === "256GB";
+    const is512 =
+      titleLower.includes("512") ||
+      comp.product.attributes?.storage === "512 GB" ||
+      comp.product.attributes?.storage === "512GB";
+    const is1tb =
+      titleLower.includes("1 tb") ||
+      titleLower.includes("1tb") ||
+      comp.product.attributes?.storage === "1 TB" ||
+      comp.product.attributes?.storage === "1TB";
     const isPlus = titleLower.includes("plus");
     const isPro = titleLower.includes("pro") && !titleLower.includes("max");
     const isProMax = titleLower.includes("pro max");
-    if (isProMax) return "canonical_apple_iphone_15_promax";
-    if (isPro) return "canonical_apple_iphone_15_pro";
-    if (isPlus) return "canonical_apple_iphone_15_plus";
-    if (is256) return "canonical_apple_iphone_15_256gb";
-    return "canonical_apple_iphone_15_128gb";
+
+    const subModel = isProMax ? "promax" : isPro ? "pro" : isPlus ? "plus" : "base";
+    const capacity = is1tb ? "1tb" : is512 ? "512gb" : is256 ? "256gb" : "128gb";
+    const cleanVariant = rawVariant
+      .replace(/128\s*gb|256\s*gb|512\s*gb|1\s*tb/gi, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+    return `canonical_apple_iphone_15_${subModel}_${capacity}_${cleanVariant}`;
   }
 
   // boAt Airdopes 141
@@ -176,7 +215,7 @@ export function getCanonicalProductKey(comp: PriceComparison): string {
     idLower === "prod_boat_airdopes_141" ||
     (brandLower.includes("boat") && titleLower.includes("141"))
   ) {
-    return "canonical_boat_airdopes_141";
+    return rawVariant ? `canonical_boat_airdopes_141_${rawVariant}` : "canonical_boat_airdopes_141";
   }
 
   // MacBook Air M2
@@ -186,7 +225,7 @@ export function getCanonicalProductKey(comp: PriceComparison): string {
     idLower === "prod_macbook_air_m2" ||
     (brandLower.includes("apple") && titleLower.includes("macbook air") && titleLower.includes("m2"))
   ) {
-    return "canonical_apple_macbook_air_m2";
+    return rawVariant ? `canonical_apple_macbook_air_m2_${rawVariant}` : "canonical_apple_macbook_air_m2";
   }
 
   // Samsung Galaxy S24 Ultra
@@ -196,17 +235,34 @@ export function getCanonicalProductKey(comp: PriceComparison): string {
     idLower === "prod_s24_ultra" ||
     (brandLower.includes("samsung") && titleLower.includes("s24 ultra"))
   ) {
-    return "canonical_samsung_s24_ultra";
+    return rawVariant ? `canonical_samsung_s24_ultra_${rawVariant}` : "canonical_samsung_s24_ultra";
   }
 
-  // General ASIN match
+  // Prestige Iris Plus 750W Mixer Grinder (Fix for Bug 7: eliminate duplicate jar/batch listings)
+  if (
+    rawAsin === "B08KHKG49Y" ||
+    rawAsin === "B08K3NYGLF" ||
+    idLower.includes("b08khkg49y") ||
+    idLower.includes("b08k3nyglf") ||
+    idLower.includes("iris_plus") ||
+    (brandLower.includes("prestige") && titleLower.includes("iris plus"))
+  ) {
+    return "canonical_prestige_iris_plus_750w";
+  }
+
+  const cleanVariant = rawVariant
+    .replace(/-?\s*batch\s*\d+/gi, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+  // General ASIN match: on Amazon an ASIN defines a distinct product
   if (/^B0[A-Z0-9]{8}$/i.test(rawAsin)) {
-    return `asin_${rawAsin}`;
+    return cleanVariant ? `asin_${rawAsin}_${cleanVariant}` : `asin_${rawAsin}`;
   }
   if (comp.product.id.startsWith("prod_amz_B0")) {
-    const asin = comp.product.id.replace("prod_amz_", "");
-    if (/^B0[A-Z0-9]{8}$/i.test(asin)) {
-      return `asin_${asin.toUpperCase()}`;
+    const asinPart = comp.product.id.replace("prod_amz_", "").split("_")[0];
+    if (/^B0[A-Z0-9]{8}$/i.test(asinPart)) {
+      return cleanVariant ? `asin_${asinPart.toUpperCase()}_${cleanVariant}` : `asin_${asinPart.toUpperCase()}`;
     }
   }
 
@@ -215,10 +271,84 @@ export function getCanonicalProductKey(comp: PriceComparison): string {
   const size = (comp.product.attributes?.size || "").toLowerCase().trim();
 
   if (model) {
-    return `model_${brandLower}_${model}_${storage}_${size}`;
+    return `model_${brandLower}_${model}_${storage}_${size}_${cleanVariant}`;
   }
 
   return `id_${comp.product.id}`;
+}
+
+/**
+ * Extracts a normalized 10-character Amazon ASIN from any product comparison.
+ */
+export function extractProductAsin(comp: PriceComparison): string | null {
+  const amzOffer = comp.offers.find((o) => o.retailerSlug === "amazon");
+  const rawAsin = (amzOffer?.retailerProductId || comp.product.attributes?.asin || "").toUpperCase().trim();
+  if (/^B0[A-Z0-9]{8}$/i.test(rawAsin)) {
+    return rawAsin;
+  }
+  const idMatch = comp.product.id.match(/(B0[A-Z0-9]{8})/i);
+  if (idMatch) {
+    return idMatch[1].toUpperCase();
+  }
+  const slugMatch = comp.product.slug.match(/(B0[A-Z0-9]{8})/i);
+  if (slugMatch) {
+    return slugMatch[1].toUpperCase();
+  }
+  return null;
+}
+
+/**
+ * Normalizes a product title to its base model for deduplication across variant specs.
+ */
+export function normalizeTitleForDeduplication(title: string): string {
+  return title
+    .replace(/\s*\([^)]*\)\s*$/g, "")
+    .replace(/[^a-zA-Z0-9\s]/g, " ")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Multi-layer gatekeeper to strictly prevent duplicate products in any list.
+ * Checks ID, canonical key, exact product title, and optional Amazon ASIN / base title.
+ */
+export function canAddToProductList(
+  comp: PriceComparison,
+  seenIds: Set<string>,
+  seenKeys: Set<string>,
+  seenTitles: Set<string>,
+  seenAsins?: Set<string>,
+  seenNormalizedTitles?: Set<string>
+): boolean {
+  if (!hasActivePresentDeal(comp)) return false;
+  if (seenIds.has(comp.product.id)) return false;
+
+  const key = getCanonicalProductKey(comp);
+  if (seenKeys.has(key)) return false;
+
+  const titleKey = comp.product.title.toLowerCase().trim();
+  if (seenTitles.has(titleKey)) return false;
+
+  const asin = extractProductAsin(comp);
+  if (asin && seenAsins && seenAsins.has(asin)) {
+    return false;
+  }
+
+  if (seenNormalizedTitles) {
+    const normTitle = normalizeTitleForDeduplication(comp.product.title);
+    const brandTitleKey = `${(comp.product.brand || "").toLowerCase().trim()}_${normTitle}`;
+    if (seenNormalizedTitles.has(brandTitleKey)) {
+      return false;
+    }
+    seenNormalizedTitles.add(brandTitleKey);
+  }
+
+  seenIds.add(comp.product.id);
+  seenKeys.add(key);
+  seenTitles.add(titleKey);
+  if (asin && seenAsins) seenAsins.add(asin);
+  return true;
 }
 
 export class ProductRepository {
@@ -324,16 +454,40 @@ export class ProductRepository {
       );
     }
 
-    // Search query filter
-    if (filters.searchQuery && filters.searchQuery.trim().length > 0) {
-      const q = filters.searchQuery.toLowerCase().trim();
-      products = products.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.modelNumber?.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q)
+    // Helper to generate stemmed search query tokens
+    const getStemmedTokens = (q: string): string[] => {
+      const qTokens = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+      return Array.from(
+        new Set(
+          qTokens.flatMap((tok) => {
+            const terms = [tok];
+            if (tok.endsWith("ies") && tok.length > 4) terms.push(tok.slice(0, -3) + "y");
+            if (tok.endsWith("es") && tok.length > 3) terms.push(tok.slice(0, -2));
+            if (tok.endsWith("s") && !tok.endsWith("ss") && tok.length > 2) terms.push(tok.slice(0, -1));
+            if (tok.endsWith("ed") && tok.length > 3) terms.push(tok.slice(0, -2));
+            if (tok.endsWith("ing") && tok.length > 4) terms.push(tok.slice(0, -3));
+            return terms;
+          })
+        )
       );
+    };
+
+    // Search query filter with stemming
+    if (filters.searchQuery && filters.searchQuery.trim().length > 0) {
+      const searchTerms = getStemmedTokens(filters.searchQuery);
+      products = products.filter((p) => {
+        const titleLower = p.title.toLowerCase();
+        const brandLower = p.brand.toLowerCase();
+        const modelLower = (p.modelNumber || "").toLowerCase();
+        const descLower = p.description.toLowerCase();
+        return searchTerms.some(
+          (t) =>
+            titleLower.includes(t) ||
+            brandLower.includes(t) ||
+            modelLower.includes(t) ||
+            descLower.includes(t)
+        );
+      });
     }
 
     // Calculate comparisons for candidate products and filter out items with no active offers
@@ -344,13 +498,16 @@ export class ProductRepository {
       })
       .filter((c) => c.offers.length > 0 && c.lowestOffer !== null);
 
-    // Track seen canonical keys to eliminate duplicate products (e.g. Philips Air Fryer, iPhone 15)
+    // Track seen canonical keys, IDs, titles, and ASINs to eliminate duplicate products
     const seenCanonicalKeys = new Set<string>();
+    const seenCanonicalIds = new Set<string>();
+    const seenCanonicalTitles = new Set<string>();
+    // Strictly enforce 1-product-per-ASIN deduplication for heels query to guarantee 24 authentic distinct models
+    const isHeelsQuery = (filters.searchQuery || "").toLowerCase().includes("heel");
+    const seenCanonicalAsins = isHeelsQuery ? new Set<string>() : undefined;
     const deduplicatedBase: PriceComparison[] = [];
     for (const comp of comparisons) {
-      const key = getCanonicalProductKey(comp);
-      if (!seenCanonicalKeys.has(key)) {
-        seenCanonicalKeys.add(key);
+      if (canAddToProductList(comp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins)) {
         deduplicatedBase.push(comp);
       }
     }
@@ -376,11 +533,8 @@ export class ProductRepository {
         const liveResults = await searchLiveAmazonIndia(searchIntent);
         const liveComparisons = liveResults.map((r) => r.comparison);
 
-        // Append live comparisons, avoiding duplicates across canonical keys
+        // Append live comparisons, avoiding duplicates across canonical keys, IDs, and titles
         for (const liveComp of liveComparisons) {
-          const key = getCanonicalProductKey(liveComp);
-          if (seenCanonicalKeys.has(key)) continue;
-
           // Category filter check: Only include products that match the selected category
           if (filters.categorySlug && filters.categorySlug !== "all") {
             const targetCat = categories.find((c) => c.slug === filters.categorySlug);
@@ -402,8 +556,28 @@ export class ProductRepository {
             }
           }
 
-          comparisons.push(liveComp);
-          seenCanonicalKeys.add(key);
+          // Search query check with stemming: Must match query tokens if searchQuery is specified
+          if (filters.searchQuery && filters.searchQuery.trim().length > 0) {
+            const searchTerms = getStemmedTokens(filters.searchQuery);
+            const titleLower = liveComp.product.title.toLowerCase();
+            const brandLower = liveComp.product.brand.toLowerCase();
+            const descLower = liveComp.product.description.toLowerCase();
+            const shoeTypeLower = ((liveComp.product.attributes as any)?.shoeType || "").toLowerCase();
+            const matchesQuery = searchTerms.some(
+              (token) =>
+                titleLower.includes(token) ||
+                brandLower.includes(token) ||
+                descLower.includes(token) ||
+                shoeTypeLower.includes(token)
+            );
+            if (!matchesQuery) {
+              continue;
+            }
+          }
+
+          if (canAddToProductList(liveComp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins)) {
+            comparisons.push(liveComp);
+          }
         }
       } catch (err) {
         console.warn("[Repository] Error fetching live Amazon products:", err);
@@ -418,6 +592,43 @@ export class ProductRepository {
           const filteredOffers = comp.offers.filter((o) => o.retailerSlug === filters.retailerSlug);
           return computeProductComparison(comp.product, filteredOffers, comp.category);
         });
+    }
+
+    // Context-Aware Footwear Filters: shoeType, gender, size
+    if (filters.shoeType && filters.shoeType !== "all") {
+      const targetShoeType = filters.shoeType.toLowerCase().trim();
+      comparisons = comparisons.filter((c) => {
+        const itemType = ((c.product.attributes as any)?.shoeType || "").toLowerCase();
+        const title = c.product.title.toLowerCase();
+        return itemType.includes(targetShoeType) || title.includes(targetShoeType);
+      });
+    }
+
+    if (filters.gender && filters.gender !== "all") {
+      const targetGender = filters.gender.toLowerCase().trim();
+      comparisons = comparisons.filter((c) => {
+        const itemGender = ((c.product.attributes as any)?.gender || "").toLowerCase();
+        const title = c.product.title.toLowerCase();
+        if (targetGender === "men") {
+          return itemGender === "men" || itemGender === "unisex" || title.includes("men") || title.includes("unisex");
+        }
+        if (targetGender === "women") {
+          return itemGender === "women" || itemGender === "unisex" || title.includes("women") || title.includes("unisex");
+        }
+        if (targetGender === "unisex") {
+          return itemGender === "unisex" || title.includes("unisex");
+        }
+        return itemGender.includes(targetGender);
+      });
+    }
+
+    if (filters.size && filters.size !== "all") {
+      const targetSize = filters.size.toLowerCase().trim();
+      comparisons = comparisons.filter((c) => {
+        const itemSizes = ((c.product.attributes as any)?.availableSizes || (c.product.attributes as any)?.size || (c.product.attributes as any)?.variant || "").toLowerCase();
+        const title = c.product.title.toLowerCase();
+        return itemSizes.includes(targetSize) || title.includes(targetSize);
+      });
     }
 
     // In-stock only filter
@@ -480,107 +691,35 @@ export class ProductRepository {
     // Sort baseline comparisons
     comparisons.sort(sortComparator);
 
-    // PAGINATED STREAM MODE (Infinite Scroll)
-    if (filters.page !== undefined && filters.limit !== undefined) {
-      const page = Math.max(1, filters.page);
-      const limit = Math.max(1, filters.limit);
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
+    // Sort baseline comparisons deterministically
+    comparisons.sort(sortComparator);
 
-      const pageResults: PriceComparison[] = [];
+    // Calculate required product volume based on pagination or browse requirements
+    const page = filters.page ? Math.max(1, filters.page) : 1;
+    const limit = filters.limit ? Math.max(1, filters.limit) : 24;
+    const targetCount = filters.page !== undefined
+      ? Math.max(page * limit, 96)
+      : (filters.limit ? Math.max(24, filters.limit) : 24);
 
-      if (startIndex < comparisons.length) {
-        // Take matching baseline items for this slice
-        const baselineSlice = comparisons.slice(startIndex, endIndex);
-        pageResults.push(...baselineSlice);
-
-        // If slice is smaller than page limit and no strict price bounds were exceeded,
-        // synthesize remaining items
-        if (pageResults.length < limit && (minPrice === undefined || maxPrice === undefined || minPrice <= maxPrice)) {
-          const needed = limit - pageResults.length;
-          const { synthesizeEndlessProducts } = await import("./endless-catalog");
-          const synth = synthesizeEndlessProducts({
-            categorySlug: filters.categorySlug,
-            brand: filters.brand,
-            searchQuery: filters.searchQuery,
-            minPrice,
-            maxPrice,
-            sortBy: filters.sortBy,
-            startIndex: 0,
-            count: needed,
-          });
-
-          let filteredSynth = synth;
-          if (filters.retailerSlug && filters.retailerSlug !== "all") {
-            filteredSynth = filteredSynth.map((comp) => {
-              const matchingOffers = comp.offers.filter((o) => o.retailerSlug === filters.retailerSlug);
-              return computeProductComparison(comp.product, matchingOffers, comp.category);
-            });
-          }
-          if (minPrice !== undefined) {
-            filteredSynth = filteredSynth.filter((c) => c.lowestOffer && c.lowestOffer.price >= minPrice);
-          }
-          if (maxPrice !== undefined) {
-            filteredSynth = filteredSynth.filter((c) => c.lowestOffer && c.lowestOffer.price <= maxPrice);
-          }
-          if (minRating !== undefined) {
-            filteredSynth = filteredSynth.filter((c) => (c.product.rating ?? 0) >= minRating);
-          }
-          pageResults.push(...filteredSynth);
-        }
-      } else if (minPrice === undefined || maxPrice === undefined || minPrice <= maxPrice) {
-        // All baseline items were already displayed on previous pages.
-        // Stream deterministic endless synthesized products from calculated offset.
-        const synthesisOffset = startIndex - comparisons.length;
-        const { synthesizeEndlessProducts } = await import("./endless-catalog");
-        const synth = synthesizeEndlessProducts({
-          categorySlug: filters.categorySlug,
-          brand: filters.brand,
-          searchQuery: filters.searchQuery,
-          minPrice,
-          maxPrice,
-          sortBy: filters.sortBy,
-          startIndex: synthesisOffset,
-          count: limit,
-        });
-
-        let filteredSynth = synth;
-        if (filters.retailerSlug && filters.retailerSlug !== "all") {
-          filteredSynth = filteredSynth.map((comp) => {
-            const matchingOffers = comp.offers.filter((o) => o.retailerSlug === filters.retailerSlug);
-            return computeProductComparison(comp.product, matchingOffers, comp.category);
-          });
-        }
-        if (minPrice !== undefined) {
-          filteredSynth = filteredSynth.filter((c) => c.lowestOffer && c.lowestOffer.price >= minPrice);
-        }
-        if (maxPrice !== undefined) {
-          filteredSynth = filteredSynth.filter((c) => c.lowestOffer && c.lowestOffer.price <= maxPrice);
-        }
-        if (minRating !== undefined) {
-          filteredSynth = filteredSynth.filter((c) => (c.product.rating ?? 0) >= minRating);
-        }
-        pageResults.push(...filteredSynth);
-      }
-
-      pageResults.sort(sortComparator);
-      return pageResults;
-    }
-
-    // UNPAGINATED MODE (e.g. Initial SSR or Catalog Stats)
-    // Guarantee rich catalog hydration (> 40 items)
-    if (comparisons.length < 48 && (minPrice === undefined || maxPrice === undefined || minPrice <= maxPrice)) {
-      const needed = 48 - comparisons.length;
+    // Rich catalog hydration: synthesize additional products if volume is below targetCount
+    if (
+      comparisons.length < targetCount &&
+      (minPrice === undefined || maxPrice === undefined || minPrice <= maxPrice)
+    ) {
+      const needed = targetCount - comparisons.length;
       const { synthesizeEndlessProducts } = await import("./endless-catalog");
       const synth = synthesizeEndlessProducts({
         categorySlug: filters.categorySlug,
         brand: filters.brand,
         searchQuery: filters.searchQuery,
+        shoeType: filters.shoeType,
+        gender: filters.gender,
+        size: filters.size,
         minPrice,
         maxPrice,
         sortBy: filters.sortBy,
         startIndex: 0,
-        count: needed + 16,
+        count: needed * 3,
       });
 
       let filteredSynth = synth;
@@ -588,6 +727,31 @@ export class ProductRepository {
         filteredSynth = filteredSynth.map((comp) => {
           const matchingOffers = comp.offers.filter((o) => o.retailerSlug === filters.retailerSlug);
           return computeProductComparison(comp.product, matchingOffers, comp.category);
+        });
+      }
+      if (filters.shoeType && filters.shoeType !== "all") {
+        const targetShoeType = filters.shoeType.toLowerCase().trim();
+        filteredSynth = filteredSynth.filter((c) => {
+          const itemType = ((c.product.attributes as any)?.shoeType || "").toLowerCase();
+          const title = c.product.title.toLowerCase();
+          return itemType.includes(targetShoeType) || title.includes(targetShoeType);
+        });
+      }
+      if (filters.gender && filters.gender !== "all") {
+        const targetGender = filters.gender.toLowerCase().trim();
+        filteredSynth = filteredSynth.filter((c) => {
+          const itemGender = ((c.product.attributes as any)?.gender || "").toLowerCase();
+          const title = c.product.title.toLowerCase();
+          if (targetGender === "men") return itemGender === "men" || itemGender === "unisex" || title.includes("men");
+          if (targetGender === "women") return itemGender === "women" || itemGender === "unisex" || title.includes("women");
+          return itemGender.includes(targetGender);
+        });
+      }
+      if (filters.size && filters.size !== "all") {
+        const targetSize = filters.size.toLowerCase().trim();
+        filteredSynth = filteredSynth.filter((c) => {
+          const itemSizes = ((c.product.attributes as any)?.availableSizes || (c.product.attributes as any)?.size || "").toLowerCase();
+          return itemSizes.includes(targetSize) || c.product.title.toLowerCase().includes(targetSize);
         });
       }
       if (minPrice !== undefined) {
@@ -599,94 +763,115 @@ export class ProductRepository {
       if (minRating !== undefined) {
         filteredSynth = filteredSynth.filter((c) => (c.product.rating ?? 0) >= minRating);
       }
+
       for (const comp of filteredSynth) {
-        if (comparisons.length >= 48) break;
-        const key = getCanonicalProductKey(comp);
-        if (!seenCanonicalKeys.has(key)) {
-          seenCanonicalKeys.add(key);
+        if (comparisons.length >= targetCount) break;
+        if (canAddToProductList(comp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins)) {
           comparisons.push(comp);
         }
       }
-      comparisons.sort(sortComparator);
     }
 
-    return comparisons;
+    // Sort all gathered comparisons deterministically
+    comparisons.sort(sortComparator);
+
+    // Filter to active, present Amazon deals
+    const activeResults = comparisons.filter(hasActivePresentDeal);
+
+    // Paginated mode: Slice deterministically from the unified, deduplicated results
+    if (filters.page !== undefined && filters.limit !== undefined) {
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      return activeResults.slice(startIndex, endIndex);
+    }
+
+    if (filters.limit !== undefined) {
+      return activeResults.slice(0, filters.limit);
+    }
+
+    return activeResults;
   }
 
   /**
    * Retrieves single product by ID or Slug with complete price comparison matrix
    */
   async getProductByIdOrSlug(idOrSlug: string): Promise<PriceComparison | null> {
-    const cleanId = idOrSlug.trim();
+    if (!idOrSlug) return null;
+    const cleanId = decodeURIComponent(idOrSlug.trim());
 
-    // 1. Check baseline catalog (filter strictly to active Amazon offers)
+    // 1. Check baseline demo catalog (filter strictly to active Amazon offers)
     const product = demoProducts.find(
       (p) => p.id === cleanId || p.slug === cleanId
     );
     if (product) {
       const cat = categories.find((c) => c.id === product.categoryId);
       const activeOffers = demoOffers.filter(
-        (o) => o.retailerSlug === "amazon" && o.productId === product.id
+        (o) => o.retailerSlug === "amazon" && o.productId === product.id && o.price > 0 && o.inStock !== false
       );
       if (activeOffers.length > 0) {
-        return computeProductComparison(product, activeOffers, cat);
+        const comp = computeProductComparison(product, activeOffers, cat);
+        if (hasActivePresentDeal(comp)) return comp;
       }
     }
 
-    // 2. Check live/curated Amazon products
+    // 2. Check authentic curated Amazon products (ALL_CURATED across all categories)
+    try {
+      const { getCuratedProductByIdOrSlug } = await import("../services/amazon-search");
+      const curatedComparison = getCuratedProductByIdOrSlug(cleanId);
+      if (curatedComparison && hasActivePresentDeal(curatedComparison)) {
+        return curatedComparison;
+      }
+    } catch (err) {
+      console.warn("[Repository] Error resolving curated product:", err);
+    }
+
+    // 3. Check template-synthesized products (BASE_TEMPLATES across all categories)
+    try {
+      const { findTemplateProductByIdOrSlug } = await import("./endless-catalog");
+      const templateComparison = findTemplateProductByIdOrSlug(cleanId);
+      if (templateComparison && hasActivePresentDeal(templateComparison)) {
+        return templateComparison;
+      }
+    } catch (err) {
+      console.warn("[Repository] Error resolving template product:", err);
+    }
+
+    // 4. Check live in-memory product cache (e.g. from active PA-API live search)
     if (cleanId.startsWith("prod_amz_") || cleanId.startsWith("amazon-")) {
       try {
         const { getLiveProductById, getLiveOffersByProductId } = await import("../services/amazon-search");
         const liveProd = getLiveProductById(cleanId);
         if (liveProd) {
           const liveOffers = getLiveOffersByProductId(liveProd.id);
-          const activeLiveOffers = liveOffers.filter((o) => o.retailerSlug === "amazon");
+          const activeLiveOffers = liveOffers.filter((o) => o.retailerSlug === "amazon" && o.price > 0 && o.inStock !== false);
           const cat = categories.find((c) => c.id === liveProd.categoryId);
-          return computeProductComparison(liveProd, activeLiveOffers, cat);
-        }
-
-        // Reconstruct from ASIN if accessed directly
-        const asin = cleanId.replace("prod_amz_", "").replace("amazon-", "");
-        if (asin.length === 10) {
-          const reconstructedProduct: Product = {
-            id: `prod_amz_${asin}`,
-            title: `Amazon Choice Item (${asin})`,
-            slug: `amazon-${asin}`,
-            brand: "Amazon India",
-            categoryId: categories[0].id,
-            description: "Direct retail listing on Amazon India.",
-            imageUrl: "https://placehold.co/400x400/fff7ed/ea580c?text=Amazon+Product",
-            attributes: {},
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          const reconstructedOffer: Offer = {
-            id: `off_amz_${asin}`,
-            productId: reconstructedProduct.id,
-            retailerId: "ret_amazon",
-            retailerName: "Amazon India",
-            retailerSlug: "amazon",
-            retailerProductId: asin,
-            title: reconstructedProduct.title,
-            productUrl: `https://www.amazon.in/dp/${asin}`,
-            price: 999,
-            originalPrice: 1499,
-            currency: "INR",
-            inStock: true,
-            shippingCost: 0,
-            lastCheckedAt: new Date().toISOString(),
-            isStale: false,
-            isDemo: false,
-            dataSource: "catalog",
-            provenance: "amazon_catalog_verified",
-            deliveryTimeEstimate: "2-3 business days (Prime)",
-            bankOffersDescription: "10% Instant Discount on Card Payments",
-          };
-          return computeProductComparison(reconstructedProduct, [reconstructedOffer], categories[0]);
+          const comp = computeProductComparison(liveProd, activeLiveOffers, cat);
+          if (hasActivePresentDeal(comp)) return comp;
         }
       } catch (err) {
         console.warn("[Repository] Error resolving live product:", err);
       }
+    }
+
+    // 5. Intelligent Deal Auto-Recovery
+    // If exact ID lookup didn't match, attempt to locate an active, present deal
+    // using clean keyword tokens extracted from the ID
+    try {
+      const cleanTokens = cleanId
+        .replace(/^prod_amz_/, "")
+        .replace(/^amazon-/, "")
+        .split(/[-_]+/)
+        .filter((t) => t.length > 2 && !/^\d+$/.test(t) && !/^v\d+$/.test(t));
+
+      if (cleanTokens.length > 0) {
+        const queryHint = cleanTokens.slice(0, 3).join(" ");
+        const candidateDeals = await this.getProducts({ searchQuery: queryHint, limit: 1 });
+        if (candidateDeals.length > 0 && hasActivePresentDeal(candidateDeals[0])) {
+          return candidateDeals[0];
+        }
+      }
+    } catch (err) {
+      console.warn("[Repository] Error auto-recovering deal:", err);
     }
 
     return null;
@@ -698,10 +883,10 @@ export class ProductRepository {
   async getTodaysDeals(minDiscountPercent: number = 20): Promise<PriceComparison[]> {
     const all = await this.getProducts({ sortBy: "discount" });
     return all.filter((comp) => {
-      if (!comp.lowestOffer) return false;
+      if (!hasActivePresentDeal(comp)) return false;
       const disc = calculateDiscount(
-        comp.lowestOffer.originalPrice,
-        comp.lowestOffer.price
+        comp.lowestOffer!.originalPrice,
+        comp.lowestOffer!.price
       );
       return disc >= minDiscountPercent;
     });

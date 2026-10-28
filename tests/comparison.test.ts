@@ -46,7 +46,7 @@ describe("Price Formatting & Indian Rupee (INR)", () => {
     const minAgo = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const hoursAgo = new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString();
 
-    expect(getRelativeTime(minAgo)).toBe("Just now");
+    expect(getRelativeTime(minAgo)).toBe("Recently");
     expect(getRelativeTime(hoursAgo)).toBe("3h ago");
   });
 });
@@ -216,8 +216,8 @@ describe("Repository Brand Search & Filtering", () => {
       expect(comp.product.categoryId).toBe("cat_fashion");
     }
 
-    // Querying heels should return authentic footwear brands (Shoetopia, TRASE, Theater)
-    const heelProducts = await repository.getProducts({ searchQuery: "heels" });
+    // Querying heels should return authentic footwear brands (Shoetopia, TRASE, Theater, Metro, Bata, Catwalk)
+    const heelProducts = await repository.getProducts({ searchQuery: "heels", page: 1, limit: 30 });
     expect(heelProducts.length).toBeGreaterThan(0);
     for (const comp of heelProducts) {
       expect(comp.product.brand.toLowerCase()).not.toBe("apple");

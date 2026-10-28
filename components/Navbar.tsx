@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Flame,
   Calendar,
@@ -19,6 +20,7 @@ import {
 import { SearchAutocomplete } from "./SearchAutocomplete";
 
 export const Navbar: React.FC = () => {
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navCategories = [
@@ -31,44 +33,48 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white border-b border-[#E5E7EB] shadow-card">
       {/* Top Banner Notice */}
-      <div className="bg-slate-900 text-slate-200 text-xs py-1.5 px-4 text-center">
-        <span className="inline-flex items-center gap-1.5 flex-wrap justify-center">
-          <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">
-            Amazon India Live Deals
+      <div className="bg-[#111827] text-gray-300 text-xs py-1.5 px-4 text-center">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 flex-wrap">
+          <span className="bg-[#F59E0B] text-[#111827] text-[10px] font-bold px-2 py-0.5 rounded tracking-wide">
+            Amazon India Deals
           </span>
-          <span>
-            Real-time verified pricing, price drops & endless catalog powered by Amazon Associates.
+          <span className="text-gray-300">
+            Catalog discovery and price tracking powered by Amazon Associates.
           </span>
           <Link
             href="/deals"
-            className="text-orange-400 hover:text-orange-300 font-semibold underline ml-1"
+            className="text-[#F59E0B] hover:text-amber-400 font-semibold transition-colors"
           >
-            View Today&apos;s Drops &rarr;
+            Today&apos;s Drops &rarr;
           </Link>
-        </span>
+        </div>
       </div>
 
       {/* Main Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex items-center justify-between h-16 gap-4 sm:gap-6">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 via-amber-500 to-blue-600 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
-              <Tag className="w-5 h-5" />
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 flex-shrink-0 group focus:outline-none"
+            aria-label="DealFinder India Homepage"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#111827] text-[#F59E0B] flex items-center justify-center border border-gray-800 shadow-xs group-hover:bg-slate-800 transition-colors">
+              <Tag className="w-4 h-4 text-[#F59E0B]" />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-1">
-                <span className="font-extrabold text-lg tracking-tight text-slate-900">
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-lg tracking-tight text-[#111827]">
                   DealFinder
                 </span>
-                <span className="font-bold text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded border border-orange-200">
-                  IN 🇮🇳
+                <span className="font-bold text-[10px] bg-gray-100 text-[#111827] px-1.5 py-0.5 rounded border border-[#E5E7EB]">
+                  IN
                 </span>
               </div>
-              <span className="text-[10px] text-slate-500 font-medium -mt-0.5">
-                Amazon Deals & Discovery
+              <span className="text-[10px] text-[#6B7280] font-medium -mt-0.5">
+                Amazon Deals &amp; Discovery
               </span>
             </div>
           </Link>
@@ -79,32 +85,32 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-6" aria-label="Main Navigation">
             <Link
               href="/products"
-              className="text-sm font-semibold text-slate-700 hover:text-orange-600 transition-colors"
+              className="text-xs font-semibold text-gray-700 hover:text-[#111827] transition-colors py-1"
             >
               All Products
             </Link>
             <Link
               href="/deals"
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-orange-600 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-[#111827] transition-colors py-1"
             >
-              <Flame className="w-4 h-4 text-rose-500" />
+              <Flame className="w-4 h-4 text-[#F59E0B]" />
               <span>Today&apos;s Deals</span>
             </Link>
             <Link
               href="/sales"
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-orange-600 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-[#111827] transition-colors py-1"
             >
-              <Calendar className="w-4 h-4 text-blue-600" />
+              <Calendar className="w-3.5 h-3.5 text-gray-500" />
               <span>Upcoming Sales</span>
             </Link>
             <Link
               href="/admin"
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-[#111827] border border-[#E5E7EB] transition-colors"
             >
-              <Activity className="w-3.5 h-3.5 text-emerald-600" />
+              <Activity className="w-3.5 h-3.5 text-[#15803D]" />
               <span>Data Sources</span>
             </Link>
           </nav>
@@ -113,28 +119,31 @@ export const Navbar: React.FC = () => {
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              className="p-2 rounded-lg text-gray-700 hover:text-[#111827] hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5 text-[#111827]" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Search Engine */}
-        <div className="md:hidden pb-3">
-          <SearchAutocomplete
-            variant="navbar"
-            placeholder="Search mobiles, laptops, fashion, electronics..."
-          />
-        </div>
+        {/* Mobile Search Engine: Only rendered on sub-pages; on homepage ('/') Hero search provides the primary search box */}
+        {pathname !== "/" && (
+          <div className="md:hidden pb-3">
+            <SearchAutocomplete
+              variant="navbar"
+              placeholder="Search mobiles, laptops, fashion, electronics..."
+            />
+          </div>
+        )}
       </div>
 
       {/* Sub-navigation Category Bar */}
-      <div className="bg-slate-50 border-t border-slate-200 overflow-x-auto scrollbar-none">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-6 py-2">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex-shrink-0">
-            Categories:
+      <div className="bg-[#F9FAFB] border-t border-[#E5E7EB] overflow-x-auto scrollbar-none">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-3 py-2">
+          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex-shrink-0">
+            Departments:
           </span>
           {navCategories.map((c) => {
             const Icon = c.icon;
@@ -142,9 +151,9 @@ export const Navbar: React.FC = () => {
               <Link
                 key={c.slug}
                 href={`/category/${c.slug}`}
-                className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-orange-600 whitespace-nowrap transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-[#111827] hover:bg-white px-2.5 py-1 rounded-md transition-colors whitespace-nowrap border border-transparent hover:border-[#E5E7EB]"
               >
-                <Icon className="w-3.5 h-3.5 text-slate-400" />
+                <Icon className="w-3.5 h-3.5 text-gray-400" />
                 <span>{c.name}</span>
               </Link>
             );
@@ -154,37 +163,37 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-slate-200 px-4 pt-3 pb-6 space-y-3">
+        <div className="md:hidden bg-white border-t border-[#E5E7EB] px-4 pt-3 pb-6 space-y-1 shadow-dropdown">
           <Link
             href="/products"
             onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-medium text-slate-700 py-2 border-b border-slate-100"
+            className="block text-sm font-semibold text-gray-800 py-2.5 px-3 rounded-lg hover:bg-gray-50 border-b border-gray-100"
           >
             All Products
           </Link>
           <Link
             href="/deals"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 text-sm font-medium text-rose-600 py-2 border-b border-slate-100"
+            className="flex items-center gap-2 text-sm font-semibold text-gray-800 py-2.5 px-3 rounded-lg hover:bg-gray-50 border-b border-gray-100"
           >
-            <Flame className="w-4 h-4" />
-            Today&apos;s Deals (Verified Drops)
+            <Flame className="w-4 h-4 text-[#F59E0B]" />
+            <span>Today&apos;s Deals</span>
           </Link>
           <Link
             href="/sales"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 text-sm font-medium text-blue-600 py-2 border-b border-slate-100"
+            className="flex items-center gap-2 text-sm font-semibold text-gray-800 py-2.5 px-3 rounded-lg hover:bg-gray-50 border-b border-gray-100"
           >
-            <Calendar className="w-4 h-4" />
-            Upcoming Indian Sales
+            <Calendar className="w-4 h-4 text-gray-500" />
+            <span>Upcoming Sales</span>
           </Link>
           <Link
             href="/admin"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 text-sm font-medium text-slate-700 py-2"
+            className="flex items-center gap-2 text-sm font-semibold text-gray-800 py-2.5 px-3 rounded-lg hover:bg-gray-50"
           >
-            <Activity className="w-4 h-4 text-emerald-600" />
-            Admin & Data Sources
+            <Activity className="w-4 h-4 text-[#15803D]" />
+            <span>Data Sources</span>
           </Link>
         </div>
       )}

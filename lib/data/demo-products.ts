@@ -129,7 +129,7 @@ export const demoProducts: Product[] = [
     modelNumber: "MTP03HN/A",
     gtin: "195949038234",
     description: "Dynamic Island, 48MP main camera with 2x Telephoto, durable color-infused glass and aluminum design with USB-C connector.",
-    imageUrl: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71d7rfSl0wL._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       color: "Black",
       storage: "128 GB",
@@ -149,7 +149,7 @@ export const demoProducts: Product[] = [
     modelNumber: "MTP63HN/A",
     gtin: "195949038760",
     description: "Dynamic Island, 48MP main camera, 256GB storage for extensive 4K HDR video capture.",
-    imageUrl: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71d7rfSl0wL._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       color: "Blue",
       storage: "256 GB",
@@ -169,7 +169,7 @@ export const demoProducts: Product[] = [
     modelNumber: "SM-S921BZKDINS",
     gtin: "8806095304915",
     description: "Galaxy AI powered with Circle to Search, Live Translate, Note Assist, and Armor Aluminum frame with 50MP ProVisual Engine.",
-    imageUrl: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71eXNq-gVTL._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       color: "Onyx Black",
       storage: "256 GB",
@@ -189,7 +189,7 @@ export const demoProducts: Product[] = [
     modelNumber: "MLY33HN/A",
     gtin: "194253080582",
     description: "Strikingly thin design with 13.6-inch Liquid Retina display, 1080p FaceTime HD camera, MagSafe 3 charging, and up to 18 hours battery life.",
-    imageUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71f5Eu5lJSL._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       color: "Midnight",
       storage: "256 GB SSD",
@@ -209,7 +209,7 @@ export const demoProducts: Product[] = [
     modelNumber: "WH1000XM5/S",
     gtin: "027242923584",
     description: "Industry Leading Active Noise Canceling with two processors and 8 microphones, LDAC Hi-Res Audio, 30 hours battery, ultra-clear hands-free calling.",
-    imageUrl: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61+elLbd3yL._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       color: "Silver",
       type: "Over-Ear",
@@ -228,7 +228,7 @@ export const demoProducts: Product[] = [
     modelNumber: "Airdopes 141",
     gtin: "8904130861112",
     description: "Up to 42 hours playback, Beast Mode 80ms low latency for gaming, ASAP Charge (5 mins = 75 mins), IPX4 water resistance.",
-    imageUrl: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/51HBom8xz7L._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       color: "Bold Black",
       type: "In-Ear TWS",
@@ -247,7 +247,7 @@ export const demoProducts: Product[] = [
     modelNumber: "CPH2613",
     gtin: "6921815626244",
     description: "Qualcomm Snapdragon 7 Gen 3, 100W SUPERVOOC charging with 5500 mAh battery, 50MP Sony LYT-600 with OIS, 120Hz AMOLED.",
-    imageUrl: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61abLrCfF7L._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       color: "Celadon Marble",
       storage: "128 GB",
@@ -266,7 +266,7 @@ export const demoProducts: Product[] = [
     categoryId: "cat_fashion",
     modelNumber: "LEV-CS-9841",
     description: "100% breathable pure cotton fabric, curved hemline, spread collar, and chest pocket with iconic Red Tab.",
-    imageUrl: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71W2bB4mRUL._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       size: "L",
       color: "Navy Blue & Red",
@@ -285,7 +285,7 @@ export const demoProducts: Product[] = [
     categoryId: "cat_fashion",
     modelNumber: "LIB-KU-403",
     description: "Vibrant ethnic 3-piece set in pure breathable cotton, 3/4 sleeves, flared calf-length hem, with matching printed dupatta.",
-    imageUrl: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71s8L+h554L._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       size: "M",
       color: "Mustard Yellow",
@@ -305,7 +305,7 @@ export const demoProducts: Product[] = [
     modelNumber: "HD9252/90",
     gtin: "8710103968252",
     description: "Fries with up to 90% less fat. 7 presets with digital touch screen, keep-warm function, QuickClean basket with dishwasher-safe parts.",
-    imageUrl: "https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/51a34tL-Z2L._AC_UL640_FMwebp_QL65_.jpg",
     attributes: {
       capacity: "4.1 Litres",
       color: "Black",

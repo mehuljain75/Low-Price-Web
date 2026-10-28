@@ -7,10 +7,13 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
-  const searchQuery = searchParams.get("search") || undefined;
+  const searchQuery = searchParams.get("search") || searchParams.get("q") || undefined;
   const categorySlug = searchParams.get("category") || undefined;
   const retailerSlug = (searchParams.get("retailer") as RetailerSlug) || undefined;
   const brand = searchParams.get("brand") || undefined;
+  const shoeType = searchParams.get("shoeType") || undefined;
+  const gender = searchParams.get("gender") || undefined;
+  const size = searchParams.get("size") || undefined;
   const minPrice = searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined;
   const maxPrice = searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined;
   const minRating = searchParams.get("minRating") ? Number(searchParams.get("minRating")) : undefined;
@@ -24,6 +27,9 @@ export async function GET(request: NextRequest) {
     categorySlug,
     retailerSlug,
     brand,
+    shoeType,
+    gender,
+    size,
     minPrice,
     maxPrice,
     minRating,
@@ -45,7 +51,7 @@ export async function GET(request: NextRequest) {
     products: pageProducts,
     page,
     limit,
-    totalCount: pageProducts.length >= limit ? 10000 : (page - 1) * limit + pageProducts.length,
+    totalCount: (page - 1) * limit + pageProducts.length,
     hasMore,
   });
 }

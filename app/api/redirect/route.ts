@@ -7,12 +7,6 @@ import { findCuratedItemByAsin } from "@/lib/services/amazon-search";
 export const dynamic = "force-dynamic";
 
 function inferRetailerSlug(offerId: string, urlStr?: string): RetailerSlug {
-  if (offerId.startsWith("off_fk_") || offerId.includes("_fk")) return "flipkart";
-  if (offerId.startsWith("off_myntra_") || offerId.includes("_myntra")) return "myntra";
-  if (offerId.startsWith("off_ajio_") || offerId.includes("_ajio")) return "ajio";
-  if (offerId.startsWith("off_meesho_") || offerId.includes("_meesho")) return "meesho";
-  if (offerId.startsWith("off_amz_") || offerId.includes("_amz")) return "amazon";
-
   if (urlStr) {
     try {
       const hostname = new URL(urlStr).hostname.toLowerCase();
@@ -20,15 +14,22 @@ function inferRetailerSlug(offerId: string, urlStr?: string): RetailerSlug {
       if (hostname.includes("myntra")) return "myntra";
       if (hostname.includes("ajio")) return "ajio";
       if (hostname.includes("meesho")) return "meesho";
-      if (hostname.includes("amazon")) return "amazon";
+      if (hostname.includes("amazon") || hostname.includes("amzn")) return "amazon";
     } catch {
       // ignore
     }
   }
+
+  if (offerId.startsWith("off_fk_") || offerId.includes("_fk")) return "flipkart";
+  if (offerId.startsWith("off_myntra_") || offerId.includes("_myntra")) return "myntra";
+  if (offerId.startsWith("off_ajio_") || offerId.includes("_ajio")) return "ajio";
+  if (offerId.startsWith("off_meesho_") || offerId.includes("_meesho")) return "meesho";
+  if (offerId.startsWith("off_amz_") || offerId.includes("_amz")) return "amazon";
+
   return "amazon";
 }
 
-import { isAllowedTargetUrl } from "@/lib/redirect-security";
+import { isAllowedTargetUrl, buildSafeAmazonUrl, isGenuineAmazonAsin } from "@/lib/redirect-security";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -47,8 +48,46 @@ export async function GET(request: NextRequest) {
       return new NextResponse("Invalid or untrusted redirect target domain", { status: 400 });
     }
 
-    const slug = inferRetailerSlug(offerId || "", passedUrl);
-    const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(slug, passedUrl, subId);
+    // Safety check for Amazon links:
+    // If the URL or offerId can resolve to a genuine Amazon India ASIN, route directly to /dp/${asin}
+    // to guarantee 100% exact product landing with active affiliate tracking.
+    let safeUrl = passedUrl;
+    if (passedUrl.includes("amazon.in")) {
+      let titleToUse = passedTitle;
+      let matchedAsin = "";
+
+      // Check if passedUrl itself contains a genuine ASIN in /dp/<asin>
+      const urlAsinMatch = passedUrl.match(/amazon\.in\/dp\/([A-Za-z0-9_]+)/);
+      if (urlAsinMatch && isGenuineAmazonAsin(urlAsinMatch[1])) {
+        matchedAsin = urlAsinMatch[1];
+      }
+
+      // Check if offerId can resolve a template with genuine ASIN
+      if (!matchedAsin && offerId) {
+        try {
+          const { findTemplateProductByIdOrSlug } = await import("@/lib/data/endless-catalog");
+          const templateMatch = findTemplateProductByIdOrSlug(offerId);
+          if (templateMatch) {
+            titleToUse = titleToUse || templateMatch.product.title;
+            const offerAsin = templateMatch.lowestOffer?.retailerProductId;
+            if (offerAsin && isGenuineAmazonAsin(offerAsin)) {
+              matchedAsin = offerAsin;
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      if (matchedAsin) {
+        safeUrl = `https://www.amazon.in/dp/${matchedAsin}`;
+      } else {
+        safeUrl = buildSafeAmazonUrl(passedUrl, titleToUse);
+      }
+    }
+
+    const slug = inferRetailerSlug(offerId || "", safeUrl);
+    const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(slug, safeUrl, subId);
     return NextResponse.redirect(finalAffiliateUrl, {
       status: 307,
       headers: {
@@ -64,9 +103,14 @@ export async function GET(request: NextRequest) {
     const { getLiveOfferById } = await import("@/lib/services/amazon-search");
     const liveOffer = getLiveOfferById(offerId);
     if (liveOffer) {
+      let targetUrl = liveOffer.productUrl;
+      if (targetUrl.includes("amazon.in")) {
+        targetUrl = buildSafeAmazonUrl(targetUrl, passedTitle || liveOffer.title);
+      }
+
       const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(
         liveOffer.retailerSlug,
-        liveOffer.productUrl,
+        targetUrl,
         subId
       );
       return NextResponse.redirect(finalAffiliateUrl, {
@@ -84,9 +128,13 @@ export async function GET(request: NextRequest) {
   if (offerId) {
     const offer = demoOffers.find((o) => o.id === offerId);
     if (offer) {
+      let targetUrl = offer.productUrl;
+      if (targetUrl.includes("amazon.in")) {
+        targetUrl = buildSafeAmazonUrl(targetUrl, passedTitle || offer.title);
+      }
       const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(
         offer.retailerSlug,
-        offer.productUrl,
+        targetUrl,
         subId
       );
       return NextResponse.redirect(finalAffiliateUrl, {
@@ -102,10 +150,23 @@ export async function GET(request: NextRequest) {
 
   // 4. Handle ASIN-based companion or fallback offers (e.g. off_amz_..., off_fk_..., off_myntra_...)
   if (offerId?.startsWith("off_amz_")) {
-    const asin = offerId.replace("off_amz_", "");
-    const targetUrl = asin.length === 10
-      ? `https://www.amazon.in/dp/${asin}`
-      : `https://www.amazon.in/s?k=${encodeURIComponent(passedTitle || "deals")}`;
+    const raw = offerId.replace("off_amz_", "");
+    let titleToUse = passedTitle;
+    let matchedAsin = "";
+    try {
+      const { findTemplateProductByIdOrSlug } = await import("@/lib/data/endless-catalog");
+      const templateMatch = findTemplateProductByIdOrSlug(raw);
+      if (templateMatch) {
+        titleToUse = titleToUse || templateMatch.product.title;
+        const offerAsin = templateMatch.lowestOffer?.retailerProductId;
+        if (offerAsin && isGenuineAmazonAsin(offerAsin)) {
+          matchedAsin = offerAsin;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    const targetUrl = matchedAsin ? `https://www.amazon.in/dp/${matchedAsin}` : buildSafeAmazonUrl(raw, titleToUse);
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("amazon", targetUrl, subId);
     return NextResponse.redirect(finalAffiliateUrl, {
       status: 307,

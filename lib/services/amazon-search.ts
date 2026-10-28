@@ -1,6 +1,7 @@
 import { Product, Offer, PriceComparison, Category, RetailerSlug } from "../types";
 import { categories, retailers } from "../data/demo-products";
 import { computeProductComparison } from "../matching";
+import { buildSafeAmazonUrl } from "../redirect-security";
 
 export interface LiveSearchResult {
   product: Product;
@@ -280,7 +281,7 @@ export function parseAmazonSearchHtml(html: string, query: string): LiveSearchRe
       block.match(/src="(https:\/\/m\.media-amazon\.com\/images\/I\/[^"]+)"/i);
     const imageUrl = imgMatch
       ? imgMatch[1]
-      : `https://placehold.co/400x400/fff7ed/ea580c?text=${encodeURIComponent(title.slice(0, 20))}`;
+      : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f9fafb'/%3E%3Cpath d='M200 140v120M140 200h120' stroke='%23d1d5db' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E";
 
     // Rating extraction
     const ratingMatch = block.match(/([0-9.]+) out of 5 stars/i);
@@ -333,7 +334,7 @@ export function parseAmazonSearchHtml(html: string, query: string): LiveSearchRe
       retailerSlug: "amazon",
       retailerProductId: asin,
       title,
-      productUrl: `https://www.amazon.in/dp/${asin}`,
+      productUrl: buildSafeAmazonUrl(asin, title),
       price,
       originalPrice: mrp > price ? mrp : Math.round(price * 1.25),
       currency: "INR",
@@ -399,11 +400,11 @@ const HEEL_PRODUCTS = [
     ratingCount: 310,
   },
   {
-    asin: "B0BSCBZNSR",
+    asin: "B0FK2P93T5",
     title: "Shoetopia Elegant Heeled Sandals for Women | Ankle Strap Chunky Block Heels",
     brand: "Shoetopia",
-    price: 699,
-    mrp: 1299,
+    price: 599,
+    mrp: 1499,
     imageUrl: "https://m.media-amazon.com/images/I/61kVNSkyOQL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 890,
@@ -412,7 +413,7 @@ const HEEL_PRODUCTS = [
     asin: "B0GWQJDVJJ",
     title: "ERIDANI Pointed Toe Stiletto High Heels for Women | Glamour Evening Pumps",
     brand: "ERIDANI",
-    price: 1709,
+    price: 1074,
     mrp: 2499,
     imageUrl: "https://m.media-amazon.com/images/I/51mbmsWoUIL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.4,
@@ -458,6 +459,226 @@ const HEEL_PRODUCTS = [
     rating: 4.3,
     ratingCount: 180,
   },
+  {
+    asin: "B0C7CCSQZL",
+    title: "Metro Women's Pink Block Heel Mules Fashion Sandals",
+    brand: "Metro",
+    price: 1699,
+    mrp: 2490,
+    imageUrl: "https://m.media-amazon.com/images/I/518Wx5Db3GL._SL1500_.jpg",
+    rating: 4.4,
+    ratingCount: 210,
+  },
+  {
+    asin: "B08THTHDVH",
+    title: "Bata Women's Block Heel Sandal Navy Blue",
+    brand: "Bata",
+    price: 899,
+    mrp: 1499,
+    imageUrl: "https://m.media-amazon.com/images/I/51KQdg3vnDL._SL1440_.jpg",
+    rating: 4.2,
+    ratingCount: 380,
+  },
+  {
+    asin: "B0H75NZ3QJ",
+    title: "Catwalk Women's Stylised Chunky Heels Brown",
+    brand: "Catwalk",
+    price: 1495,
+    mrp: 2995,
+    imageUrl: "https://m.media-amazon.com/images/I/61ACGXO+2ZL._SL1500_.jpg",
+    rating: 4.3,
+    ratingCount: 160,
+  },
+  {
+    asin: "B0DCVXKKJG",
+    title: "Carlton London Women Beige Pointed Block Heel Pumps",
+    brand: "Carlton London",
+    price: 1745,
+    mrp: 3490,
+    imageUrl: "https://m.media-amazon.com/images/I/51ReR-Tq0bL._SL1440_.jpg",
+    rating: 4.5,
+    ratingCount: 290,
+  },
+  {
+    asin: "B0C3WBJPSR",
+    title: "Marc Loire Women's Pointed Toe Block Heel Sandals",
+    brand: "Marc Loire",
+    price: 1199,
+    mrp: 2499,
+    imageUrl: "https://m.media-amazon.com/images/I/51k7kNPwbNL._SL1500_.jpg",
+    rating: 4.2,
+    ratingCount: 450,
+  },
+  {
+    asin: "B0C8TLJ4ND",
+    title: "Mochi Women Black Wedge Heel Sandal",
+    brand: "Mochi",
+    price: 1890,
+    mrp: 2690,
+    imageUrl: "https://m.media-amazon.com/images/I/61tPoDrat6L._SL1500_.jpg",
+    rating: 4.4,
+    ratingCount: 190,
+  },
+  {
+    asin: "B0CNKMDY5R",
+    title: "Inc.5 Stylish Wedge Sandals for Women",
+    brand: "Inc.5",
+    price: 1290,
+    mrp: 2290,
+    imageUrl: "https://m.media-amazon.com/images/I/51x4CQ-XU5L._SL1440_.jpg",
+    rating: 4.3,
+    ratingCount: 310,
+  },
+  {
+    asin: "B0B8Z7L9QP",
+    title: "Bata Women's Glamour Stiletto High Heel Party Pumps",
+    brand: "Bata",
+    price: 1299,
+    mrp: 1999,
+    imageUrl: "https://m.media-amazon.com/images/I/61N9lZFYd9L._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.3,
+    ratingCount: 310,
+  },
+  {
+    asin: "B09W4K7P2L",
+    title: "Mochi Women Gold Shimmer Ankle Strap Party Block Heels",
+    brand: "Mochi",
+    price: 2190,
+    mrp: 2990,
+    imageUrl: "https://m.media-amazon.com/images/I/51AelPKUL8L._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.5,
+    ratingCount: 260,
+  },
+  {
+    asin: "B0C5T9K2NP",
+    title: "Shoetopia Clear Strap Square Toe Chunky Block Heels",
+    brand: "Shoetopia",
+    price: 899,
+    mrp: 1499,
+    imageUrl: "https://m.media-amazon.com/images/I/61kVNSkyOQL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.1,
+    ratingCount: 540,
+  },
+  {
+    asin: "B09M7P3K8L",
+    title: "ERIDANI Women's Square Toe Strappy Flared Heels",
+    brand: "ERIDANI",
+    price: 1699,
+    mrp: 2799,
+    imageUrl: "https://m.media-amazon.com/images/I/51mbmsWoUIL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.4,
+    ratingCount: 380,
+  },
+  {
+    asin: "B08R6M4N9Q",
+    title: "Catwalk Women Criss-Cross Strap Platform Block Heels",
+    brand: "Catwalk",
+    price: 1695,
+    mrp: 3195,
+    imageUrl: "https://m.media-amazon.com/images/I/61ACGXO+2ZL._SL1500_.jpg",
+    rating: 4.2,
+    ratingCount: 190,
+  },
+  {
+    asin: "B09Y2W6K8P",
+    title: "Carlton London Women Embellished Slip-On Kitten Heels",
+    brand: "Carlton London",
+    price: 1599,
+    mrp: 2990,
+    imageUrl: "https://m.media-amazon.com/images/I/51ReR-Tq0bL._SL1440_.jpg",
+    rating: 4.4,
+    ratingCount: 220,
+  },
+  {
+    asin: "B0B7F8P9KL",
+    title: "Marc Loire Women's Peep Toe Platform Block Heel Sandals",
+    brand: "Marc Loire",
+    price: 1349,
+    mrp: 2699,
+    imageUrl: "https://m.media-amazon.com/images/I/51k7kNPwbNL._SL1500_.jpg",
+    rating: 4.3,
+    ratingCount: 340,
+  },
+  {
+    asin: "B08X5N2K9P",
+    title: "Inc.5 Women's Criss-Cross Strap Heeled Mules",
+    brand: "Inc.5",
+    price: 1490,
+    mrp: 2490,
+    imageUrl: "https://m.media-amazon.com/images/I/51x4CQ-XU5L._SL1440_.jpg",
+    rating: 4.2,
+    ratingCount: 180,
+  },
+  {
+    asin: "B0BR5L2N8M",
+    title: "Metro Women Metallic Strappy Stiletto Heel Sandals",
+    brand: "Metro",
+    price: 1999,
+    mrp: 2990,
+    imageUrl: "https://m.media-amazon.com/images/I/518Wx5Db3GL._SL1500_.jpg",
+    rating: 4.5,
+    ratingCount: 175,
+  },
+  {
+    asin: "B07FKRHQ4V",
+    title: "Clarks Women's Linvale Jerica Classic Leather Pump Heels",
+    brand: "Clarks",
+    price: 3999,
+    mrp: 5999,
+    imageUrl: "https://m.media-amazon.com/images/I/61vtVIlZ7KL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.6,
+    ratingCount: 420,
+  },
+  {
+    asin: "B07Z4G6Z9Q",
+    title: "Hush Puppies Women's Soft Cushion Comfort Block Heels",
+    brand: "Hush Puppies",
+    price: 2499,
+    mrp: 3999,
+    imageUrl: "https://m.media-amazon.com/images/I/61MvFD5buqL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.5,
+    ratingCount: 330,
+  },
+  {
+    asin: "B0B9R4M7KP",
+    title: "TRASE Women's Orthopedic Low Block Heel Dress Pumps",
+    brand: "TRASE",
+    price: 749,
+    mrp: 1399,
+    imageUrl: "https://m.media-amazon.com/images/I/61N9lZFYd9L._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.2,
+    ratingCount: 610,
+  },
+  {
+    asin: "B08P5N7K2L",
+    title: "Liberty Women's Gliders Slip-On Formal Block Heels",
+    brand: "Liberty",
+    price: 949,
+    mrp: 1699,
+    imageUrl: "https://m.media-amazon.com/images/I/51KQdg3vnDL._SL1440_.jpg",
+    rating: 4.1,
+    ratingCount: 280,
+  },
+  {
+    asin: "B0BR3N8K5L",
+    title: "Red Tape Women's Casual Square Toe Heeled Sandals",
+    brand: "Red Tape",
+    price: 1199,
+    mrp: 2999,
+    imageUrl: "https://m.media-amazon.com/images/I/5157KXSrGxL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.3,
+    ratingCount: 490,
+  },
+  {
+    asin: "B09K8P4M2L",
+    title: "Paragon Women's Solea Elegant Wedge Heel Sandals",
+    brand: "Paragon",
+    price: 649,
+    mrp: 999,
+    imageUrl: "https://m.media-amazon.com/images/I/61tPoDrat6L._SL1500_.jpg",
+    rating: 4.0,
+    ratingCount: 720,
+  },
 ];
 
 const WATCH_PRODUCTS = [
@@ -467,7 +688,7 @@ const WATCH_PRODUCTS = [
     brand: "Noise",
     price: 1499,
     mrp: 5999,
-    imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61SSVxTSstL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 1450,
   },
@@ -477,7 +698,7 @@ const WATCH_PRODUCTS = [
     brand: "Fire-Boltt",
     price: 1299,
     mrp: 11999,
-    imageUrl: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71Y8UfHskVL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 3200,
   },
@@ -487,7 +708,7 @@ const WATCH_PRODUCTS = [
     brand: "boAt",
     price: 1199,
     mrp: 6990,
-    imageUrl: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61G5JqZ5oBL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.1,
     ratingCount: 2800,
   },
@@ -497,7 +718,7 @@ const WATCH_PRODUCTS = [
     brand: "Apple",
     price: 24999,
     mrp: 29900,
-    imageUrl: "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71XMTLtZd5L._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.6,
     ratingCount: 1100,
   },
@@ -510,9 +731,13 @@ const FOOTWEAR_PRODUCTS = [
     brand: "Puma",
     price: 2199,
     mrp: 3999,
-    imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61utX8IQkkL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 1600,
+    shoeType: "Sneakers",
+    gender: "Unisex",
+    availableSizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["White/Peacoat", "Black"],
   },
   {
     asin: "B0BHY57K9L",
@@ -520,9 +745,13 @@ const FOOTWEAR_PRODUCTS = [
     brand: "Nike",
     price: 3195,
     mrp: 3695,
-    imageUrl: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71D9ImsvEtL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.4,
     ratingCount: 2100,
+    shoeType: "Running Shoes",
+    gender: "Men",
+    availableSizes: ["UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
+    colors: ["Black/White", "Grey"],
   },
   {
     asin: "B09G3F3Q8Z",
@@ -530,9 +759,13 @@ const FOOTWEAR_PRODUCTS = [
     brand: "Red Tape",
     price: 1349,
     mrp: 5499,
-    imageUrl: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61-wLd6K+eL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 4500,
+    shoeType: "Sneakers",
+    gender: "Men",
+    availableSizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["White", "Off White"],
   },
   {
     asin: "B08Z44ZDFH",
@@ -540,9 +773,153 @@ const FOOTWEAR_PRODUCTS = [
     brand: "Asian",
     price: 749,
     mrp: 1499,
-    imageUrl: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61zAjw4bqPL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.0,
     ratingCount: 8900,
+    shoeType: "Running Shoes",
+    gender: "Men",
+    availableSizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["Grey/Orange", "Navy Blue"],
+  },
+  {
+    asin: "B089278M6Q",
+    title: "Nike Air Max Excee Men's Road Running Shoes",
+    brand: "Nike",
+    price: 6295,
+    mrp: 7995,
+    imageUrl: "https://m.media-amazon.com/images/I/714oxkLq5rL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.5,
+    ratingCount: 1850,
+    shoeType: "Running Shoes",
+    gender: "Men",
+    availableSizes: ["UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["Black/White", "Triple White"],
+  },
+  {
+    asin: "B08C1PBD8N",
+    title: "Nike Court Vision Low Men's Retro Casual Sneakers",
+    brand: "Nike",
+    price: 4995,
+    mrp: 5695,
+    imageUrl: "https://m.media-amazon.com/images/I/61U0887eZ9L._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.4,
+    ratingCount: 3200,
+    shoeType: "Sneakers",
+    gender: "Men",
+    availableSizes: ["UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
+    colors: ["Triple White", "Black/White"],
+  },
+  {
+    asin: "B0BFF7329Y",
+    title: "Adidas Men's Adizero RC 5 Lightweight Running Shoes",
+    brand: "Adidas",
+    price: 4499,
+    mrp: 7999,
+    imageUrl: "https://m.media-amazon.com/images/I/71N9lH2+tqL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.3,
+    ratingCount: 920,
+    shoeType: "Running Shoes",
+    gender: "Men",
+    availableSizes: ["UK 8", "UK 9", "UK 10"],
+    colors: ["Core Black", "Solar Red"],
+  },
+  {
+    asin: "B07T48HQX1",
+    title: "Adidas Stan Smith Classic Leather Casual Sneakers",
+    brand: "Adidas",
+    price: 5399,
+    mrp: 8999,
+    imageUrl: "https://m.media-amazon.com/images/I/61Gg56EsmEL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.5,
+    ratingCount: 4100,
+    shoeType: "Casual Shoes",
+    gender: "Unisex",
+    availableSizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["Cloud White/Green", "Cloud White/Navy"],
+  },
+  {
+    asin: "B08NTR51N3",
+    title: "Bata Men's Formal Derby Genuine Leather Dress Shoes",
+    brand: "Bata",
+    price: 1699,
+    mrp: 2999,
+    imageUrl: "https://m.media-amazon.com/images/I/71b2dD3wNLL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.1,
+    ratingCount: 2800,
+    shoeType: "Formal Shoes",
+    gender: "Men",
+    availableSizes: ["UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["Black", "Dark Tan Brown"],
+  },
+  {
+    asin: "B085XF3H37",
+    title: "Campus North Plus Men's Lightweight Running Shoes",
+    brand: "Campus",
+    price: 1299,
+    mrp: 2199,
+    imageUrl: "https://m.media-amazon.com/images/I/61VbT1Q5zCL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.2,
+    ratingCount: 6700,
+    shoeType: "Running Shoes",
+    gender: "Men",
+    availableSizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["Grey/Orange", "Black/Gold"],
+  },
+  {
+    asin: "B085XFF892",
+    title: "Sparx SM-676 Men's Lightweight Sports Running Shoes",
+    brand: "Sparx",
+    price: 899,
+    mrp: 1799,
+    imageUrl: "https://m.media-amazon.com/images/I/71G1Pj3g7vL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.1,
+    ratingCount: 5400,
+    shoeType: "Walking Shoes",
+    gender: "Men",
+    availableSizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["Black/Red", "Grey/Lime"],
+  },
+  {
+    asin: "B01N22Q67Y",
+    title: "Woodland Men's Rugged OGC Leather Outdoor Trekking Boots",
+    brand: "Woodland",
+    price: 3895,
+    mrp: 5495,
+    imageUrl: "https://m.media-amazon.com/images/I/81h83oWb4rL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.4,
+    ratingCount: 3800,
+    shoeType: "Boots",
+    gender: "Men",
+    availableSizes: ["UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["Camel Nubuck", "Khaki Brown"],
+  },
+  {
+    asin: "B08N5N4Z9T",
+    title: "Puma Softride Rift Men's Running Shoes",
+    brand: "Puma",
+    price: 2499,
+    mrp: 4999,
+    imageUrl: "https://m.media-amazon.com/images/I/71sE3pB6JgL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.3,
+    ratingCount: 1420,
+    shoeType: "Running Shoes",
+    gender: "Men",
+    availableSizes: ["UK 7", "UK 8", "UK 9", "UK 10"],
+    colors: ["Castlerock-Black", "Puma Navy"],
+  },
+  {
+    asin: "B0014C2N6A",
+    title: "Crocs Classic Unisex Slip-On Waterproof Clogs",
+    brand: "Crocs",
+    price: 2295,
+    mrp: 2995,
+    imageUrl: "https://m.media-amazon.com/images/I/71cFlGj6PUL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.5,
+    ratingCount: 12000,
+    shoeType: "Casual Shoes",
+    gender: "Unisex",
+    availableSizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
+    colors: ["Navy", "White", "Black"],
   },
 ];
 
@@ -553,7 +930,7 @@ const ETHNIC_FASHION_PRODUCTS = [
     brand: "Manyavar",
     price: 2999,
     mrp: 4999,
-    imageUrl: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71W2bB4mRUL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.5,
     ratingCount: 780,
   },
@@ -563,7 +940,7 @@ const ETHNIC_FASHION_PRODUCTS = [
     brand: "BIBA",
     price: 1899,
     mrp: 3999,
-    imageUrl: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71s8L+h554L._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.4,
     ratingCount: 1120,
   },
@@ -573,7 +950,7 @@ const ETHNIC_FASHION_PRODUCTS = [
     brand: "W for Woman",
     price: 1399,
     mrp: 2599,
-    imageUrl: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61v-F-F49wL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 650,
   },
@@ -583,7 +960,7 @@ const ETHNIC_FASHION_PRODUCTS = [
     brand: "FabIndia",
     price: 1490,
     mrp: 1990,
-    imageUrl: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61H4s+5n6QL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 490,
   },
@@ -596,7 +973,7 @@ const APPLIANCE_PRODUCTS = [
     brand: "Philips",
     price: 6999,
     mrp: 11995,
-    imageUrl: "https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/51a34tL-Z2L._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.4,
     ratingCount: 8400,
   },
@@ -606,7 +983,7 @@ const APPLIANCE_PRODUCTS = [
     brand: "Prestige",
     price: 2999,
     mrp: 6295,
-    imageUrl: "https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61Nl-iW6u9L._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.1,
     ratingCount: 15300,
   },
@@ -616,7 +993,7 @@ const APPLIANCE_PRODUCTS = [
     brand: "Bajaj",
     price: 5499,
     mrp: 9650,
-    imageUrl: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/51n2v6TLLZL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 4200,
   },
@@ -626,7 +1003,7 @@ const APPLIANCE_PRODUCTS = [
     brand: "Crompton",
     price: 9999,
     mrp: 17200,
-    imageUrl: "https://images.unsplash.com/photo-1618956445347-1959b87fcf19?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61dC6QO6BcL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.0,
     ratingCount: 3900,
   },
@@ -636,7 +1013,7 @@ const APPLIANCE_PRODUCTS = [
     brand: "Eureka Forbes",
     price: 3499,
     mrp: 4999,
-    imageUrl: "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61J2xXN-8LL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.1,
     ratingCount: 12500,
   },
@@ -646,7 +1023,7 @@ const APPLIANCE_PRODUCTS = [
     brand: "Kent",
     price: 14999,
     mrp: 20000,
-    imageUrl: "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71vNn+U48cL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 7100,
   },
@@ -656,7 +1033,7 @@ const APPLIANCE_PRODUCTS = [
     brand: "Havells",
     price: 9299,
     mrp: 16190,
-    imageUrl: "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/51HwGjP9bML._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 2800,
   },
@@ -666,7 +1043,7 @@ const APPLIANCE_PRODUCTS = [
     brand: "Bosch",
     price: 41990,
     mrp: 52990,
-    imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61T2Y4v+u4L._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.5,
     ratingCount: 1950,
   },
@@ -679,7 +1056,7 @@ const BEAUTY_PRODUCTS = [
     brand: "Minimalist",
     price: 569,
     mrp: 599,
-    imageUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61eK+Rz6Q2L._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 9400,
   },
@@ -689,7 +1066,7 @@ const BEAUTY_PRODUCTS = [
     brand: "Minimalist",
     price: 379,
     mrp: 399,
-    imageUrl: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/51vIq3a2UML._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.4,
     ratingCount: 14200,
   },
@@ -699,7 +1076,7 @@ const BEAUTY_PRODUCTS = [
     brand: "Mamaearth",
     price: 519,
     mrp: 599,
-    imageUrl: "https://images.unsplash.com/photo-1608248597359-54332900e572?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61W2W9FzLqL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.1,
     ratingCount: 18600,
   },
@@ -709,7 +1086,7 @@ const BEAUTY_PRODUCTS = [
     brand: "Bombay Shaving Company",
     price: 1199,
     mrp: 2499,
-    imageUrl: "https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61g9L6K6QcL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 3800,
   },
@@ -719,7 +1096,7 @@ const BEAUTY_PRODUCTS = [
     brand: "Biotique",
     price: 219,
     mrp: 330,
-    imageUrl: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61Vv3n+bCqL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 24100,
   },
@@ -729,7 +1106,7 @@ const BEAUTY_PRODUCTS = [
     brand: "L'Oreal",
     price: 499,
     mrp: 649,
-    imageUrl: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61D8o3O15lL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.5,
     ratingCount: 16700,
   },
@@ -739,7 +1116,7 @@ const BEAUTY_PRODUCTS = [
     brand: "Forest Essentials",
     price: 1475,
     mrp: 1550,
-    imageUrl: "https://images.unsplash.com/photo-1556228722-d0b75c879410?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61k2hS2O7BL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.6,
     ratingCount: 1850,
   },
@@ -749,7 +1126,7 @@ const BEAUTY_PRODUCTS = [
     brand: "mCaffeine",
     price: 299,
     mrp: 349,
-    imageUrl: "https://images.unsplash.com/photo-1567928815104-b7980ee5032e?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61Nl0d+7cEL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 11200,
   },
@@ -762,7 +1139,7 @@ const MOBILE_PRODUCTS = [
     brand: "Apple",
     price: 65999,
     mrp: 79900,
-    imageUrl: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71d7rfSl0wL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.6,
     ratingCount: 9200,
   },
@@ -772,7 +1149,7 @@ const MOBILE_PRODUCTS = [
     brand: "Samsung",
     price: 64999,
     mrp: 74999,
-    imageUrl: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71eXNq-gVTL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.5,
     ratingCount: 3100,
   },
@@ -782,7 +1159,7 @@ const MOBILE_PRODUCTS = [
     brand: "OnePlus",
     price: 42999,
     mrp: 45999,
-    imageUrl: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/717Qo4MH97L._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.4,
     ratingCount: 4700,
   },
@@ -792,7 +1169,7 @@ const MOBILE_PRODUCTS = [
     brand: "Apple",
     price: 33900,
     mrp: 39900,
-    imageUrl: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61uA2UVnYWL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.6,
     ratingCount: 2600,
   },
@@ -802,7 +1179,7 @@ const MOBILE_PRODUCTS = [
     brand: "Xiaomi",
     price: 21999,
     mrp: 28999,
-    imageUrl: "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71d1ytdePXL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 5800,
   },
@@ -812,7 +1189,7 @@ const MOBILE_PRODUCTS = [
     brand: "Realme",
     price: 17999,
     mrp: 24999,
-    imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71759582+eL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 3900,
   },
@@ -822,7 +1199,7 @@ const MOBILE_PRODUCTS = [
     brand: "Samsung",
     price: 12999,
     mrp: 24499,
-    imageUrl: "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/81x3A4n7GUL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.1,
     ratingCount: 8900,
   },
@@ -832,7 +1209,7 @@ const MOBILE_PRODUCTS = [
     brand: "Google",
     price: 62999,
     mrp: 75999,
-    imageUrl: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71657TiFeHL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.4,
     ratingCount: 1400,
   },
@@ -845,7 +1222,7 @@ const LAPTOP_PRODUCTS = [
     brand: "Apple",
     price: 82990,
     mrp: 99900,
-    imageUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71jG+e7roXL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.7,
     ratingCount: 4200,
   },
@@ -855,7 +1232,7 @@ const LAPTOP_PRODUCTS = [
     brand: "HP",
     price: 62490,
     mrp: 77900,
-    imageUrl: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71TPda7cwUL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 1850,
   },
@@ -865,7 +1242,7 @@ const LAPTOP_PRODUCTS = [
     brand: "Lenovo",
     price: 47990,
     mrp: 69990,
-    imageUrl: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61HbcxM9fQL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 2900,
   },
@@ -875,7 +1252,7 @@ const LAPTOP_PRODUCTS = [
     brand: "Dell",
     price: 49990,
     mrp: 68500,
-    imageUrl: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61Xz9B+rFwL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 1600,
   },
@@ -885,7 +1262,7 @@ const LAPTOP_PRODUCTS = [
     brand: "ASUS",
     price: 51990,
     mrp: 77990,
-    imageUrl: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71z7x6v8LCL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.4,
     ratingCount: 3100,
   },
@@ -895,7 +1272,7 @@ const LAPTOP_PRODUCTS = [
     brand: "Acer",
     price: 69990,
     mrp: 92999,
-    imageUrl: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71v15S9u7KL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 1400,
   },
@@ -905,7 +1282,7 @@ const LAPTOP_PRODUCTS = [
     brand: "Apple",
     price: 114900,
     mrp: 134900,
-    imageUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/71Otc0+5GUL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.8,
     ratingCount: 950,
   },
@@ -918,7 +1295,7 @@ const AUDIO_PRODUCTS = [
     brand: "boAt",
     price: 1299,
     mrp: 5990,
-    imageUrl: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61kn9608tDL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.1,
     ratingCount: 38200,
   },
@@ -928,7 +1305,7 @@ const AUDIO_PRODUCTS = [
     brand: "Sony",
     price: 28990,
     mrp: 34990,
-    imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/51aXvjzcukL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.6,
     ratingCount: 5200,
   },
@@ -938,7 +1315,7 @@ const AUDIO_PRODUCTS = [
     brand: "OnePlus",
     price: 2499,
     mrp: 3299,
-    imageUrl: "https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61+q6OnPjTL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 9100,
   },
@@ -948,7 +1325,7 @@ const AUDIO_PRODUCTS = [
     brand: "JBL",
     price: 8999,
     mrp: 13999,
-    imageUrl: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/617n-Z+Y64L._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.5,
     ratingCount: 6800,
   },
@@ -958,7 +1335,7 @@ const AUDIO_PRODUCTS = [
     brand: "boAt",
     price: 1499,
     mrp: 3490,
-    imageUrl: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61Z6s7p0dTL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.2,
     ratingCount: 14500,
   },
@@ -968,7 +1345,7 @@ const AUDIO_PRODUCTS = [
     brand: "Sony",
     price: 4490,
     mrp: 8990,
-    imageUrl: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/51oO6S5X+VL._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.3,
     ratingCount: 8200,
   },
@@ -978,7 +1355,7 @@ const AUDIO_PRODUCTS = [
     brand: "Boult",
     price: 999,
     mrp: 4999,
-    imageUrl: "https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?w=600&auto=format&fit=crop&q=80",
+    imageUrl: "https://m.media-amazon.com/images/I/61nBzBti+1L._AC_UL640_FMwebp_QL65_.jpg",
     rating: 4.1,
     ratingCount: 22100,
   },
@@ -997,10 +1374,123 @@ export const ALL_CURATED = [
 ];
 
 /**
- * Lookup curated product by ASIN
+ * Lookup curated product by ASIN, Product ID, or canonical Slug
  */
+export function findCuratedItem(idOrAsinOrSlug: string) {
+  if (!idOrAsinOrSlug) return null;
+  const clean = idOrAsinOrSlug.trim();
+  const rawAsin = clean.replace(/^prod_amz_/, "").replace(/^amazon-/, "");
+
+  return (
+    ALL_CURATED.find((item) => {
+      return (
+        item.asin === clean ||
+        item.asin === rawAsin ||
+        `prod_amz_${item.asin}` === clean ||
+        `amazon-${item.asin}` === clean
+      );
+    }) || null
+  );
+}
+
 export function findCuratedItemByAsin(asin: string) {
-  return ALL_CURATED.find((item) => item.asin === asin) || null;
+  return findCuratedItem(asin);
+}
+
+/**
+ * Builds authentic PriceComparison for an item in ALL_CURATED
+ */
+export function buildCuratedProductComparison(item: (typeof ALL_CURATED)[0]): PriceComparison {
+  let itemCat = detectCategory(item.title, item.brand);
+  if (BEAUTY_PRODUCTS.some((p) => p.asin === item.asin)) {
+    itemCat = categories.find((c) => c.slug === "beauty") || itemCat;
+  } else if (APPLIANCE_PRODUCTS.some((p) => p.asin === item.asin)) {
+    itemCat = categories.find((c) => c.slug === "appliances") || itemCat;
+  } else if (MOBILE_PRODUCTS.some((p) => p.asin === item.asin)) {
+    itemCat = categories.find((c) => c.slug === "mobiles") || itemCat;
+  } else if (LAPTOP_PRODUCTS.some((p) => p.asin === item.asin)) {
+    itemCat = categories.find((c) => c.slug === "laptops") || itemCat;
+  } else if (AUDIO_PRODUCTS.some((p) => p.asin === item.asin)) {
+    itemCat = categories.find((c) => c.slug === "audio") || itemCat;
+  } else if (
+    HEEL_PRODUCTS.some((p) => p.asin === item.asin) ||
+    FOOTWEAR_PRODUCTS.some((p) => p.asin === item.asin) ||
+    ETHNIC_FASHION_PRODUCTS.some((p) => p.asin === item.asin)
+  ) {
+    itemCat = categories.find((c) => c.slug === "fashion") || itemCat;
+  }
+
+  const productId = `prod_amz_${item.asin}`;
+  const offerId = `off_amz_${item.asin}`;
+
+  const product: Product = {
+    id: productId,
+    title: item.title,
+    slug: `amazon-${item.asin}`,
+    brand: item.brand,
+    categoryId: itemCat.id,
+    description: `${item.title}. Available on Amazon India with fast doorstep delivery, verified merchant warranty, and customer reviews.`,
+    imageUrl: item.imageUrl,
+    attributes: {
+      asin: item.asin,
+      shoeType: (item as any).shoeType,
+      gender: (item as any).gender,
+      availableSizes: (item as any).availableSizes ? (item as any).availableSizes.join(", ") : undefined,
+      size: (item as any).availableSizes ? (item as any).availableSizes[0] : undefined,
+      color: (item as any).colors ? (item as any).colors[0] : undefined,
+    },
+    rating: item.rating,
+    ratingCount: item.ratingCount,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const offer: Offer = {
+    id: offerId,
+    productId,
+    retailerId: "ret_amazon",
+    retailerName: "Amazon India",
+    retailerSlug: "amazon",
+    retailerProductId: item.asin,
+    title: item.title,
+    productUrl: buildSafeAmazonUrl(item.asin, item.title),
+    price: item.price,
+    originalPrice: item.mrp,
+    currency: "INR",
+    inStock: true,
+    shippingCost: item.price >= 499 ? 0 : 40,
+    lastCheckedAt: new Date().toISOString(),
+    isStale: false,
+    isDemo: false,
+    dataSource: "catalog",
+    provenance: "amazon_catalog_verified",
+    deliveryTimeEstimate: "2-3 business days (Prime available)",
+    bankOffersDescription: "10% Instant Bank Discount on Card Payments",
+  };
+
+  productCache.set(productId, product);
+  offerCache.set(offerId, offer);
+
+  const companionOffers = createCompanionOffers(
+    productId,
+    item.asin,
+    item.title,
+    item.price,
+    item.mrp,
+    itemCat.slug
+  );
+  const allOffers = [offer, ...companionOffers];
+
+  return computeProductComparison(product, allOffers, itemCat);
+}
+
+/**
+ * Resolves curated product by ID, ASIN, or Slug with complete price comparison
+ */
+export function getCuratedProductByIdOrSlug(idOrSlug: string): PriceComparison | null {
+  const item = findCuratedItem(idOrSlug);
+  if (!item) return null;
+  return buildCuratedProductComparison(item);
 }
 
 /**
@@ -1020,9 +1510,22 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
     imageUrl: string;
     rating: number;
     ratingCount: number;
-  }[];
+    shoeType?: string;
+    gender?: string;
+    availableSizes?: string[];
+    colors?: string[];
+  }[] = [];
 
-  // 1. Check direct brand match
+  // Split query into individual words (e.g. ["nike", "shoes"])
+  const queryTokens = lower.split(/\s+/).filter(Boolean);
+
+  // 1. Check direct multi-token match (matches title, brand, or shoeType)
+  const tokenMatches = ALL_CURATED.filter((item) => {
+    const combined = `${item.title} ${item.brand} ${(item as any).shoeType || ""}`.toLowerCase();
+    return queryTokens.every((token) => combined.includes(token));
+  });
+
+  // 2. Check direct brand match
   const brandMatches = ALL_CURATED.filter(
     (item) =>
       item.brand.toLowerCase() === lower ||
@@ -1030,14 +1533,24 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
       (lower.length >= 3 && item.brand.toLowerCase().startsWith(lower))
   );
 
-  // 2. Query title match
+  // 3. Query title match
   const titleMatches = ALL_CURATED.filter((item) =>
     item.title.toLowerCase().includes(lower)
   );
 
-  if (brandMatches.length > 0) {
+  // Category and product-type intent routing
+  if (
+    lower.includes("heel") ||
+    lower.includes("stiletto") ||
+    lower === "sandals" ||
+    lower === "heeled sandals"
+  ) {
+    selectedItems = HEEL_PRODUCTS;
+  } else if (tokenMatches.length > 0 && queryTokens.length > 1) {
+    selectedItems = tokenMatches;
+  } else if (brandMatches.length > 0) {
     selectedItems = brandMatches;
-  } else if (titleMatches.length >= 2) {
+  } else if (titleMatches.length > 0) {
     selectedItems = titleMatches;
   } else if (
     lower.includes("appliance") ||
@@ -1105,7 +1618,9 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
   } else if (
     lower.includes("shoe") ||
     lower.includes("sneaker") ||
-    lower.includes("running")
+    lower.includes("running") ||
+    lower.includes("footwear") ||
+    lower.includes("boot")
   ) {
     selectedItems = FOOTWEAR_PRODUCTS;
   } else if (
@@ -1118,12 +1633,12 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
     selectedItems = ETHNIC_FASHION_PRODUCTS;
   } else if (category.slug === "fashion") {
     selectedItems = [
-      ...HEEL_PRODUCTS,
       ...FOOTWEAR_PRODUCTS,
+      ...HEEL_PRODUCTS,
       ...ETHNIC_FASHION_PRODUCTS,
     ];
-  } else {
-    // Rich multi-category cross-section
+  } else if (!lower || lower === "all" || lower === "deals" || lower === "best deals" || lower.includes("deal")) {
+    // Rich multi-category cross-section only for general browsing
     selectedItems = [
       ...APPLIANCE_PRODUCTS,
       ...MOBILE_PRODUCTS,
@@ -1135,84 +1650,14 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
       ...ETHNIC_FASHION_PRODUCTS,
       ...WATCH_PRODUCTS,
     ];
+  } else {
+    // Zero results query with no keywords, brand, or category matches
+    return [];
   }
 
   return selectedItems.map((item) => {
-    let itemCat = detectCategory(item.title, item.brand);
-    if (BEAUTY_PRODUCTS.some((p) => p.asin === item.asin)) {
-      itemCat = categories.find((c) => c.slug === "beauty") || itemCat;
-    } else if (APPLIANCE_PRODUCTS.some((p) => p.asin === item.asin)) {
-      itemCat = categories.find((c) => c.slug === "appliances") || itemCat;
-    } else if (MOBILE_PRODUCTS.some((p) => p.asin === item.asin)) {
-      itemCat = categories.find((c) => c.slug === "mobiles") || itemCat;
-    } else if (LAPTOP_PRODUCTS.some((p) => p.asin === item.asin)) {
-      itemCat = categories.find((c) => c.slug === "laptops") || itemCat;
-    } else if (AUDIO_PRODUCTS.some((p) => p.asin === item.asin)) {
-      itemCat = categories.find((c) => c.slug === "audio") || itemCat;
-    } else if (
-      HEEL_PRODUCTS.some((p) => p.asin === item.asin) ||
-      FOOTWEAR_PRODUCTS.some((p) => p.asin === item.asin) ||
-      ETHNIC_FASHION_PRODUCTS.some((p) => p.asin === item.asin)
-    ) {
-      itemCat = categories.find((c) => c.slug === "fashion") || itemCat;
-    }
-
-    const productId = `prod_amz_${item.asin}`;
-    const offerId = `off_amz_${item.asin}`;
-
-    const product: Product = {
-      id: productId,
-      title: item.title,
-      slug: `amazon-${item.asin}`,
-      brand: item.brand,
-      categoryId: itemCat.id,
-      description: `${item.title}. Available on Amazon India with fast doorstep delivery, verified merchant warranty, and customer reviews.`,
-      imageUrl: item.imageUrl,
-      attributes: {},
-      rating: item.rating,
-      ratingCount: item.ratingCount,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const offer: Offer = {
-      id: offerId,
-      productId,
-      retailerId: "ret_amazon",
-      retailerName: "Amazon India",
-      retailerSlug: "amazon",
-      retailerProductId: item.asin,
-      title: item.title,
-      productUrl: `https://www.amazon.in/dp/${item.asin}`,
-      price: item.price,
-      originalPrice: item.mrp,
-      currency: "INR",
-      inStock: true,
-      shippingCost: item.price >= 499 ? 0 : 40,
-      lastCheckedAt: new Date().toISOString(),
-      isStale: false,
-      isDemo: false,
-      dataSource: "catalog",
-      provenance: "amazon_catalog_verified",
-      deliveryTimeEstimate: "2-3 business days (Prime available)",
-      bankOffersDescription: "10% Instant Bank Discount on Card Payments",
-    };
-
-    productCache.set(productId, product);
-    offerCache.set(offerId, offer);
-
-    const companionOffers = createCompanionOffers(
-      productId,
-      item.asin,
-      item.title,
-      item.price,
-      item.mrp,
-      itemCat.slug
-    );
-    const allOffers = [offer, ...companionOffers];
-
-    const comparison = computeProductComparison(product, allOffers, itemCat);
-    return { product, offers: allOffers, comparison };
+    const comparison = buildCuratedProductComparison(item);
+    return { product: comparison.product, offers: comparison.offers, comparison };
   });
 }
 
@@ -1272,7 +1717,7 @@ export async function searchLiveAmazonIndia(query: string): Promise<LiveSearchRe
           const asin = item.ASIN;
           const title = item.ItemInfo?.Title?.DisplayValue || `Amazon Choice Product (${asin})`;
           const brand = item.ItemInfo?.ByLineInfo?.Brand?.DisplayValue || "Amazon Choice";
-          const imageUrl = item.Images?.Primary?.Large?.URL || "https://placehold.co/400x400/fff7ed/ea580c?text=Amazon";
+          const imageUrl = item.Images?.Primary?.Large?.URL || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f9fafb'/%3E%3Cpath d='M200 140v120M140 200h120' stroke='%23d1d5db' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E";
           const listing = item.Offers?.Listings?.[0];
           const price = listing?.Price?.Amount ? Math.round(listing.Price.Amount) : 1999;
           const mrp = listing?.SavingBasis?.Amount ? Math.round(listing.SavingBasis.Amount) : Math.round(price * 1.3);

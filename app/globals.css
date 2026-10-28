@@ -3,16 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-start-rgb: 248, 250, 252;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 17, 24, 39;
+  --background-rgb: 243, 244, 246;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background-color: #f8fafc;
+  color: #111827;
+  background-color: #F3F4F6;
   min-height: 100vh;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessible focus styling */
+:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+}
+
+/* Clean text selection */
+::selection {
+  background-color: #FDE68A;
+  color: #111827;
 }
 
 /* Custom scrollbar utility */
@@ -23,3 +36,4 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+

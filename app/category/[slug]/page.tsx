@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
   return {
     title: `${category.name} Deals & Price Comparison on Amazon India | DealFinder`,
-    description: `Discover top ${category.name} on Amazon India. Compare verified deals, filter by brand, price, and customer ratings.`,
+    description: `Discover top ${category.name} on Amazon India. Compare deals, filter by brand, price, and customer ratings.`,
     alternates: {
       canonical: `/category/${category.slug}`,
     },
@@ -79,24 +79,24 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Category Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#E5E7EB]">
         <div>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
-            <Link href="/" className="hover:text-slate-900 transition-colors">
+          <div className="flex items-center gap-2 text-xs text-[#6B7280] mb-1">
+            <Link href="/" className="hover:text-[#111827] transition-colors">
               Home
             </Link>
             <span>/</span>
-            <Link href="/products" className="hover:text-slate-900 transition-colors">
+            <Link href="/products" className="hover:text-[#111827] transition-colors">
               Products
             </Link>
             <span>/</span>
-            <span className="text-slate-900 font-semibold">{category.name}</span>
+            <span className="text-[#111827] font-semibold">{category.name}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight flex items-center gap-2">
             <span>{category.name} on Amazon India</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            {category.description || `Discover top verified ${category.name} deals and prices on Amazon India.`}
+          <p className="text-xs sm:text-sm text-[#6B7280] mt-1 max-w-2xl">
+            {category.description || `Discover top ${category.name} deals and prices on Amazon India.`}
           </p>
         </div>
 
@@ -107,30 +107,30 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       {/* Active Filter Badges */}
       {(brand || minPrice !== undefined || maxPrice !== undefined || minRating !== undefined || inStockOnly) && (
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <span className="text-slate-400 font-medium">Active filters:</span>
+          <span className="text-[#6B7280] font-medium">Active filters:</span>
           {brand && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-semibold">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-[#111827] border border-[#E5E7EB] font-semibold">
               Brand: {brand}
             </span>
           )}
           {(minPrice !== undefined || maxPrice !== undefined) && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-[#15803D] border border-emerald-200 font-semibold">
               Price: ₹{minPrice || 0} - ₹{maxPrice || "Max"}
             </span>
           )}
           {minRating !== undefined && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-[#111827] border border-amber-200 font-semibold">
               {minRating}★ &amp; above
             </span>
           )}
           {inStockOnly && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-[#15803D] border border-emerald-200 font-semibold">
               In Stock Only
             </span>
           )}
           <Link
             href={`/category/${category.slug}`}
-            className="text-orange-600 hover:text-orange-700 font-semibold underline ml-1"
+            className="text-xs font-semibold text-[#6B7280] hover:text-[#111827] underline ml-1 transition-colors"
           >
             Clear Filters
           </Link>

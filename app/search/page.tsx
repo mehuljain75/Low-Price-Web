@@ -17,6 +17,9 @@ interface SearchPageProps {
     search?: string;
     category?: string;
     brand?: string;
+    shoeType?: string;
+    gender?: string;
+    size?: string;
     minPrice?: string;
     maxPrice?: string;
     minRating?: string;
@@ -33,7 +36,7 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
     title: query
       ? `Search results for "${query}" on Amazon India | DealFinder`
       : "Product Search on Amazon India | DealFinder",
-    description: `Discover and compare prices for "${query}" on Amazon India with verified deals, specs, and reviews.`,
+    description: `Discover and compare prices for "${query}" on Amazon India with deals, specs, and customer reviews.`,
   };
 }
 
@@ -42,6 +45,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const searchQuery = (resolved.q || resolved.search || "").trim();
   const categorySlug = resolved.category;
   const brand = resolved.brand;
+  const shoeType = resolved.shoeType;
+  const gender = resolved.gender;
+  const size = resolved.size;
   const minPrice = resolved.minPrice ? Number(resolved.minPrice) : undefined;
   const maxPrice = resolved.maxPrice ? Number(resolved.maxPrice) : undefined;
   const minRating = resolved.minRating ? Number(resolved.minRating) : undefined;
@@ -55,6 +61,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     searchQuery,
     categorySlug,
     brand,
+    shoeType,
+    gender,
+    size,
     minPrice,
     maxPrice,
     minRating,
@@ -64,88 +73,166 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     limit: 24,
   });
 
+  // Helper to remove one filter while keeping other active filters and q
+  const getFilterRemoveUrl = (removeKey: string) => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("q", searchQuery);
+    if (categorySlug && removeKey !== "category") params.set("category", categorySlug);
+    if (brand && removeKey !== "brand") params.set("brand", brand);
+    if (shoeType && removeKey !== "shoeType") params.set("shoeType", shoeType);
+    if (gender && removeKey !== "gender") params.set("gender", gender);
+    if (size && removeKey !== "size") params.set("size", size);
+    if (minPrice !== undefined && removeKey !== "price") params.set("minPrice", String(minPrice));
+    if (maxPrice !== undefined && removeKey !== "price") params.set("maxPrice", String(maxPrice));
+    if (minRating !== undefined && removeKey !== "rating") params.set("minRating", String(minRating));
+    if (inStockOnly && removeKey !== "inStock") params.set("inStock", "true");
+    if (sortBy && sortBy !== "discount") params.set("sortBy", sortBy);
+    return `/search?${params.toString()}`;
+  };
+
+  const hasAnyFilter = Boolean(
+    brand ||
+    categorySlug ||
+    shoeType ||
+    gender ||
+    size ||
+    minPrice !== undefined ||
+    maxPrice !== undefined ||
+    minRating !== undefined ||
+    inStockOnly
+  );
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Search Header & Search Input */}
-      <div className="space-y-4 pb-4 border-b border-slate-200">
+      {/* Search Header */}
+      <div className="space-y-4 pb-4 border-b border-[#E5E7EB]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
-              <Link href="/" className="hover:text-slate-900 transition-colors">
+            <div className="flex items-center gap-2 text-xs text-[#6B7280] mb-1">
+              <Link href="/" className="hover:text-[#111827] transition-colors">
                 Home
               </Link>
               <span>/</span>
-              <span className="text-slate-900 font-semibold">Search</span>
+              <span className="text-[#111827] font-semibold">Search</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight">
               {searchQuery ? (
                 <>
-                  Results for &ldquo;<span className="text-orange-600">{searchQuery}</span>&rdquo;
+                  Results for &ldquo;<span className="text-amber-600">{searchQuery}</span>&rdquo;
                 </>
               ) : (
                 "Search Amazon Products"
               )}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-[#6B7280] mt-1">
               {comparisons.length > 0
-                ? `Found ${comparisons.length}+ verified product listings on Amazon India`
-                : "Enter product keywords to explore live deals on Amazon India"}
+                ? `Found ${comparisons.length} product listings on Amazon India`
+                : "Enter product keywords to explore deals on Amazon India"}
             </p>
           </div>
 
           {/* Sorting Dropdown */}
           <SortDropdown currentSort={sortBy} />
         </div>
-
-        {/* Embedded Search Input */}
-        <div className="max-w-xl">
-          <SearchAutocomplete
-            variant="hero"
-            placeholder="Search Amazon India (e.g. iPhone 15, Dell XPS, Sony XM5)..."
-          />
-        </div>
       </div>
 
       {/* Active Filter Badges */}
-      {(searchQuery || brand || categorySlug || minPrice !== undefined || maxPrice !== undefined || minRating !== undefined || inStockOnly) && (
+      {(searchQuery || hasAnyFilter) && (
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <span className="text-slate-400 font-medium">Active filters:</span>
+          <span className="text-[#6B7280] font-medium">Active filters:</span>
           {searchQuery && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-medium">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-[#111827] font-medium border border-[#E5E7EB]">
               Query: &quot;{searchQuery}&quot;
             </span>
           )}
           {categorySlug && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-orange-800 font-medium">
-              Category: {categories.find((c) => c.slug === categorySlug)?.name || categorySlug}
-            </span>
+            <Link
+              href={getFilterRemoveUrl("category")}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-[#111827] border border-amber-200 font-semibold hover:bg-amber-100 transition-colors"
+              title="Remove category filter"
+            >
+              <span>Category: {categories.find((c) => c.slug === categorySlug)?.name || categorySlug}</span>
+              <span className="font-bold text-amber-700">×</span>
+            </Link>
           )}
           {brand && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-semibold">
-              Brand: {brand}
-            </span>
+            <Link
+              href={getFilterRemoveUrl("brand")}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-100 text-[#111827] border border-[#E5E7EB] font-semibold hover:bg-gray-200 transition-colors"
+              title="Remove brand filter"
+            >
+              <span>Brand: {brand}</span>
+              <span className="font-bold text-gray-600">×</span>
+            </Link>
+          )}
+          {shoeType && (
+            <Link
+              href={getFilterRemoveUrl("shoeType")}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-[#111827] border border-amber-200 font-semibold hover:bg-amber-100 transition-colors"
+              title="Remove shoe type filter"
+            >
+              <span>Type: {shoeType}</span>
+              <span className="font-bold text-amber-700">×</span>
+            </Link>
+          )}
+          {gender && (
+            <Link
+              href={getFilterRemoveUrl("gender")}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-100 text-[#111827] border border-[#E5E7EB] font-medium hover:bg-gray-200 transition-colors"
+              title="Remove gender filter"
+            >
+              <span>Gender: {gender}</span>
+              <span className="font-bold text-gray-600">×</span>
+            </Link>
+          )}
+          {size && (
+            <Link
+              href={getFilterRemoveUrl("size")}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#F59E0B] text-[#111827] border border-[#F59E0B] font-bold hover:bg-amber-500 transition-colors"
+              title="Remove size filter"
+            >
+              <span>Size: {size}</span>
+              <span className="font-black">×</span>
+            </Link>
           )}
           {(minPrice !== undefined || maxPrice !== undefined) && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
-              Price: ₹{minPrice || 0} - ₹{maxPrice || "Max"}
-            </span>
+            <Link
+              href={getFilterRemoveUrl("price")}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-[#15803D] border border-emerald-200 font-semibold hover:bg-emerald-100 transition-colors"
+              title="Remove price filter"
+            >
+              <span>Price: ₹{minPrice || 0} - ₹{maxPrice || "Max"}</span>
+              <span className="font-bold text-[#15803D]">×</span>
+            </Link>
           )}
           {minRating !== undefined && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
-              {minRating}★ &amp; above
-            </span>
+            <Link
+              href={getFilterRemoveUrl("rating")}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-[#111827] border border-amber-200 font-semibold hover:bg-amber-100 transition-colors"
+              title="Remove rating filter"
+            >
+              <span>{minRating}★ &amp; above</span>
+              <span className="font-bold text-amber-700">×</span>
+            </Link>
           )}
           {inStockOnly && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
-              In Stock Only
-            </span>
+            <Link
+              href={getFilterRemoveUrl("inStock")}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-[#15803D] border border-emerald-200 font-semibold hover:bg-emerald-100 transition-colors"
+              title="Remove stock filter"
+            >
+              <span>In Stock Only</span>
+              <span className="font-bold text-[#15803D]">×</span>
+            </Link>
           )}
-          <Link
-            href={searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : "/search"}
-            className="text-orange-600 hover:text-orange-700 font-semibold underline ml-1"
-          >
-            Clear Filters
-          </Link>
+          {hasAnyFilter && (
+            <Link
+              href={searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : "/search"}
+              className="text-xs font-semibold text-[#6B7280] hover:text-[#111827] underline ml-1 transition-colors"
+            >
+              Clear Filters
+            </Link>
+          )}
         </div>
       )}
 
@@ -155,10 +242,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         brands={brands}
         currentCategory={categorySlug}
         currentBrand={brand}
+        currentShoeType={shoeType}
+        currentGender={gender}
+        currentSize={size}
         currentMinPrice={minPrice}
         currentMaxPrice={maxPrice}
         currentMinRating={minRating}
         currentInStock={inStockOnly}
+        searchQuery={searchQuery}
         totalProductsCount={comparisons.length}
       />
 
@@ -171,36 +262,54 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             brands={brands}
             currentCategory={categorySlug}
             currentBrand={brand}
+            currentShoeType={shoeType}
+            currentGender={gender}
+            currentSize={size}
             currentMinPrice={minPrice}
             currentMaxPrice={maxPrice}
             currentMinRating={minRating}
             currentInStock={inStockOnly}
+            searchQuery={searchQuery}
           />
         </div>
 
         {/* Right Column: Products List or No Results */}
         <div className="lg:col-span-3">
           {comparisons.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-orange-50 text-orange-500 mx-auto flex items-center justify-center">
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 mx-auto flex items-center justify-center">
                 <SearchIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="text-lg font-bold text-[#111827]">
                   No matching Amazon products found
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
-                  We couldn&apos;t find products matching &ldquo;{searchQuery}&rdquo;. Try checking spelling, using more general keywords, or browsing popular categories below.
+                <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto">
+                  {hasAnyFilter
+                    ? `No products match the selected filters for "${searchQuery}". Try clearing filters or searching for another item.`
+                    : `We couldn't find products matching "${searchQuery}". Try checking spelling, using more general keywords, or browsing popular categories below.`}
                 </p>
               </div>
 
+              {hasAnyFilter && (
+                <div className="pt-1">
+                  <Link
+                    href={searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : "/search"}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#111827] text-white hover:bg-black text-xs font-bold transition-colors"
+                  >
+                    Reset All Filters
+                  </Link>
+                </div>
+              )}
+
               {/* Suggestions */}
-              <div className="pt-2 flex items-center justify-center gap-2 flex-wrap">
-                {["Mobiles", "Laptops", "Headphones", "Air Fryer", "Smartwatch"].map((term) => (
+              <div className="pt-3 flex items-center justify-center gap-2 flex-wrap">
+                <span className="text-xs text-gray-400 font-medium w-full block">Try searching for:</span>
+                {["Shoes", "Running Shoes", "Nike Shoes", "iPhone 15", "Laptops", "Air Fryer", "Headphones"].map((term) => (
                   <Link
                     key={term}
                     href={`/search?q=${encodeURIComponent(term)}`}
-                    className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-orange-50 hover:text-orange-700 text-xs font-semibold text-slate-700 transition-colors"
+                    className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-amber-50 hover:text-amber-900 border border-gray-200 text-xs font-semibold text-gray-700 transition-colors"
                   >
                     {term}
                   </Link>
@@ -214,6 +323,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 searchQuery,
                 categorySlug,
                 brand,
+                shoeType,
+                gender,
+                size,
                 minPrice,
                 maxPrice,
                 minRating,

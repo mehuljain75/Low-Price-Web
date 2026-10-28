@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
   Search,
   Clock,
@@ -13,6 +13,7 @@ import {
   Store,
   Tag,
   CornerDownLeft,
+  Check,
 } from "lucide-react";
 import { formatINR } from "@/lib/formatters";
 import { QuerySuggestion, SearchProductSuggestion } from "@/lib/data/search-suggestions";
@@ -21,6 +22,7 @@ interface SearchAutocompleteProps {
   placeholder?: string;
   variant?: "navbar" | "hero";
   initialCategory?: string;
+  initialQuery?: string;
   className?: string;
   onSearchSubmit?: () => void;
 }
@@ -37,19 +39,490 @@ const CATEGORY_OPTIONS = [
 
 const LOCAL_STORAGE_KEY = "dealfinder_recent_searches";
 
-export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
+interface DropdownItem {
+  id: string;
+  type: "category" | "shoeType" | "switch";
+  label: string;
+  description?: string;
+  slug?: string;
+  shoeType?: string;
+  searchKeyword?: string;
+  isSelected: boolean;
+}
+
+interface DropdownGroup {
+  title: string;
+  items: DropdownItem[];
+}
+
+const SearchAutocompleteInternal: React.FC<SearchAutocompleteProps> = ({
   placeholder = "Search iPhone 15, Samsung Galaxy, MacBooks, Earbuds, Kurta...",
   variant = "navbar",
   initialCategory = "all",
+  initialQuery = "",
   className = "",
   onSearchSubmit,
 }) => {
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const urlParamQuery = searchParams ? (searchParams.get("q") || searchParams.get("search") || "") : "";
+  const urlParamCategory = searchParams ? (searchParams.get("category") || "all") : "all";
+  const urlParamShoeType = searchParams ? (searchParams.get("shoeType") || "") : "";
+
+  const [query, setQuery] = useState(initialQuery || urlParamQuery || "");
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory || urlParamCategory);
   const [isOpen, setIsOpen] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [focusedCategoryIdx, setFocusedCategoryIdx] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+
+  // Synchronize query in input when URL param changes
+  useEffect(() => {
+    if (urlParamQuery && urlParamQuery !== query) {
+      setQuery(urlParamQuery);
+    }
+  }, [urlParamQuery]);
+
+  // Synchronize selectedCategory with URL param category
+  useEffect(() => {
+    if (urlParamCategory) {
+      setSelectedCategory(urlParamCategory);
+    }
+  }, [urlParamCategory]);
+
+  const qLower = (query || urlParamQuery || "").toLowerCase().trim();
+
+  const isFootwear =
+    qLower.includes("shoe") ||
+    qLower.includes("sneaker") ||
+    qLower.includes("running") ||
+    qLower.includes("boot") ||
+    qLower.includes("footwear") ||
+    qLower.includes("clog") ||
+    qLower.includes("heel") ||
+    Boolean(urlParamShoeType);
+
+  const isMobile =
+    qLower.includes("phone") ||
+    qLower.includes("mobile") ||
+    qLower.includes("iphone") ||
+    qLower.includes("pixel") ||
+    qLower.includes("samsung") ||
+    qLower.includes("oneplus");
+
+  const isLaptop =
+    qLower.includes("laptop") ||
+    qLower.includes("macbook") ||
+    qLower.includes("dell") ||
+    qLower.includes("thinkpad") ||
+    qLower.includes("computer");
+
+  const isAudio =
+    qLower.includes("headphone") ||
+    qLower.includes("earphone") ||
+    qLower.includes("earbud") ||
+    qLower.includes("airpod") ||
+    qLower.includes("speaker") ||
+    qLower.includes("soundbar");
+
+  // Display label on the trigger button
+  const displayCategoryLabel = useMemo(() => {
+    if (urlParamShoeType) {
+      return urlParamShoeType;
+    }
+    if (selectedCategory && selectedCategory !== "all") {
+      const match = CATEGORY_OPTIONS.find((c) => c.slug === selectedCategory);
+      return match ? match.shortLabel : selectedCategory;
+    }
+    if (isFootwear) return "Shoes";
+    if (isMobile) return "Mobiles";
+    if (isLaptop) return "Laptops";
+    if (isAudio) return "Audio";
+    return "All";
+  }, [selectedCategory, urlParamShoeType, isFootwear, isMobile, isLaptop, isAudio]);
+
+  const categoryGroups = useMemo<DropdownGroup[]>(() => {
+    // 1. Footwear query detected:
+    if (isFootwear) {
+      return [
+        {
+          title: "Refine Footwear Results",
+          items: [
+            {
+              id: "cat_all_shoes",
+              type: "category",
+              slug: "all",
+              label: "All Footwear Results",
+              isSelected: (selectedCategory === "all" || !selectedCategory) && !urlParamShoeType,
+            },
+            {
+              id: "cat_fashion_footwear",
+              type: "category",
+              slug: "fashion",
+              label: "Fashion & Footwear Catalog",
+              isSelected: selectedCategory === "fashion" && !urlParamShoeType,
+            },
+            {
+              id: "st_running",
+              type: "shoeType",
+              shoeType: "Running Shoes",
+              label: "Running Shoes",
+              description: "Lightweight road & marathon shoes",
+              isSelected: urlParamShoeType.toLowerCase() === "running shoes",
+            },
+            {
+              id: "st_sneakers",
+              type: "shoeType",
+              shoeType: "Sneakers",
+              label: "Casual Sneakers",
+              description: "Lifestyle & retro sneakers",
+              isSelected: urlParamShoeType.toLowerCase() === "sneakers",
+            },
+            {
+              id: "st_casual",
+              type: "shoeType",
+              shoeType: "Casual Shoes",
+              label: "Casual & Slip-Ons",
+              isSelected: urlParamShoeType.toLowerCase() === "casual shoes",
+            },
+            {
+              id: "st_formal",
+              type: "shoeType",
+              shoeType: "Formal Shoes",
+              label: "Formal & Dress Shoes",
+              isSelected: urlParamShoeType.toLowerCase() === "formal shoes",
+            },
+            {
+              id: "st_walking",
+              type: "shoeType",
+              shoeType: "Walking Shoes",
+              label: "Walking & Training",
+              isSelected: urlParamShoeType.toLowerCase() === "walking shoes",
+            },
+            {
+              id: "st_boots",
+              type: "shoeType",
+              shoeType: "Boots",
+              label: "Boots & High Tops",
+              isSelected: urlParamShoeType.toLowerCase() === "boots",
+            },
+          ],
+        },
+        {
+          title: "Switch to Another Category",
+          items: [
+            {
+              id: "switch_mobiles",
+              type: "switch",
+              slug: "mobiles",
+              label: "Mobiles & Tablets",
+              searchKeyword: "smartphones",
+              isSelected: selectedCategory === "mobiles",
+            },
+            {
+              id: "switch_laptops",
+              type: "switch",
+              slug: "laptops",
+              label: "Laptops & PCs",
+              searchKeyword: "laptops",
+              isSelected: selectedCategory === "laptops",
+            },
+            {
+              id: "switch_audio",
+              type: "switch",
+              slug: "audio",
+              label: "Audio & Headphones",
+              searchKeyword: "headphones",
+              isSelected: selectedCategory === "audio",
+            },
+            {
+              id: "switch_appliances",
+              type: "switch",
+              slug: "appliances",
+              label: "Home Appliances",
+              searchKeyword: "appliances",
+              isSelected: selectedCategory === "appliances",
+            },
+            {
+              id: "switch_beauty",
+              type: "switch",
+              slug: "beauty",
+              label: "Beauty & Personal Care",
+              searchKeyword: "beauty",
+              isSelected: selectedCategory === "beauty",
+            },
+          ],
+        },
+      ];
+    }
+
+    // 2. Mobile / Phone query detected:
+    if (isMobile) {
+      return [
+        {
+          title: "Refine Mobile Results",
+          items: [
+            {
+              id: "cat_all_mobiles",
+              type: "category",
+              slug: "all",
+              label: "All Mobile Results",
+              isSelected: selectedCategory === "all" || !selectedCategory,
+            },
+            {
+              id: "cat_mobiles",
+              type: "category",
+              slug: "mobiles",
+              label: "Mobiles & Tablets Catalog",
+              isSelected: selectedCategory === "mobiles",
+            },
+            {
+              id: "cat_audio_acc",
+              type: "category",
+              slug: "audio",
+              label: "Compatible Audio & AirPods",
+              isSelected: selectedCategory === "audio",
+            },
+          ],
+        },
+        {
+          title: "Switch to Another Category",
+          items: [
+            {
+              id: "switch_laptops",
+              type: "switch",
+              slug: "laptops",
+              label: "Laptops & PCs",
+              searchKeyword: "laptops",
+              isSelected: false,
+            },
+            {
+              id: "switch_fashion",
+              type: "switch",
+              slug: "fashion",
+              label: "Fashion & Footwear",
+              searchKeyword: "shoes",
+              isSelected: false,
+            },
+            {
+              id: "switch_appliances",
+              type: "switch",
+              slug: "appliances",
+              label: "Home Appliances",
+              searchKeyword: "appliances",
+              isSelected: false,
+            },
+            {
+              id: "switch_beauty",
+              type: "switch",
+              slug: "beauty",
+              label: "Beauty & Personal Care",
+              searchKeyword: "beauty",
+              isSelected: false,
+            },
+          ],
+        },
+      ];
+    }
+
+    // 3. Laptop query detected:
+    if (isLaptop) {
+      return [
+        {
+          title: "Refine Laptop Results",
+          items: [
+            {
+              id: "cat_all_laptops",
+              type: "category",
+              slug: "all",
+              label: "All Laptop Results",
+              isSelected: selectedCategory === "all" || !selectedCategory,
+            },
+            {
+              id: "cat_laptops",
+              type: "category",
+              slug: "laptops",
+              label: "Laptops & PCs Catalog",
+              isSelected: selectedCategory === "laptops",
+            },
+          ],
+        },
+        {
+          title: "Switch to Another Category",
+          items: [
+            {
+              id: "switch_mobiles",
+              type: "switch",
+              slug: "mobiles",
+              label: "Mobiles & Tablets",
+              searchKeyword: "smartphones",
+              isSelected: false,
+            },
+            {
+              id: "switch_audio",
+              type: "switch",
+              slug: "audio",
+              label: "Audio & Headphones",
+              searchKeyword: "headphones",
+              isSelected: false,
+            },
+            {
+              id: "switch_fashion",
+              type: "switch",
+              slug: "fashion",
+              label: "Fashion & Footwear",
+              searchKeyword: "shoes",
+              isSelected: false,
+            },
+            {
+              id: "switch_appliances",
+              type: "switch",
+              slug: "appliances",
+              label: "Home Appliances",
+              searchKeyword: "appliances",
+              isSelected: false,
+            },
+            {
+              id: "switch_beauty",
+              type: "switch",
+              slug: "beauty",
+              label: "Beauty & Personal Care",
+              searchKeyword: "beauty",
+              isSelected: false,
+            },
+          ],
+        },
+      ];
+    }
+
+    // 4. Default / Generic categories:
+    return [
+      {
+        title: "All Amazon Categories",
+        items: CATEGORY_OPTIONS.map((c) => ({
+          id: `cat_${c.slug}`,
+          type: "category" as const,
+          slug: c.slug,
+          label: c.label,
+          isSelected: selectedCategory === c.slug || (!selectedCategory && c.slug === "all"),
+        })),
+      },
+    ];
+  }, [isFootwear, isMobile, isLaptop, selectedCategory, urlParamShoeType]);
+
+  const flatCategoryItems = useMemo(() => {
+    return categoryGroups.flatMap((g) => g.items);
+  }, [categoryGroups]);
+
+  const categoryContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close category dropdown on outside click
+  useEffect(() => {
+    const handleCategoryClickOutside = (e: MouseEvent) => {
+      if (categoryContainerRef.current && !categoryContainerRef.current.contains(e.target as Node)) {
+        setIsCategoryOpen(false);
+        setFocusedCategoryIdx(-1);
+      }
+    };
+    document.addEventListener("mousedown", handleCategoryClickOutside);
+    return () => document.removeEventListener("mousedown", handleCategoryClickOutside);
+  }, []);
+
+  const handleCategorySelection = useCallback(
+    (item: DropdownItem) => {
+      setIsCategoryOpen(false);
+      setFocusedCategoryIdx(-1);
+
+      if (item.type === "switch" && item.slug) {
+        // User wants to switch to a different department
+        const newQuery = item.searchKeyword || item.slug;
+        setQuery(newQuery);
+        setSelectedCategory(item.slug);
+
+        const params = new URLSearchParams();
+        params.set("q", newQuery);
+        params.set("category", item.slug);
+        // Resets pagination (page omitted) & clears incompatible filters
+        router.push(`/search?${params.toString()}`);
+        return;
+      }
+
+      if (item.type === "shoeType" && item.shoeType) {
+        // Footwear refinement selected
+        setSelectedCategory("fashion");
+        const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
+        params.delete("page"); // Resets pagination
+        params.set("category", "fashion");
+        params.set("shoeType", item.shoeType);
+        if (query.trim()) {
+          params.set("q", query.trim());
+        }
+        router.push(`/search?${params.toString()}`);
+        return;
+      }
+
+      if (item.type === "category" && item.slug) {
+        setSelectedCategory(item.slug);
+        const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
+        params.delete("page"); // Resets pagination
+
+        if (item.slug === "all") {
+          params.delete("category");
+          params.delete("shoeType");
+        } else {
+          params.set("category", item.slug);
+          if (item.slug !== "fashion") {
+            // Clears incompatible footwear filters when switching away from fashion
+            params.delete("shoeType");
+            params.delete("gender");
+            params.delete("size");
+          }
+        }
+
+        if (query.trim()) {
+          params.set("q", query.trim());
+        }
+
+        if (pathname && (pathname.startsWith("/search") || pathname.startsWith("/products"))) {
+          router.push(`${pathname}?${params.toString()}`);
+        } else if (query.trim()) {
+          router.push(`/search?${params.toString()}`);
+        }
+        return;
+      }
+    },
+    [query, searchParams, pathname, router]
+  );
+
+  const handleCategoryKeyDown = (e: React.KeyboardEvent) => {
+    if (!isCategoryOpen) {
+      if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setIsCategoryOpen(true);
+        setFocusedCategoryIdx(0);
+      }
+      return;
+    }
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setIsCategoryOpen(false);
+      setFocusedCategoryIdx(-1);
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setFocusedCategoryIdx((prev) => (prev < flatCategoryItems.length - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setFocusedCategoryIdx((prev) => (prev > 0 ? prev - 1 : flatCategoryItems.length - 1));
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      if (focusedCategoryIdx >= 0 && focusedCategoryIdx < flatCategoryItems.length) {
+        handleCategorySelection(flatCategoryItems[focusedCategoryIdx]);
+      }
+    }
+  };
 
   const [suggestions, setSuggestions] = useState<{
     querySuggestions: QuerySuggestion[];
@@ -302,40 +775,95 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       {/* Amazon-style Capsule Search Bar Container */}
       <form
         onSubmit={handleSubmit}
-        className={`group relative flex items-center bg-white rounded-full transition-all duration-200 border ${
+        className={`group relative flex items-center bg-white rounded-xl transition-all duration-150 border ${
           isOpen
-            ? "border-orange-500 ring-2 ring-orange-500/30 shadow-md"
-            : "border-slate-300 hover:border-slate-400 shadow-sm"
-        } ${variant === "hero" ? "p-1.5" : "p-0.5"}`}
+            ? "border-amber-500 ring-2 ring-amber-500/20 shadow-sm"
+            : "border-[#E5E7EB] hover:border-gray-300 shadow-xs"
+        } ${variant === "hero" ? "p-1.5" : "p-1"}`}
       >
-        {/* Amazon Category Dropdown (Left side) */}
-        <div className="relative flex-shrink-0 hidden sm:flex items-center pl-1">
-          <label htmlFor="search-category" className="sr-only">Category</label>
-          <select
-            id="search-category"
+        {/* Custom Accessible Category Dropdown (Left side) */}
+        <div ref={categoryContainerRef} className="relative flex-shrink-0 flex items-center pl-1">
+          <button
+            type="button"
+            id="search-category-button"
+            aria-haspopup="listbox"
+            aria-expanded={isCategoryOpen}
             aria-label="Filter search by category"
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              inputRef.current?.focus();
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsCategoryOpen((prev) => !prev);
+              setIsOpen(false); // Close suggestions autocomplete when toggling category
             }}
-            className={`appearance-none bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-l-full cursor-pointer transition-colors focus:outline-none pr-7 pl-3 text-xs ${
-              variant === "hero" ? "py-2.5" : "py-2"
+            onKeyDown={handleCategoryKeyDown}
+            className={`flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 text-[#111827] font-semibold rounded-lg cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/20 px-2.5 sm:px-3 text-xs border border-transparent hover:border-[#E5E7EB] ${
+              variant === "hero" ? "py-2.5" : "py-1.5"
             }`}
           >
-            {CATEGORY_OPTIONS.map((cat) => (
-              <option key={cat.slug} value={cat.slug}>
-                {cat.shortLabel}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-2 pointer-events-none" />
-          <div className="h-5 w-[1px] bg-slate-200 mx-1"></div>
+            <span className="truncate max-w-[70px] sm:max-w-[110px] select-none">{displayCategoryLabel}</span>
+            <ChevronDown
+              className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-150 ${
+                isCategoryOpen ? "rotate-180 text-amber-600" : ""
+              }`}
+            />
+          </button>
+          <div className="h-5 w-[1px] bg-[#E5E7EB] mx-1.5"></div>
+
+          {/* Custom Accessible Dropdown Menu */}
+          {isCategoryOpen && (
+            <div
+              role="listbox"
+              aria-labelledby="search-category-button"
+              className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-32px)] max-h-96 overflow-y-auto bg-white rounded-xl border border-[#E5E7EB] shadow-dropdown z-50 py-1.5 focus:outline-none animate-in fade-in-50 zoom-in-95 duration-100 divide-y divide-[#E5E7EB]/60"
+            >
+              {categoryGroups.map((group, gIdx) => (
+                <div key={group.title} className={gIdx > 0 ? "pt-1.5" : ""}>
+                  <div className="px-3.5 py-1 text-[10px] font-bold text-[#6B7280] uppercase tracking-wider bg-gray-50/80">
+                    {group.title}
+                  </div>
+                  <div className="py-1">
+                    {group.items.map((item) => {
+                      const itemIdx = flatCategoryItems.findIndex((fi) => fi.id === item.id);
+                      const isFocused = itemIdx === focusedCategoryIdx;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          role="option"
+                          aria-selected={item.isSelected}
+                          onClick={() => handleCategorySelection(item)}
+                          onMouseEnter={() => setFocusedCategoryIdx(itemIdx)}
+                          className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                            item.isSelected
+                              ? "bg-amber-50 text-amber-900 font-bold border-l-2 border-[#F59E0B]"
+                              : isFocused
+                              ? "bg-gray-100 text-[#111827] font-semibold"
+                              : "text-[#111827] hover:bg-gray-50 font-medium"
+                          }`}
+                        >
+                          <div className="flex flex-col pr-2">
+                            <span>{item.label}</span>
+                            {item.description && (
+                              <span className="text-[10px] text-[#6B7280] font-normal">
+                                {item.description}
+                              </span>
+                            )}
+                          </div>
+                          {item.isSelected && (
+                            <Check className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Search Icon / Loading indicator */}
-        <div className="pl-3 pr-1 text-slate-400 flex items-center justify-center flex-shrink-0">
-          <Search className={`${variant === "hero" ? "w-5 h-5" : "w-4 h-4"} text-slate-400`} />
+        <div className="pl-2 pr-1 text-gray-400 flex items-center justify-center flex-shrink-0">
+          <Search className={`${variant === "hero" ? "w-5 h-5" : "w-4 h-4"} text-gray-400`} />
         </div>
 
         {/* Input Field */}
@@ -357,7 +885,7 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           role="combobox"
           aria-expanded={isOpen}
           aria-autocomplete="list"
-          className={`w-full bg-transparent text-slate-900 placeholder:text-slate-400 focus:outline-none font-normal ${
+          className={`w-full bg-transparent text-[#111827] placeholder:text-gray-400 focus:outline-none font-normal ${
             variant === "hero" ? "px-2 py-2 text-base" : "px-2 py-1.5 text-sm"
           }`}
         />
@@ -367,44 +895,44 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           <button
             type="button"
             onClick={handleClear}
-            className="p-1 mr-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors flex-shrink-0"
+            className="p-1 mr-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
             aria-label="Clear search input"
           >
             <X className="w-4 h-4" />
           </button>
         )}
 
-        {/* Amazon Orange Search / Compare Button */}
+        {/* Search Button */}
         <button
           type="submit"
-          className={`flex-shrink-0 flex items-center justify-center gap-1.5 font-bold rounded-full text-white bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 active:scale-[0.98] transition-all shadow-sm ${
-            variant === "hero" ? "px-6 py-2.5 text-sm" : "px-4 py-1.5 text-xs"
+          className={`flex-shrink-0 flex items-center justify-center gap-1.5 font-bold rounded-lg text-[#111827] bg-[#F59E0B] hover:bg-[#D97706] active:scale-[0.98] transition-all shadow-xs ${
+            variant === "hero" ? "px-6 py-2.5 text-sm" : "px-4 py-2 text-xs"
           }`}
         >
-          <span>Compare</span>
+          <span>Search</span>
         </button>
       </form>
 
-      {/* Google + Amazon Autocomplete Dropdown */}
+      {/* Autocomplete Dropdown */}
       {shouldRenderDropdown && (
         <div
           role="listbox"
-          className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 divide-y divide-slate-100 animate-in fade-in slide-in-from-top-1 duration-150"
+          className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-[#E5E7EB] overflow-hidden z-50 divide-y divide-[#E5E7EB] animate-in fade-in slide-in-from-top-1 duration-150"
         >
           {/* ZERO-STATE: Recent Searches & Trending */}
           {showRecentOrTrending && (
             <div className="p-2 space-y-3">
               {recentSearches.length > 0 && (
                 <div>
-                  <div className="flex items-center justify-between px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="flex items-center justify-between px-3 py-1.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                     <span className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      <Clock className="w-3.5 h-3.5 text-gray-400" />
                       Recent Searches
                     </span>
                     <button
                       type="button"
                       onClick={clearAllRecent}
-                      className="hover:text-orange-600 font-semibold lowercase transition-colors"
+                      className="hover:text-[#111827] font-semibold lowercase transition-colors"
                     >
                       clear all
                     </button>
@@ -420,18 +948,18 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                           onMouseEnter={() => setSelectedIndex(idx)}
                           onClick={() => triggerSearch(term)}
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm cursor-pointer transition-colors ${
-                            isSelected ? "bg-orange-50/80 text-orange-950" : "hover:bg-slate-50 text-slate-800"
+                            isSelected ? "bg-amber-50 text-[#111827]" : "hover:bg-gray-50 text-gray-800"
                           }`}
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <Clock className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                            <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
                             <span className="truncate font-medium">{term}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <button
                               type="button"
                               onClick={(e) => handleFill(e, term)}
-                              className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded"
+                              className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-200/60 rounded"
                               title="Fill in search box"
                               aria-label={`Fill ${term}`}
                             >
@@ -440,7 +968,7 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                             <button
                               type="button"
                               onClick={(e) => removeRecentSearch(e, term)}
-                              className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
+                              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
                               title="Remove from history"
                               aria-label={`Remove ${term}`}
                             >
@@ -456,8 +984,8 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
               {/* Trending Searches */}
               <div>
-                <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Flame className="w-3.5 h-3.5 text-rose-500" />
+                <div className="px-3 py-1.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Flame className="w-3.5 h-3.5 text-amber-500" />
                   Trending Searches in India
                 </div>
                 <div className="flex flex-wrap gap-1.5 px-3 py-1">
@@ -475,11 +1003,11 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                         onMouseEnter={() => setSelectedIndex(globalIdx)}
                         className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
                           isSelected
-                            ? "bg-orange-50 border-orange-300 text-orange-700 scale-105"
-                            : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700 hover:border-slate-300"
+                            ? "bg-amber-50 border-amber-300 text-amber-900 scale-102"
+                            : "bg-gray-50 hover:bg-gray-100 border-[#E5E7EB] text-gray-700 hover:border-gray-300"
                         }`}
                       >
-                        <Flame className="w-3 h-3 text-rose-500" />
+                        <Flame className="w-3 h-3 text-amber-500" />
                         <span>{trendTerm}</span>
                       </button>
                     );
@@ -489,15 +1017,15 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
             </div>
           )}
 
-          {/* ACTIVE TYPING: Google-style suggestions + Amazon-style product previews */}
+          {/* ACTIVE TYPING: Suggestions + Product Previews */}
           {showTypingSuggestions && (
             <div>
               {/* Category scope indicator banner if active */}
               {selectedCategory !== "all" && (
-                <div className="bg-amber-50/70 border-b border-amber-100 px-4 py-1.5 text-xs text-amber-800 flex items-center justify-between">
+                <div className="bg-gray-50 border-b border-[#E5E7EB] px-4 py-1.5 text-xs text-gray-700 flex items-center justify-between">
                   <span>
                     Searching in:{" "}
-                    <strong>
+                    <strong className="text-[#111827]">
                       {CATEGORY_OPTIONS.find((c) => c.slug === selectedCategory)?.label}
                     </strong>
                   </span>
@@ -511,7 +1039,7 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                 </div>
               )}
 
-              {/* Google-Style Query Predictions */}
+              {/* Query Predictions */}
               {suggestions.querySuggestions.length > 0 && (
                 <div className="py-1">
                   {suggestions.querySuggestions.map((sug, idx) => {
@@ -519,8 +1047,6 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                     const qLower = query.toLowerCase().trim();
                     const textLower = sug.text.toLowerCase();
 
-                    // Google-style typing bold completion:
-                    // If text starts with query, prefix is regular, rest is bold!
                     let prefix = "";
                     let boldSuffix = sug.text;
                     if (textLower.startsWith(qLower)) {
@@ -536,39 +1062,37 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                         onMouseEnter={() => setSelectedIndex(idx)}
                         onClick={() => triggerSearch(sug.text, sug.categorySlug)}
                         className={`w-full flex items-center justify-between px-4 py-2.5 cursor-pointer text-sm transition-colors group ${
-                          isSelected ? "bg-orange-50/90 text-orange-950" : "hover:bg-slate-50 text-slate-800"
+                          isSelected ? "bg-amber-50/90 text-[#111827]" : "hover:bg-gray-50 text-gray-800"
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <Search
                             className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                              isSelected ? "text-orange-600" : "text-slate-400 group-hover:text-slate-600"
+                              isSelected ? "text-amber-500" : "text-gray-400 group-hover:text-gray-600"
                             }`}
                           />
                           <div className="truncate flex items-baseline gap-1.5">
                             {prefix ? (
                               <span>
-                                <span className="font-normal text-slate-600">{prefix}</span>
-                                <span className="font-bold text-slate-900">{boldSuffix}</span>
+                                <span className="font-normal text-gray-600">{prefix}</span>
+                                <span className="font-bold text-[#111827]">{boldSuffix}</span>
                               </span>
                             ) : (
-                              <span className="font-medium text-slate-900">{sug.text}</span>
+                              <span className="font-medium text-[#111827]">{sug.text}</span>
                             )}
 
-                            {/* Amazon-style "in Category" contextual pill */}
                             {sug.isScoped && sug.categoryName && (
-                              <span className="text-xs font-medium text-orange-600 ml-1">
+                              <span className="text-xs font-medium text-amber-700 ml-1">
                                 in <span className="font-bold underline">{sug.categoryName}</span>
                               </span>
                             )}
                           </div>
                         </div>
 
-                        {/* Quick-fill icon (Google ↖) */}
                         <button
                           type="button"
                           onClick={(e) => handleFill(e, sug.text)}
-                          className="p-1 text-slate-300 hover:text-slate-700 hover:bg-slate-200/60 rounded flex-shrink-0 transition-colors"
+                          className="p-1 text-gray-300 hover:text-gray-700 hover:bg-gray-200/60 rounded flex-shrink-0 transition-colors"
                           title="Insert into search bar"
                           aria-label={`Insert ${sug.text}`}
                         >
@@ -580,19 +1104,19 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                 </div>
               )}
 
-              {/* Amazon-Style Rich Product Preview Cards */}
+              {/* Product Preview Cards */}
               {suggestions.products.length > 0 && (
-                <div className="border-t border-slate-100 bg-slate-50/50 py-2">
-                  <div className="px-4 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                <div className="border-t border-[#E5E7EB] bg-gray-50/50 py-2">
+                  <div className="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
-                      <ShoppingBag className="w-3.5 h-3.5 text-orange-500" />
-                      Matching Products & Best Prices
+                      <ShoppingBag className="w-3.5 h-3.5 text-amber-500" />
+                      Matching Amazon Products
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium lowercase">
-                      live comparisons
+                    <span className="text-[10px] text-gray-400 font-medium">
+                      Amazon offers
                     </span>
                   </div>
-                  <div className="divide-y divide-slate-100/80">
+                  <div className="divide-y divide-gray-100">
                     {suggestions.products.map((p, pIdx) => {
                       const globalIdx = suggestions.querySuggestions.length + pIdx;
                       const isSelected = selectedIndex === globalIdx;
@@ -605,11 +1129,10 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                           onMouseEnter={() => setSelectedIndex(globalIdx)}
                           onClick={() => triggerProductClick(p)}
                           className={`w-full px-4 py-2 flex items-center gap-3 cursor-pointer transition-colors ${
-                            isSelected ? "bg-orange-50/90" : "hover:bg-white"
+                            isSelected ? "bg-amber-50" : "hover:bg-white"
                           }`}
                         >
-                          {/* Product Thumbnail */}
-                          <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 p-1 flex-shrink-0 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-lg bg-white border border-[#E5E7EB] p-1 flex-shrink-0 flex items-center justify-center">
                             <img
                               src={p.imageUrl}
                               alt={p.title}
@@ -618,23 +1141,21 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                             />
                           </div>
 
-                          {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <div className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">
+                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                               {p.brand}
                             </div>
-                            <div className="text-xs font-semibold text-slate-900 truncate">
+                            <div className="text-xs font-semibold text-[#111827] truncate">
                               {p.title}
                             </div>
                           </div>
 
-                          {/* Price & Stores */}
                           <div className="text-right flex-shrink-0">
-                            <div className="text-xs font-black text-slate-900">
+                            <div className="text-xs font-black text-[#111827]">
                               {formatINR(p.price)}
                             </div>
-                            <div className="text-[10px] font-bold text-orange-600 flex items-center justify-end gap-1">
-                              <Store className="w-3 h-3 inline" />
+                            <div className="text-[10px] font-semibold text-gray-500 flex items-center justify-end gap-1">
+                              <Store className="w-3 h-3 inline text-amber-600" />
                               <span>Amazon India</span>
                             </div>
                           </div>
@@ -645,26 +1166,26 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                 </div>
               )}
 
-              {/* Bottom Footer: View all results & Keyboard tips */}
-              <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+              {/* Bottom Footer */}
+              <div className="px-4 py-2.5 bg-gray-50 border-t border-[#E5E7EB] flex items-center justify-between text-xs">
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  className="font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                  className="font-bold text-[#111827] hover:text-amber-600 flex items-center gap-1 transition-colors"
                 >
                   <span>View all results for &ldquo;{query}&rdquo;</span>
-                  <span className="text-slate-400 font-normal">&rarr;</span>
+                  <span className="text-gray-400 font-normal">&rarr;</span>
                 </button>
-                <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] text-slate-400">
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] text-gray-400">
                   <span>Use</span>
-                  <kbd className="px-1 py-0.5 bg-white border border-slate-200 rounded font-mono text-[9px] shadow-2xs">
+                  <kbd className="px-1 py-0.5 bg-white border border-[#E5E7EB] rounded font-mono text-[9px] shadow-2xs">
                     ↑
                   </kbd>
-                  <kbd className="px-1 py-0.5 bg-white border border-slate-200 rounded font-mono text-[9px] shadow-2xs">
+                  <kbd className="px-1 py-0.5 bg-white border border-[#E5E7EB] rounded font-mono text-[9px] shadow-2xs">
                     ↓
                   </kbd>
                   <span>to navigate</span>
-                  <kbd className="px-1.5 py-0.5 bg-white border border-slate-200 rounded font-mono text-[9px] shadow-2xs">
+                  <kbd className="px-1.5 py-0.5 bg-white border border-[#E5E7EB] rounded font-mono text-[9px] shadow-2xs">
                     ↵
                   </kbd>
                   <span>to select</span>
@@ -675,5 +1196,19 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         </div>
       )}
     </div>
+  );
+};
+
+export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = (props) => {
+  return (
+    <React.Suspense
+      fallback={
+        <div className={`relative w-full ${props.className || ""}`}>
+          <div className="h-10 sm:h-11 w-full bg-gray-50 border border-[#E5E7EB] rounded-xl animate-pulse" />
+        </div>
+      }
+    >
+      <SearchAutocompleteInternal {...props} />
+    </React.Suspense>
   );
 };

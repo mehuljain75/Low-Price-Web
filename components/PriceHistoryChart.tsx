@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { TrendingDown, Flame, Sparkles, AlertCircle, Clock, ShieldCheck } from "lucide-react";
+import { TrendingDown, Flame, Sparkles, AlertCircle, Clock, ShieldCheck, Info } from "lucide-react";
 import { formatINR } from "@/lib/formatters";
+import { analyzePriceHistory, PricePoint } from "@/lib/price-history";
 
 interface PriceHistoryChartProps {
   currentPrice: number;
@@ -11,56 +12,55 @@ interface PriceHistoryChartProps {
   priceHistory?: PricePoint[];
 }
 
-interface PricePoint {
-  date: string;
-  price: number;
-}
-
 export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
   currentPrice,
   originalPrice,
   productTitle = "Product",
   priceHistory = [],
 }) => {
-  const [timeframe, setTimeframe] = useState<30 | 90>(90);
   const [hoveredPoint, setHoveredPoint] = useState<PricePoint | null>(null);
 
-  // If no continuous historical observations exist, display honest tracking status
-  // without mathematical mock curves or fabricated 'All-Time Low' badges
-  if (!priceHistory || priceHistory.length < 2) {
+  const analysis = useMemo(() => {
+    return analyzePriceHistory(currentPrice, originalPrice, priceHistory);
+  }, [currentPrice, originalPrice, priceHistory]);
+
+  const { state, sanitizedPoints, trackingPeriodDays, lowestPrice, averagePrice, verdict } = analysis;
+
+  // State 1: Insufficient Data (< 2 points)
+  if (state === "insufficient_data") {
     return (
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-xs">
+      <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 sm:p-8 space-y-4 shadow-card">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-orange-600" />
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Verified Price History &amp; Trend
+            <Clock className="w-5 h-5 text-amber-600" />
+            <h2 className="text-xl sm:text-2xl font-bold text-[#111827] tracking-tight">
+              Price History &amp; Trend
             </h2>
           </div>
-          <span className="self-start sm:self-auto text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+          <span className="self-start sm:self-auto text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 border border-[#E5E7EB]">
             Observation In Progress
           </span>
         </div>
 
-        <div className="p-5 sm:p-6 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="p-3 bg-orange-100 text-orange-600 rounded-2xl flex-shrink-0">
+        <div className="p-5 sm:p-6 bg-gray-50 border border-[#E5E7EB] rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="p-3 bg-amber-50 text-amber-700 rounded-xl flex-shrink-0 border border-amber-200">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div className="space-y-1.5 flex-1">
-            <h4 className="text-sm font-bold text-slate-900">
+            <h4 className="text-sm font-bold text-[#111827]">
               Price History Tracking Active
             </h4>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              DealFinder India is continuously observing Amazon India price fluctuations for {productTitle}. Verified historical price trends and genuine deal drop verdicts will be published once continuous observation records sufficient verified price points.
+            <p className="text-xs text-[#6B7280] leading-relaxed">
+              DealFinder India is continuously observing retailer price fluctuations for {productTitle}. Historical price trends and verified deal drop verdicts are certified once observation records sufficient price checkpoints.
             </p>
             <div className="flex items-center gap-3 text-xs pt-1">
-              <span className="text-slate-500">
-                Current verified price: <strong className="text-slate-900">{formatINR(currentPrice)}</strong>
+              <span className="text-[#6B7280]">
+                Current price: <strong className="text-[#111827]">{formatINR(currentPrice)}</strong>
               </span>
               {originalPrice > currentPrice && (
                 <>
-                  <span className="text-slate-300">&bull;</span>
-                  <span className="text-slate-500">
+                  <span className="text-gray-300">&bull;</span>
+                  <span className="text-[#6B7280]">
                     MRP: <span className="line-through">{formatINR(originalPrice)}</span>
                   </span>
                 </>
@@ -72,134 +72,86 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
     );
   }
 
-  const historyData = priceHistory;
-
-  const prices = historyData.map((p) => p.price);
-  const lowestPrice = Math.min(...prices);
-  const highestPrice = Math.max(...prices);
-  const averagePrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
-
-  // Deal Verdict Logic
-  const verdict = useMemo(() => {
-    if (currentPrice <= lowestPrice) {
-      return {
-        badge: "All-Time Low",
-        badgeBg: "bg-rose-600 text-white",
-        icon: Flame,
-        headline: "🔥 All-Time Low Detected!",
-        text: `Today's price of ${formatINR(currentPrice)} is the lowest recorded in the last ${timeframe} days. You are saving ${formatINR(averagePrice - currentPrice)} compared to the average market price.`,
-        action: "Excellent time to buy before price rebounds.",
-      };
-    } else if (currentPrice < averagePrice) {
-      const savingsPct = Math.round(((averagePrice - currentPrice) / averagePrice) * 100);
-      return {
-        badge: "Great Deal",
-        badgeBg: "bg-emerald-600 text-white",
-        icon: Sparkles,
-        headline: "⚡ Great Bargain!",
-        text: `Currently ${savingsPct}% cheaper than the ${timeframe}-day average (${formatINR(averagePrice)}). A solid discount worth grabbing.`,
-        action: "Good buying opportunity.",
-      };
-    } else {
-      return {
-        badge: "Fair Price",
-        badgeBg: "bg-slate-700 text-white",
-        icon: AlertCircle,
-        headline: "⚖️ Normal Market Pricing",
-        text: `Currently selling near the typical market rate of ${formatINR(averagePrice)}. If not urgent, check the Sales Calendar for upcoming festive price drops.`,
-        action: "Consider waiting for major sale events if not urgent.",
-      };
-    }
-  }, [currentPrice, lowestPrice, averagePrice, timeframe]);
-
   // Chart dimensions & scaling
   const chartHeight = 160;
   const chartWidth = 500;
   const paddingX = 40;
   const paddingY = 24;
 
+  const highestPrice = Math.max(...sanitizedPoints.map((p) => p.price), currentPrice);
   const minPlot = Math.floor(lowestPrice * 0.95);
   const maxPlot = Math.ceil(highestPrice * 1.05);
   const priceRange = maxPlot - minPlot || 1;
 
   const getX = (index: number) =>
-    paddingX + (index / (historyData.length - 1)) * (chartWidth - paddingX * 2);
+    paddingX + (index / (sanitizedPoints.length - 1)) * (chartWidth - paddingX * 2);
   const getY = (price: number) =>
     chartHeight - paddingY - ((price - minPlot) / priceRange) * (chartHeight - paddingY * 2);
 
-  const pathPoints = historyData.map((p, i) => `${getX(i)},${getY(p.price)}`).join(" ");
+  const pathPoints = sanitizedPoints.map((p, i) => `${getX(i)},${getY(p.price)}`).join(" ");
   const areaPath = `${getX(0)},${chartHeight - paddingY} ${pathPoints} ${getX(
-    historyData.length - 1
+    sanitizedPoints.length - 1
   )},${chartHeight - paddingY}`;
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
-      {/* Header & Timeframe Selector */}
+    <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 space-y-6 shadow-xs">
+      {/* Header & Truthful Tracking Window */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Verified Price History & Trend
+            <h2 className="text-xl sm:text-2xl font-bold text-[#111827] tracking-tight">
+              Price History &amp; Trend
             </h2>
-            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${verdict.badgeBg}`}>
+            <span className={`text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full ${verdict.badgeBg}`}>
               {verdict.badge}
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Real tracking data across Indian stores to verify if this deal is genuine
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            {state === "tracking_in_progress"
+              ? `Provisional tracking data across ${sanitizedPoints.length} checkpoints (${trackingPeriodDays} days)`
+              : `Certified price tracking across Indian stores over the last ${trackingPeriodDays} days`}
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
-          <button
-            onClick={() => setTimeframe(30)}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
-              timeframe === 30 ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            30 Days
-          </button>
-          <button
-            onClick={() => setTimeframe(90)}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
-              timeframe === 90 ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            90 Days
-          </button>
+        {/* Tracking Period Badge */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-700 self-start sm:self-auto">
+          <Clock className="w-3.5 h-3.5 text-gray-500" />
+          <span>Tracking Window: {trackingPeriodDays} {trackingPeriodDays === 1 ? "Day" : "Days"}</span>
         </div>
       </div>
 
       {/* 3 Metric Cards */}
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        <div className="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-3 sm:p-4 text-center">
-          <span className="block text-[10px] sm:text-xs text-emerald-700 font-bold uppercase tracking-wider">
-            Lowest Tracked
+        <div className="bg-green-50/70 border border-green-200 rounded-xl p-3 sm:p-4 text-center">
+          <span className="block text-[10px] sm:text-xs text-green-700 font-bold uppercase tracking-wider">
+            {state === "ready" ? "Lowest Tracked" : "Period Low"}
           </span>
-          <span className="text-base sm:text-2xl font-black text-emerald-900 mt-0.5 block">
+          <span className="text-base sm:text-2xl font-black text-[#15803D] mt-0.5 block">
             {formatINR(lowestPrice)}
           </span>
-          <span className="text-[10px] text-emerald-600">Past {timeframe} days</span>
+          <span className="text-[10px] text-green-700">Past {trackingPeriodDays} days</span>
         </div>
 
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 text-center">
-          <span className="block text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-wider">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 sm:p-4 text-center">
+          <span className="block text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider">
             Average Price
           </span>
-          <span className="text-base sm:text-2xl font-black text-slate-800 mt-0.5 block">
+          <span className="text-base sm:text-2xl font-black text-[#111827] mt-0.5 block">
             {formatINR(averagePrice)}
           </span>
-          <span className="text-[10px] text-slate-400">Regular market rate</span>
+          <span className="text-[10px] text-gray-400">
+            {state === "ready" ? "Market benchmark" : "Provisional average"}
+          </span>
         </div>
 
-        <div className="bg-orange-50/60 border border-orange-200 rounded-2xl p-3 sm:p-4 text-center">
-          <span className="block text-[10px] sm:text-xs text-orange-700 font-bold uppercase tracking-wider">
+        <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3 sm:p-4 text-center">
+          <span className="block text-[10px] sm:text-xs text-amber-800 font-bold uppercase tracking-wider">
             Current Price
           </span>
-          <span className="text-base sm:text-2xl font-black text-orange-900 mt-0.5 block">
+          <span className="text-base sm:text-2xl font-black text-amber-900 mt-0.5 block">
             {formatINR(currentPrice)}
           </span>
-          <span className="text-[10px] text-orange-600 font-medium">Live best offer</span>
+          <span className="text-[10px] text-amber-700 font-medium">Live best offer</span>
         </div>
       </div>
 
@@ -211,8 +163,8 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
         >
           <defs>
             <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ea580c" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#ea580c" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
@@ -222,7 +174,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
             y1={paddingY}
             x2={chartWidth - paddingX}
             y2={paddingY}
-            stroke="#e2e8f0"
+            stroke="#E5E7EB"
             strokeDasharray="4 4"
             strokeWidth="1"
           />
@@ -231,7 +183,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
             y1={chartHeight / 2}
             x2={chartWidth - paddingX}
             y2={chartHeight / 2}
-            stroke="#e2e8f0"
+            stroke="#E5E7EB"
             strokeDasharray="4 4"
             strokeWidth="1"
           />
@@ -240,7 +192,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
             y1={chartHeight - paddingY}
             x2={chartWidth - paddingX}
             y2={chartHeight - paddingY}
-            stroke="#cbd5e1"
+            stroke="#D1D5DB"
             strokeWidth="1"
           />
 
@@ -250,43 +202,43 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
           {/* Price Line */}
           <polyline
             fill="none"
-            stroke="#ea580c"
-            strokeWidth="3"
+            stroke="#F59E0B"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
             points={pathPoints}
           />
 
           {/* Interactive Data Points */}
-          {historyData.map((pt, i) => {
+          {sanitizedPoints.map((pt, i) => {
             const cx = getX(i);
             const cy = getY(pt.price);
-            const isLast = i === historyData.length - 1;
+            const isLast = i === sanitizedPoints.length - 1;
             const isHovered = hoveredPoint?.date === pt.date;
 
             return (
-              <g key={pt.date} className="cursor-pointer">
+              <g key={`${pt.date}-${i}`} className="cursor-pointer">
                 <circle
                   cx={cx}
                   cy={cy}
                   r={isHovered ? 6 : isLast ? 5 : 3.5}
                   className={`transition-all duration-150 ${
                     isLast
-                      ? "fill-orange-600 stroke-white stroke-2"
+                      ? "fill-[#F59E0B] stroke-white stroke-2"
                       : isHovered
-                      ? "fill-slate-900 stroke-white stroke-2"
-                      : "fill-orange-400 stroke-white stroke-1"
+                      ? "fill-[#111827] stroke-white stroke-2"
+                      : "fill-amber-400 stroke-white stroke-1"
                   }`}
                   onMouseEnter={() => setHoveredPoint(pt)}
                   onMouseLeave={() => setHoveredPoint(null)}
                 />
                 {/* Date labels below */}
-                {(i === 0 || i === Math.floor(historyData.length / 2) || isLast) && (
+                {(i === 0 || i === Math.floor(sanitizedPoints.length / 2) || isLast) && (
                   <text
                     x={cx}
                     y={chartHeight - 6}
                     textAnchor="middle"
-                    className="text-[10px] fill-slate-400 font-medium"
+                    className="text-[10px] fill-gray-400 font-medium"
                   >
                     {pt.date}
                   </text>
@@ -298,8 +250,8 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
 
         {/* Hover Tooltip Overlay */}
         {hoveredPoint && (
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-2 pointer-events-none">
-            <Clock className="w-3.5 h-3.5 text-orange-400" />
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-[#111827] text-white text-xs px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-2 pointer-events-none">
+            <Clock className="w-3.5 h-3.5 text-[#F59E0B]" />
             <span>
               {hoveredPoint.date}: <strong>{formatINR(hoveredPoint.price)}</strong>
             </span>
@@ -308,14 +260,18 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
       </div>
 
       {/* AI Deal Verdict Banner */}
-      <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-3.5">
-        <div className="p-2 rounded-xl bg-orange-100 text-orange-600 flex-shrink-0 mt-0.5">
-          <verdict.icon className="w-5 h-5" />
+      <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-start gap-3.5">
+        <div className="p-2 rounded-xl bg-amber-100 text-amber-700 flex-shrink-0 mt-0.5">
+          {verdict.confidence === "provisional" ? (
+            <Info className="w-5 h-5" />
+          ) : (
+            <Sparkles className="w-5 h-5" />
+          )}
         </div>
         <div className="space-y-1">
-          <h4 className="text-sm font-bold text-slate-900">{verdict.headline}</h4>
-          <p className="text-xs text-slate-600 leading-relaxed">{verdict.text}</p>
-          <p className="text-xs font-semibold text-orange-700 pt-0.5">{verdict.action}</p>
+          <h4 className="text-sm font-bold text-[#111827]">{verdict.headline}</h4>
+          <p className="text-xs text-gray-600 leading-relaxed">{verdict.description}</p>
+          <p className="text-xs font-semibold text-amber-800 pt-0.5">{verdict.actionableTip}</p>
         </div>
       </div>
     </div>

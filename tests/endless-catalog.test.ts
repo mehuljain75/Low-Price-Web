@@ -58,6 +58,7 @@ describe("Endless Catalog & Infinite Pagination Engine", () => {
   it("checks products count for each category in unpaginated mode", async () => {
     for (const slug of ["mobiles", "laptops", "audio", "fashion", "appliances", "beauty"]) {
       const prods = await repository.getProducts({ categorySlug: slug });
+      console.log(`CATEGORY ${slug}: count = ${prods.length}`);
       expect(prods.length).toBeGreaterThanOrEqual(24);
     }
   });
@@ -111,5 +112,36 @@ describe("Endless Catalog & Infinite Pagination Engine", () => {
       const overlap = p2.filter((p) => ids1.has(p.product.id));
       expect(overlap.length).toBe(0);
     }
+  });
+
+  it("strictly enforces zero duplicate titles, IDs, or ASINs for 'heels' search", async () => {
+    const p1 = await repository.getProducts({ searchQuery: "heels", page: 1, limit: 24 });
+    expect(p1.length).toBe(24);
+
+    const titles = new Set<string>();
+    const ids = new Set<string>();
+    const asins = new Set<string>();
+
+    for (const comp of p1) {
+      const titleLower = comp.product.title.toLowerCase().trim();
+      expect(titles.has(titleLower)).toBe(false);
+      titles.add(titleLower);
+
+      expect(ids.has(comp.product.id)).toBe(false);
+      ids.add(comp.product.id);
+
+      const amzOffer = comp.offers.find((o) => o.retailerSlug === "amazon");
+      expect(amzOffer).toBeDefined();
+      expect(amzOffer!.productUrl).toContain("amazon.in");
+      expect(amzOffer!.inStock).toBe(true);
+
+      const asin = amzOffer?.retailerProductId || comp.product.attributes?.asin;
+      expect(asin).toBeDefined();
+      expect(asins.has(asin!)).toBe(false);
+      asins.add(asin!);
+
+      expect(titleLower).not.toContain("batch");
+    }
+    expect(asins.size).toBe(24);
   });
 });

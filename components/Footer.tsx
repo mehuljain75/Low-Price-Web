@@ -4,51 +4,51 @@ import { ShieldCheck, Sparkles, ExternalLink } from "lucide-react";
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-12 pb-8 border-t border-slate-800 text-xs">
+    <footer className="bg-[#111827] text-gray-300 pt-12 pb-8 border-t border-gray-800 text-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Info */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-white text-base">DealFinder India</span>
-              <span className="text-[10px] bg-orange-500/20 text-orange-300 px-1.5 py-0.5 rounded font-mono border border-orange-500/30">
+              <span className="font-bold text-white text-base">DealFinder India</span>
+              <span className="text-[10px] bg-[#F59E0B]/15 text-[#F59E0B] px-1.5 py-0.5 rounded font-mono border border-[#F59E0B]/30">
                 MVP v1.0
               </span>
             </div>
-            <p className="text-slate-400 leading-relaxed text-xs">
-              Empowering Indian shoppers to make smarter decisions by comparing genuine prices, verified discounts, and bank offers across premier retail platforms.
+            <p className="text-gray-400 leading-relaxed text-xs">
+              Empowering Indian shoppers to make smarter decisions by discovering genuine prices, curated discounts, and bank offers on Amazon India.
             </p>
-            <div className="flex items-center gap-2 text-slate-400 pt-1">
+            <div className="flex items-center gap-2 text-gray-400 pt-1">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Free & Unbiased Comparison</span>
+              <span>Free & Unbiased Discovery</span>
             </div>
           </div>
 
           {/* Supported Retailers */}
           <div className="space-y-3">
             <h4 className="text-white font-semibold uppercase tracking-wider text-xs">
-              Tracked Retailers
+              Retailer Platforms
             </h4>
             <ul className="space-y-2 text-slate-400">
               <li className="flex items-center justify-between">
                 <span>Amazon India</span>
-                <span className="text-[10px] text-amber-400">Associates Ready</span>
+                <span className="text-[10px] text-amber-400 font-semibold">Active (Associates)</span>
               </li>
-              <li className="flex items-center justify-between">
+              <li className="flex items-center justify-between opacity-60">
                 <span>Flipkart</span>
-                <span className="text-[10px] text-blue-400">Affiliate API</span>
+                <span className="text-[10px] text-gray-500">Pending Approval</span>
               </li>
-              <li className="flex items-center justify-between">
+              <li className="flex items-center justify-between opacity-60">
                 <span>Myntra</span>
-                <span className="text-[10px] text-pink-400">Aggregator Feed</span>
+                <span className="text-[10px] text-gray-500">Pending Approval</span>
               </li>
-              <li className="flex items-center justify-between">
+              <li className="flex items-center justify-between opacity-60">
                 <span>AJIO</span>
-                <span className="text-[10px] text-slate-300">Partner Feed</span>
+                <span className="text-[10px] text-gray-500">Pending Approval</span>
               </li>
-              <li className="flex items-center justify-between">
+              <li className="flex items-center justify-between opacity-60">
                 <span>Meesho</span>
-                <span className="text-[10px] text-purple-400">Reseller / Direct</span>
+                <span className="text-[10px] text-gray-500">Pending Approval</span>
               </li>
             </ul>
           </div>
@@ -106,7 +106,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link href="/deals" className="hover:text-white">
-                  Today&apos;s Verified Drops
+                  Today&apos;s Deal Drops
                 </Link>
               </li>
               <li className="text-slate-500 text-[11px] pt-1">
@@ -117,26 +117,26 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Affiliate Disclosure & Legal Notice (Mandatory for ASCI & FTC Compliance) */}
-        <div className="border-t border-slate-800 pt-6 space-y-3">
-          <div className="bg-slate-800/60 p-3.5 rounded-lg border border-slate-700/50 space-y-1.5">
-            <p className="text-[11px] text-slate-300 font-medium">
+        <div className="border-t border-gray-800 pt-6 space-y-3">
+          <div className="bg-gray-800/60 p-3.5 rounded-xl border border-gray-700/50 space-y-1.5">
+            <p className="text-[11px] text-gray-300 font-medium">
               <strong>Affiliate Disclosure & Pricing Transparency:</strong> DealFinder India is a participant in affiliate advertising programs (including Amazon Associates India, Flipkart Affiliate Program, and partner networks). When you click on outbound links and complete a purchase, we may earn an affiliate commission at zero additional cost to you.
             </p>
-            <p className="text-[11px] text-slate-400">
-              Prices, stock availability, and promotional bank offers are subject to change by respective retailers. DealFinder India computes the <em>lowest price among currently tracked and verified stores only</em> and does not guarantee that lower prices do not exist in untracked local or unverified marketplaces. All currency values are in Indian Rupees (INR ₹).
+            <p className="text-[11px] text-gray-400">
+              Prices, stock availability, and promotional bank offers are subject to change by respective retailers. DealFinder India computes prices among currently tracked Amazon India catalog listings and does not guarantee that lower prices do not exist in untracked local marketplaces. All currency values are in Indian Rupees (INR ₹).
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between text-slate-500 text-[11px] gap-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between text-gray-400 text-[11px] gap-2">
             <div>
               &copy; {new Date().getFullYear()} DealFinder India. Built for the Indian shopper.
             </div>
             <div className="flex items-center gap-4">
               <span>Made with ❤️ in India</span>
               <span>•</span>
-              <span className="flex items-center gap-1 text-slate-400">
-                <Sparkles className="w-3 h-3 text-orange-400" />
-                No web scraping / Clean APIs
+              <span className="flex items-center gap-1 text-gray-400">
+                <Sparkles className="w-3 h-3 text-[#F59E0B]" />
+                Affiliate Partner APIs
               </span>
             </div>
           </div>

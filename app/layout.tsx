@@ -7,16 +7,16 @@ import { Footer } from "@/components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DealFinder India — Compare Prices Across Amazon, Flipkart, Myntra & More",
+  title: "DealFinder India — Amazon Product Discovery, Deals & Price Tracking",
   description:
-    "Find the lowest price among tracked Indian online stores. Real-time price comparison across Amazon India, Flipkart, Myntra, AJIO, and Meesho with verified discounts and bank offers.",
+    "Discover and track prices on Amazon India. Explore top deals, specifications, customer ratings, bank discounts, and price history.",
   keywords: [
-    "price comparison india",
-    "amazon vs flipkart price",
-    "lowest price india",
-    "iphone 15 price flipkart amazon",
-    "festive deals bbd gif 2026",
+    "amazon india deals",
+    "amazon price tracker india",
+    "lowest price amazon",
+    "iphone 15 price amazon",
     "online shopping discount india",
+    "amazon associates india",
   ],
   icons: {
     icon: [
@@ -39,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.className} min-h-screen flex flex-col bg-slate-50 text-slate-900`}>
+      <body className={`${inter.className} min-h-screen flex flex-col bg-[#F3F4F6] text-[#111827]`}>
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

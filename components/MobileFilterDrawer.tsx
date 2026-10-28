@@ -17,9 +17,13 @@ interface MobileFilterDrawerProps {
   currentMinRating?: number;
   currentInStock?: boolean;
   totalProductsCount: number | string;
+  searchQuery?: string;
+  currentShoeType?: string;
+  currentGender?: string;
+  currentSize?: string;
 }
 
-export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
+const MobileFilterDrawerInternal: React.FC<MobileFilterDrawerProps> = ({
   categories,
   brands = [],
   currentCategory,
@@ -29,6 +33,10 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   currentMinRating,
   currentInStock,
   totalProductsCount,
+  searchQuery = "",
+  currentShoeType,
+  currentGender,
+  currentSize,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,22 +46,39 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   // Local state inside drawer until user clicks "Apply"
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(currentCategory);
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>(currentBrand);
+  const [selectedShoeType, setSelectedShoeType] = useState<string | undefined>(currentShoeType);
+  const [selectedGender, setSelectedGender] = useState<string | undefined>(currentGender);
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(currentSize);
   const [minPrice, setMinPrice] = useState(currentMinPrice?.toString() || "");
   const [maxPrice, setMaxPrice] = useState(currentMaxPrice?.toString() || "");
   const [selectedMinRating, setSelectedMinRating] = useState<number | undefined>(currentMinRating);
   const [inStockOnly, setInStockOnly] = useState(Boolean(currentInStock));
   const [brandSearch, setBrandSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<"category" | "brand" | "rating" | "price">("category");
+  const [activeTab, setActiveTab] = useState<"category" | "brand" | "rating" | "price" | "shoeType" | "gender" | "size">("category");
+
+  const qLower = (searchQuery || searchParams.get("q") || searchParams.get("search") || "").toLowerCase().trim();
+  const isFootwear =
+    currentCategory === "fashion" ||
+    qLower.includes("shoe") ||
+    qLower.includes("sneaker") ||
+    qLower.includes("running") ||
+    qLower.includes("boot") ||
+    qLower.includes("footwear") ||
+    qLower.includes("clog") ||
+    Boolean(currentShoeType || currentGender || currentSize);
 
   // Sync state when props change
   useEffect(() => {
     setSelectedCategory(currentCategory);
     setSelectedBrand(currentBrand);
+    setSelectedShoeType(currentShoeType);
+    setSelectedGender(currentGender);
+    setSelectedSize(currentSize);
     setMinPrice(currentMinPrice?.toString() || "");
     setMaxPrice(currentMaxPrice?.toString() || "");
     setSelectedMinRating(currentMinRating);
     setInStockOnly(Boolean(currentInStock));
-  }, [currentCategory, currentBrand, currentMinPrice, currentMaxPrice, currentMinRating, currentInStock]);
+  }, [currentCategory, currentBrand, currentShoeType, currentGender, currentSize, currentMinPrice, currentMaxPrice, currentMinRating, currentInStock]);
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -71,6 +96,9 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   let activeFilterCount = 0;
   if (currentCategory && currentCategory !== "all") activeFilterCount++;
   if (currentBrand) activeFilterCount++;
+  if (currentShoeType) activeFilterCount++;
+  if (currentGender) activeFilterCount++;
+  if (currentSize) activeFilterCount++;
   if (currentMinPrice || currentMaxPrice) activeFilterCount++;
   if (currentMinRating) activeFilterCount++;
   if (currentInStock) activeFilterCount++;
@@ -95,6 +123,15 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
     if (selectedBrand) params.set("brand", selectedBrand);
     else params.delete("brand");
 
+    if (selectedShoeType) params.set("shoeType", selectedShoeType);
+    else params.delete("shoeType");
+
+    if (selectedGender) params.set("gender", selectedGender);
+    else params.delete("gender");
+
+    if (selectedSize) params.set("size", selectedSize);
+    else params.delete("size");
+
     const minNum = minPrice.trim() ? Number(minPrice) : undefined;
     const maxNum = maxPrice.trim() ? Number(maxPrice) : undefined;
 
@@ -117,12 +154,21 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   const resetAll = () => {
     setSelectedCategory(undefined);
     setSelectedBrand(undefined);
+    setSelectedShoeType(undefined);
+    setSelectedGender(undefined);
+    setSelectedSize(undefined);
     setMinPrice("");
     setMaxPrice("");
     setSelectedMinRating(undefined);
     setInStockOnly(false);
     setBrandSearch("");
-    router.push("/products");
+    const params = new URLSearchParams();
+    const q = searchParams.get("q") || searchParams.get("search");
+    if (q) {
+      params.set("q", q);
+    }
+    const queryStr = params.toString();
+    router.push(`${getBasePath(undefined)}${queryStr ? `?${queryStr}` : ""}`);
     setIsOpen(false);
   };
 
@@ -137,12 +183,12 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
         <button
           onClick={() => setIsOpen(true)}
           type="button"
-          className="pointer-events-auto bg-slate-900 hover:bg-black text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-2.5 font-bold text-xs tracking-wide active:scale-95 transition-all border border-slate-700 backdrop-blur-sm cursor-pointer"
+          className="pointer-events-auto bg-[#111827] hover:bg-slate-800 text-white px-5 py-3 rounded-full shadow-xl flex items-center gap-2.5 font-bold text-xs tracking-wide active:scale-95 transition-all border border-gray-700 cursor-pointer"
         >
-          <SlidersHorizontal className="w-4 h-4 text-orange-400" />
+          <SlidersHorizontal className="w-4 h-4 text-[#F59E0B]" />
           <span>Filters &amp; Categories</span>
           {activeFilterCount > 0 && (
-            <span className="w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] flex items-center justify-center font-black">
+            <span className="w-5 h-5 rounded-full bg-[#F59E0B] text-[#111827] text-[10px] flex items-center justify-center font-black">
               {activeFilterCount}
             </span>
           )}
@@ -155,19 +201,19 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby="mobile-filter-title"
-          className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end bg-slate-900/60 backdrop-blur-xs transition-opacity"
+          className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-xs transition-opacity"
         >
           {/* Modal Container */}
-          <div className="bg-white rounded-t-3xl max-h-[85vh] h-[85vh] flex flex-col w-full overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-250">
+          <div className="bg-white rounded-t-2xl max-h-[85vh] h-[85vh] flex flex-col w-full overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-200">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E5E7EB]">
               <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-orange-600" />
-                <h2 id="mobile-filter-title" className="font-bold text-sm text-slate-900">
+                <Filter className="w-4 h-4 text-[#111827]" />
+                <h2 id="mobile-filter-title" className="font-bold text-sm text-[#111827]">
                   Filters &amp; Categories
                 </h2>
                 {activeFilterCount > 0 && (
-                  <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                  <span className="bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold px-2 py-0.5 rounded-full">
                     {activeFilterCount} Active
                   </span>
                 )}
@@ -176,7 +222,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                 <button
                   onClick={resetAll}
                   type="button"
-                  className="text-xs text-slate-500 hover:text-slate-800 font-medium flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-[#6B7280] hover:text-[#111827] font-medium flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Reset</span>
@@ -184,7 +230,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                 <button
                   onClick={() => setIsOpen(false)}
                   type="button"
-                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-[#111827] cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -194,19 +240,19 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
             {/* Split View Content: Vertical Tabs on Left, Options on Right */}
             <div className="flex-1 flex overflow-hidden">
               {/* Nav Tabs */}
-              <div className="w-1/3 bg-slate-50 border-r border-slate-200 overflow-y-auto py-2">
+              <div className="w-1/3 bg-[#F9FAFB] border-r border-[#E5E7EB] overflow-y-auto py-2">
                 <button
                   type="button"
                   onClick={() => setActiveTab("category")}
                   className={`w-full text-left px-3.5 py-3 text-xs font-semibold flex items-center justify-between transition-colors ${
                     activeTab === "category"
-                      ? "bg-white text-orange-600 border-l-3 border-orange-500 shadow-2xs"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-white text-[#111827] font-bold border-l-2 border-[#F59E0B]"
+                      : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   <span>Category</span>
                   {selectedCategory && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
                   )}
                 </button>
 
@@ -215,28 +261,77 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                   onClick={() => setActiveTab("brand")}
                   className={`w-full text-left px-3.5 py-3 text-xs font-semibold flex items-center justify-between transition-colors ${
                     activeTab === "brand"
-                      ? "bg-white text-orange-600 border-l-3 border-orange-500 shadow-2xs"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-white text-[#111827] font-bold border-l-2 border-[#F59E0B]"
+                      : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   <span>Brand</span>
                   {selectedBrand && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
                   )}
                 </button>
+
+                {isFootwear && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("shoeType")}
+                      className={`w-full text-left px-3.5 py-3 text-xs font-semibold flex items-center justify-between transition-colors ${
+                        activeTab === "shoeType"
+                          ? "bg-white text-[#111827] font-bold border-l-2 border-[#F59E0B]"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      <span>Shoe Type</span>
+                      {selectedShoeType && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("gender")}
+                      className={`w-full text-left px-3.5 py-3 text-xs font-semibold flex items-center justify-between transition-colors ${
+                        activeTab === "gender"
+                          ? "bg-white text-[#111827] font-bold border-l-2 border-[#F59E0B]"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      <span>Gender</span>
+                      {selectedGender && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("size")}
+                      className={`w-full text-left px-3.5 py-3 text-xs font-semibold flex items-center justify-between transition-colors ${
+                        activeTab === "size"
+                          ? "bg-white text-[#111827] font-bold border-l-2 border-[#F59E0B]"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      <span>Size</span>
+                      {selectedSize && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
+                      )}
+                    </button>
+                  </>
+                )}
 
                 <button
                   type="button"
                   onClick={() => setActiveTab("price")}
                   className={`w-full text-left px-3.5 py-3 text-xs font-semibold flex items-center justify-between transition-colors ${
                     activeTab === "price"
-                      ? "bg-white text-orange-600 border-l-3 border-orange-500 shadow-2xs"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-white text-[#111827] font-bold border-l-2 border-[#F59E0B]"
+                      : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   <span>Price &amp; Stock</span>
                   {(minPrice || maxPrice || inStockOnly) && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
                   )}
                 </button>
 
@@ -245,13 +340,13 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                   onClick={() => setActiveTab("rating")}
                   className={`w-full text-left px-3.5 py-3 text-xs font-semibold flex items-center justify-between transition-colors ${
                     activeTab === "rating"
-                      ? "bg-white text-orange-600 border-l-3 border-orange-500 shadow-2xs"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-white text-[#111827] font-bold border-l-2 border-[#F59E0B]"
+                      : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   <span>Rating</span>
                   {selectedMinRating && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
                   )}
                 </button>
               </div>
@@ -267,14 +362,14 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                         setSelectedCategory(undefined);
                         setSelectedBrand(undefined);
                       }}
-                      className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between border ${
+                      className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between border ${
                         !selectedCategory
-                          ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
-                          : "bg-white border-slate-200 text-slate-700"
+                          ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                          : "bg-white border-[#E5E7EB] text-gray-700"
                       }`}
                     >
                       <span>All Categories</span>
-                      {!selectedCategory && <Check className="w-4 h-4 text-orange-600" />}
+                      {!selectedCategory && <Check className="w-4 h-4 text-amber-600" />}
                     </button>
                     {categories.map((cat) => (
                       <button
@@ -284,15 +379,15 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                           setSelectedCategory(cat.slug);
                           setSelectedBrand(undefined);
                         }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between border ${
+                        className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between border ${
                           selectedCategory === cat.slug
-                            ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
-                            : "bg-white border-slate-200 text-slate-700"
+                            ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                            : "bg-white border-[#E5E7EB] text-gray-700"
                         }`}
                       >
                         <span>{cat.name}</span>
                         {selectedCategory === cat.slug && (
-                          <Check className="w-4 h-4 text-orange-600" />
+                          <Check className="w-4 h-4 text-amber-600" />
                         )}
                       </button>
                     ))}
@@ -302,15 +397,22 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                 {/* 2. Brand Tab */}
                 {activeTab === "brand" && (
                   <div className="space-y-3">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Search brands..."
-                        value={brandSearch}
-                        onChange={(e) => setBrandSearch(e.target.value)}
-                        className="w-full text-xs pl-7 pr-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
-                      />
-                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
+                    <div>
+                      <label htmlFor="mobile-brand-filter-input" className="block text-[11px] font-semibold text-gray-500 mb-1">
+                        Filter Brand List
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="mobile-brand-filter-input"
+                          aria-label="Filter brands list"
+                          type="text"
+                          placeholder="Filter brands below..."
+                          value={brandSearch}
+                          onChange={(e) => setBrandSearch(e.target.value)}
+                          className="w-full text-xs pl-7 pr-2.5 py-1.5 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 text-[#111827]"
+                        />
+                        <Search className="w-3.5 h-3.5 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2" />
+                      </div>
                     </div>
 
                     <div className="space-y-1.5 max-h-[55vh] overflow-y-auto">
@@ -319,12 +421,12 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                         onClick={() => setSelectedBrand(undefined)}
                         className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between border ${
                           !selectedBrand
-                            ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
-                            : "bg-white border-slate-200 text-slate-700"
+                            ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                            : "bg-white border-[#E5E7EB] text-gray-700"
                         }`}
                       >
                         <span>All Brands</span>
-                        {!selectedBrand && <Check className="w-4 h-4 text-orange-600" />}
+                        {!selectedBrand && <Check className="w-4 h-4 text-amber-600" />}
                       </button>
                       {filteredBrands.map((b) => (
                         <button
@@ -333,14 +435,118 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                           onClick={() => setSelectedBrand(b)}
                           className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between border ${
                             selectedBrand?.toLowerCase() === b.toLowerCase()
-                              ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
-                              : "bg-white border-slate-200 text-slate-700"
+                              ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                              : "bg-white border-[#E5E7EB] text-gray-700"
                           }`}
                         >
                           <span>{b}</span>
                           {selectedBrand?.toLowerCase() === b.toLowerCase() && (
-                            <Check className="w-4 h-4 text-orange-600" />
+                            <Check className="w-4 h-4 text-amber-600" />
                           )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Footwear: Shoe Type Tab */}
+                {isFootwear && activeTab === "shoeType" && (
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedShoeType(undefined)}
+                      className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between border ${
+                        !selectedShoeType
+                          ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                          : "bg-white border-[#E5E7EB] text-gray-700"
+                      }`}
+                    >
+                      <span>All Shoe Types</span>
+                      {!selectedShoeType && <Check className="w-4 h-4 text-amber-600" />}
+                    </button>
+                    {["Running Shoes", "Sneakers", "Casual Shoes", "Formal Shoes", "Walking Shoes", "Boots"].map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setSelectedShoeType(selectedShoeType?.toLowerCase() === t.toLowerCase() ? undefined : t)}
+                        className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between border ${
+                          selectedShoeType?.toLowerCase() === t.toLowerCase()
+                            ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                            : "bg-white border-[#E5E7EB] text-gray-700"
+                        }`}
+                      >
+                        <span>{t}</span>
+                        {selectedShoeType?.toLowerCase() === t.toLowerCase() && (
+                          <Check className="w-4 h-4 text-amber-600" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Footwear: Gender Tab */}
+                {isFootwear && activeTab === "gender" && (
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGender(undefined)}
+                      className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between border ${
+                        !selectedGender
+                          ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                          : "bg-white border-[#E5E7EB] text-gray-700"
+                      }`}
+                    >
+                      <span>All Genders</span>
+                      {!selectedGender && <Check className="w-4 h-4 text-amber-600" />}
+                    </button>
+                    {["Men", "Women", "Unisex"].map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => setSelectedGender(selectedGender?.toLowerCase() === g.toLowerCase() ? undefined : g)}
+                        className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between border ${
+                          selectedGender?.toLowerCase() === g.toLowerCase()
+                            ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                            : "bg-white border-[#E5E7EB] text-gray-700"
+                        }`}
+                      >
+                        <span>{g}</span>
+                        {selectedGender?.toLowerCase() === g.toLowerCase() && (
+                          <Check className="w-4 h-4 text-amber-600" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Footwear: Size Tab */}
+                {isFootwear && activeTab === "size" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 font-medium">Select UK Size:</span>
+                      {selectedSize && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSize(undefined)}
+                          className="text-[11px] text-amber-700 font-semibold"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"].map((sz) => (
+                        <button
+                          key={sz}
+                          type="button"
+                          onClick={() => setSelectedSize(selectedSize?.toLowerCase() === sz.toLowerCase() ? undefined : sz)}
+                          className={`py-3 px-2 rounded-lg border text-center text-xs font-bold transition-all ${
+                            selectedSize?.toLowerCase() === sz.toLowerCase()
+                              ? "bg-[#F59E0B] text-[#111827] border-[#F59E0B] shadow-xs"
+                              : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
+                          }`}
+                        >
+                          {sz}
                         </button>
                       ))}
                     </div>
@@ -351,7 +557,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                 {activeTab === "price" && (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-700 block">
+                      <label className="text-xs font-bold text-[#111827] block">
                         Custom Price Range (₹)
                       </label>
                       <div className="grid grid-cols-2 gap-2">
@@ -361,7 +567,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                             placeholder="Min ₹"
                             value={minPrice}
                             onChange={(e) => setMinPrice(e.target.value)}
-                            className="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-orange-500"
+                            className="w-full text-xs p-2.5 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 text-[#111827]"
                           />
                         </div>
                         <div>
@@ -370,19 +576,19 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                             placeholder="Max ₹"
                             value={maxPrice}
                             onChange={(e) => setMaxPrice(e.target.value)}
-                            className="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-orange-500"
+                            className="w-full text-xs p-2.5 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 text-[#111827]"
                           />
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100">
-                      <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-800 select-none">
+                    <div className="pt-2 border-t border-[#E5E7EB]">
+                      <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-[#111827] select-none">
                         <input
                           type="checkbox"
                           checked={inStockOnly}
                           onChange={(e) => setInStockOnly(e.target.checked)}
-                          className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                          className="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                         />
                         <span>In Stock Only</span>
                       </label>
@@ -396,36 +602,36 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
                     <button
                       type="button"
                       onClick={() => setSelectedMinRating(undefined)}
-                      className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between border ${
+                      className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between border ${
                         !selectedMinRating
-                          ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
-                          : "bg-white border-slate-200 text-slate-700"
+                          ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                          : "bg-white border-[#E5E7EB] text-gray-700"
                       }`}
                     >
                       <span>All Ratings</span>
-                      {!selectedMinRating && <Check className="w-4 h-4 text-orange-600" />}
+                      {!selectedMinRating && <Check className="w-4 h-4 text-amber-600" />}
                     </button>
                     {[4, 3].map((star) => (
                       <button
                         key={star}
                         type="button"
                         onClick={() => setSelectedMinRating(star)}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between border ${
+                        className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between border ${
                           selectedMinRating === star
-                            ? "bg-orange-50 text-orange-800 border-orange-300 font-bold"
-                            : "bg-white border-slate-200 text-slate-700"
+                            ? "bg-amber-50 text-[#111827] border-amber-300 font-bold"
+                            : "bg-white border-[#E5E7EB] text-gray-700"
                         }`}
                       >
                         <div className="flex items-center gap-1.5">
                           <div className="flex text-amber-500">
                             {Array.from({ length: star }).map((_, i) => (
-                              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                              <Star key={i} className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                             ))}
                           </div>
-                          <span>&amp; above</span>
+                          <span className="text-gray-700 font-medium">&amp; above</span>
                         </div>
                         {selectedMinRating === star && (
-                          <Check className="w-4 h-4 text-orange-600" />
+                          <Check className="w-4 h-4 text-amber-600" />
                         )}
                       </button>
                     ))}
@@ -435,22 +641,22 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
             </div>
 
             {/* Bottom Actions Bar */}
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center gap-3">
+            <div className="p-4 bg-gray-50 border-t border-[#E5E7EB] flex items-center gap-3">
               <button
                 type="button"
                 onClick={resetAll}
-                className="w-1/3 py-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 transition-colors"
+                className="w-1/3 py-2.5 rounded-lg border border-[#E5E7EB] text-xs font-bold text-[#111827] bg-white hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 Clear All
               </button>
               <button
                 type="button"
                 onClick={applyFilters}
-                className="w-2/3 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-black shadow-md transition-colors flex items-center justify-center gap-2"
+                className="w-2/3 py-2.5 rounded-lg bg-[#F59E0B] hover:bg-[#D97706] text-[#111827] text-xs font-extrabold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Apply Filters</span>
                 {totalProductsCount && (
-                  <span className="text-[10px] font-normal opacity-90">
+                  <span className="text-[10px] font-normal opacity-80">
                     ({totalProductsCount} items)
                   </span>
                 )}
@@ -462,3 +668,9 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
     </>
   );
 };
+
+export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = (props) => (
+  <React.Suspense fallback={null}>
+    <MobileFilterDrawerInternal {...props} />
+  </React.Suspense>
+);

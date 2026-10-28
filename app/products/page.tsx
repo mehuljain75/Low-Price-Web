@@ -64,26 +64,26 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Top Header / Breadcrumbs & Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#E5E7EB]">
         <div>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
-            <Link href="/" className="hover:text-slate-900 transition-colors">
+          <div className="flex items-center gap-2 text-xs text-[#6B7280] mb-1">
+            <Link href="/" className="hover:text-[#111827] transition-colors">
               Home
             </Link>
             <span>/</span>
-            <span className="text-slate-900 font-semibold">Products</span>
+            <span className="text-[#111827] font-semibold">Products</span>
             {activeCategory && (
               <>
                 <span>/</span>
-                <span className="text-slate-900 font-semibold">{activeCategory.name}</span>
+                <span className="text-[#111827] font-semibold">{activeCategory.name}</span>
               </>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight">
             {activeCategory ? `${activeCategory.name} on Amazon India` : "All Amazon India Products"}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Browse verified deals, filter by department, brand, and customer ratings on Amazon India
+          <p className="text-xs sm:text-sm text-[#6B7280] mt-1">
+            Browse deals, filter by department, brand, and customer ratings on Amazon India
           </p>
         </div>
 
@@ -94,40 +94,40 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       {/* Active Filter Badges */}
       {(searchQuery || effectiveBrand || activeCategory || minPrice !== undefined || maxPrice !== undefined || minRating !== undefined || inStockOnly) && (
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <span className="text-slate-400 font-medium">Active filters:</span>
+          <span className="text-[#6B7280] font-medium">Active filters:</span>
           {searchQuery && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-medium">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-[#111827] font-medium border border-[#E5E7EB]">
               Query: &quot;{searchQuery}&quot;
             </span>
           )}
           {effectiveBrand && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-semibold">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-[#111827] border border-[#E5E7EB] font-semibold">
               Brand: {effectiveBrand}
             </span>
           )}
           {activeCategory && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-orange-800 font-medium">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-[#111827] border border-amber-200 font-semibold">
               Category: {activeCategory.name}
             </span>
           )}
           {(minPrice !== undefined || maxPrice !== undefined) && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-[#15803D] border border-emerald-200 font-semibold">
               Price: ₹{minPrice || 0} - ₹{maxPrice || "Max"}
             </span>
           )}
           {minRating !== undefined && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-[#111827] border border-amber-200 font-semibold">
               {minRating}★ &amp; above
             </span>
           )}
           {inStockOnly && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-[#15803D] border border-emerald-200 font-semibold">
               In Stock Only
             </span>
           )}
           <Link
             href="/products"
-            className="text-orange-600 hover:text-orange-700 font-semibold underline ml-1"
+            className="text-xs font-semibold text-[#6B7280] hover:text-[#111827] underline ml-1 transition-colors"
           >
             Clear All
           </Link>
@@ -166,22 +166,22 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         {/* Right Column: Products List */}
         <div className="lg:col-span-3">
           {comparisons.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-orange-50 text-orange-500 mx-auto flex items-center justify-center">
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 mx-auto flex items-center justify-center">
                 <Search className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="text-lg font-bold text-[#111827]">
                   No matching Amazon products found
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+                <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto">
                   Try adjusting your search query, expanding the price range, or clearing filters.
                 </p>
               </div>
               <div>
                 <Link
                   href="/products"
-                  className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-xl bg-orange-600 text-white hover:bg-orange-700 transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold rounded-xl bg-[#F59E0B] hover:bg-amber-600 text-[#111827] transition-colors cursor-pointer"
                 >
                   Reset All Filters
                 </Link>
