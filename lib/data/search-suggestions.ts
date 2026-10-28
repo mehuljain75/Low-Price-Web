@@ -1,5 +1,6 @@
 import { categories, demoProducts, demoOffers } from "./demo-products";
 import { CATEGORY_BRANDS } from "./repository";
+import { correctQuerySpelling } from "../search/spelling-corrector";
 
 export interface QuerySuggestion {
   text: string;
@@ -144,6 +145,19 @@ export const CURATED_SEARCH_TERMS: Array<{ text: string; categorySlug: string }>
   { text: "Plum Green Tea Pore Cleansing Face Wash", categorySlug: "beauty" },
   { text: "Bombay Shaving Company Beard Trimmer", categorySlug: "beauty" },
   { text: "Philips BT1232 Cordless Beard Trimmer", categorySlug: "beauty" },
+
+  // Gourmet, Chocolates & Wellness
+  { text: "Cadbury Dairy Milk Silk Chocolate", categorySlug: "beauty" },
+  { text: "Ferrero Rocher Hazelnut Chocolates", categorySlug: "beauty" },
+  { text: "Hershey's Kisses Milk Chocolate", categorySlug: "beauty" },
+  { text: "Amul Dark Chocolate Bar", categorySlug: "beauty" },
+  { text: "Lindt Excellence Dark Chocolate", categorySlug: "beauty" },
+  { text: "Optimum Nutrition Whey Protein Powder", categorySlug: "beauty" },
+  { text: "MuscleBlaze Biozyme Whey Protein", categorySlug: "beauty" },
+
+  // Smart TVs
+  { text: "Samsung 43 Inch Crystal 4K TV", categorySlug: "appliances" },
+  { text: "Samsung 32 Inch Smart LED TV", categorySlug: "appliances" },
 ];
 
 export const TRENDING_SEARCHES = [
@@ -329,8 +343,16 @@ export function getSuggestions(
     }
   }
 
-  // If user typed a search term without an exact match yet, provide the raw query as top suggestion
+  // If user typed a search term without an exact match yet, check for typo corrections
   if (enrichedSuggestions.length === 0 && q.length > 0) {
+    const correction = correctQuerySpelling(query.trim());
+    if (correction.hasCorrection) {
+      enrichedSuggestions.push({
+        text: correction.correctedQuery,
+        categoryName: "Did you mean",
+        isScoped: false,
+      });
+    }
     enrichedSuggestions.push({ text: query.trim() });
   }
 

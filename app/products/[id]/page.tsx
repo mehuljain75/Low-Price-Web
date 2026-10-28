@@ -38,7 +38,13 @@ export async function generateMetadata({ params }: ProductDetailsPageProps): Pro
   const resolvedParams = await params;
   const cleanId = decodeURIComponent(resolvedParams.id || "");
   const comparison = await repository.getProductByIdOrSlug(cleanId);
-  if (!comparison || !hasActivePresentDeal(comparison)) {
+  if (!comparison) {
+    return {
+      title: "Product Not Found | DealFinder India",
+      description: "The product you requested could not be located on DealFinder India. Browse verified live deals on Amazon India.",
+    };
+  }
+  if (!hasActivePresentDeal(comparison)) {
     return {
       title: "Deal Unavailable | Best Live Amazon Deals | DealFinder India",
       description: "This deal is currently unavailable or expired. Browse verified live deals and price drops on Amazon India.",
@@ -77,7 +83,12 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
   const cleanId = decodeURIComponent(resolvedParams.id || "");
   const comparison = await repository.getProductByIdOrSlug(cleanId);
 
-  const isDealPresent = comparison && hasActivePresentDeal(comparison);
+  // Return a true 404 response for genuinely unknown products
+  if (!comparison) {
+    notFound();
+  }
+
+  const isDealPresent = hasActivePresentDeal(comparison);
 
   if (!isDealPresent) {
     const alternativeDeals = await repository.getProducts({
@@ -248,13 +259,13 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
     },
     ...(product.gtin && { gtin: product.gtin }),
     ...(product.modelNumber && { mpn: product.modelNumber }),
-    ...(product.rating && {
+    ...(product.rating && product.ratingCount ? {
       aggregateRating: {
         "@type": "AggregateRating",
         ratingValue: product.rating,
-        reviewCount: product.ratingCount || 100,
+        reviewCount: product.ratingCount,
       },
-    }),
+    } : {}),
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "INR",

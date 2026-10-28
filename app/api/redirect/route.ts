@@ -31,6 +31,20 @@ function inferRetailerSlug(offerId: string, urlStr?: string): RetailerSlug {
 
 import { isAllowedTargetUrl, buildSafeAmazonUrl, isGenuineAmazonAsin } from "@/lib/redirect-security";
 
+function performSafeRedirect(targetUrl: string, slug: string): NextResponse {
+  if (!isAllowedTargetUrl(targetUrl)) {
+    return new NextResponse("Invalid or untrusted redirect target domain", { status: 400 });
+  }
+  return NextResponse.redirect(targetUrl, {
+    status: 307,
+    headers: {
+      "Cache-Control": "no-store, max-age=0",
+      "X-Affiliate-Redirect": "true",
+      "X-Retailer": slug,
+    },
+  });
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const offerId = searchParams.get("offerId");
@@ -88,14 +102,7 @@ export async function GET(request: NextRequest) {
 
     const slug = inferRetailerSlug(offerId || "", safeUrl);
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(slug, safeUrl, subId);
-    return NextResponse.redirect(finalAffiliateUrl, {
-      status: 307,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-        "X-Affiliate-Redirect": "true",
-        "X-Retailer": slug,
-      },
-    });
+    return performSafeRedirect(finalAffiliateUrl, slug);
   }
 
   // 2. Check if it is a live offer from memory cache
@@ -113,14 +120,7 @@ export async function GET(request: NextRequest) {
         targetUrl,
         subId
       );
-      return NextResponse.redirect(finalAffiliateUrl, {
-        status: 307,
-        headers: {
-          "Cache-Control": "no-store, max-age=0",
-          "X-Affiliate-Redirect": "true",
-          "X-Retailer": liveOffer.retailerSlug,
-        },
-      });
+      return performSafeRedirect(finalAffiliateUrl, liveOffer.retailerSlug);
     }
   }
 
@@ -137,14 +137,7 @@ export async function GET(request: NextRequest) {
         targetUrl,
         subId
       );
-      return NextResponse.redirect(finalAffiliateUrl, {
-        status: 307,
-        headers: {
-          "Cache-Control": "no-store, max-age=0",
-          "X-Affiliate-Redirect": "true",
-          "X-Retailer": offer.retailerSlug,
-        },
-      });
+      return performSafeRedirect(finalAffiliateUrl, offer.retailerSlug);
     }
   }
 
@@ -168,14 +161,7 @@ export async function GET(request: NextRequest) {
     }
     const targetUrl = matchedAsin ? `https://www.amazon.in/dp/${matchedAsin}` : buildSafeAmazonUrl(raw, titleToUse);
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("amazon", targetUrl, subId);
-    return NextResponse.redirect(finalAffiliateUrl, {
-      status: 307,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-        "X-Affiliate-Redirect": "true",
-        "X-Retailer": "amazon",
-      },
-    });
+    return performSafeRedirect(finalAffiliateUrl, "amazon");
   }
 
   if (offerId?.startsWith("off_fk_")) {
@@ -184,14 +170,7 @@ export async function GET(request: NextRequest) {
     const searchTarget = passedTitle || curated?.title || asinOrQuery;
     const targetUrl = `https://www.flipkart.com/search?q=${encodeURIComponent(searchTarget)}`;
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("flipkart", targetUrl, subId);
-    return NextResponse.redirect(finalAffiliateUrl, {
-      status: 307,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-        "X-Affiliate-Redirect": "true",
-        "X-Retailer": "flipkart",
-      },
-    });
+    return performSafeRedirect(finalAffiliateUrl, "flipkart");
   }
 
   if (offerId?.startsWith("off_myntra_")) {
@@ -200,14 +179,7 @@ export async function GET(request: NextRequest) {
     const searchTarget = passedTitle || curated?.title || asinOrQuery;
     const targetUrl = `https://www.myntra.com/search?rawQuery=${encodeURIComponent(searchTarget)}`;
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("myntra", targetUrl, subId);
-    return NextResponse.redirect(finalAffiliateUrl, {
-      status: 307,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-        "X-Affiliate-Redirect": "true",
-        "X-Retailer": "myntra",
-      },
-    });
+    return performSafeRedirect(finalAffiliateUrl, "myntra");
   }
 
   if (offerId?.startsWith("off_ajio_")) {
@@ -216,14 +188,7 @@ export async function GET(request: NextRequest) {
     const searchTarget = passedTitle || curated?.title || asinOrQuery;
     const targetUrl = `https://www.ajio.com/search/?text=${encodeURIComponent(searchTarget)}`;
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("ajio", targetUrl, subId);
-    return NextResponse.redirect(finalAffiliateUrl, {
-      status: 307,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-        "X-Affiliate-Redirect": "true",
-        "X-Retailer": "ajio",
-      },
-    });
+    return performSafeRedirect(finalAffiliateUrl, "ajio");
   }
 
   if (offerId?.startsWith("off_meesho_")) {
@@ -232,14 +197,7 @@ export async function GET(request: NextRequest) {
     const searchTarget = passedTitle || curated?.title || asinOrQuery;
     const targetUrl = `https://www.meesho.com/search?q=${encodeURIComponent(searchTarget)}`;
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("meesho", targetUrl, subId);
-    return NextResponse.redirect(finalAffiliateUrl, {
-      status: 307,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-        "X-Affiliate-Redirect": "true",
-        "X-Retailer": "meesho",
-      },
-    });
+    return performSafeRedirect(finalAffiliateUrl, "meesho");
   }
 
   // 5. If passedTitle is available, route to search for the inferred retailer
@@ -252,14 +210,7 @@ export async function GET(request: NextRequest) {
     if (slug === "meesho") targetUrl = `https://www.meesho.com/search?q=${encodeURIComponent(passedTitle)}`;
 
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(slug, targetUrl, subId);
-    return NextResponse.redirect(finalAffiliateUrl, {
-      status: 307,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-        "X-Affiliate-Redirect": "true",
-        "X-Retailer": slug,
-      },
-    });
+    return performSafeRedirect(finalAffiliateUrl, slug);
   }
 
   return new NextResponse("Offer not found or expired", { status: 404 });

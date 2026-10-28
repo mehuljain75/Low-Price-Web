@@ -184,6 +184,9 @@ export async function sendPAAPIRequest<T>(
     `SignedHeaders=${signedHeaders}, ` +
     `Signature=${signature}`;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const res = await fetch(endpoint, {
       method: "POST",
@@ -196,17 +199,26 @@ export async function sendPAAPIRequest<T>(
         Authorization: authorizationHeader,
       },
       body: requestBody,
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
       const errText = await res.text();
       console.warn(`[PA-API 5.0] Request ${target} failed (${res.status}):`, errText);
-      return null;
+      try {
+        const errorJson = JSON.parse(errText);
+        return errorJson as T;
+      } catch {
+        return null;
+      }
     }
 
     const data = (await res.json()) as T;
     return data;
   } catch (err) {
+    clearTimeout(timeoutId);
     console.warn(`[PA-API 5.0] Network/execution error:`, err);
     return null;
   }

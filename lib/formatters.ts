@@ -19,7 +19,17 @@ export function formatINR(amount: number): string {
  * Calculates percentage discount from MRP (originalPrice) and current price
  */
 export function calculateDiscount(originalPrice: number, currentPrice: number): number {
-  if (!originalPrice || originalPrice <= currentPrice) return 0;
+  if (
+    typeof originalPrice !== "number" ||
+    typeof currentPrice !== "number" ||
+    isNaN(originalPrice) ||
+    isNaN(currentPrice) ||
+    originalPrice <= 0 ||
+    currentPrice <= 0 ||
+    originalPrice <= currentPrice
+  ) {
+    return 0;
+  }
   const discount = ((originalPrice - currentPrice) / originalPrice) * 100;
   return Math.round(discount);
 }
@@ -28,7 +38,17 @@ export function calculateDiscount(originalPrice: number, currentPrice: number): 
  * Calculates Rupee savings amount between MRP and discounted price
  */
 export function calculateSavings(originalPrice: number, currentPrice: number): number {
-  if (!originalPrice || originalPrice <= currentPrice) return 0;
+  if (
+    typeof originalPrice !== "number" ||
+    typeof currentPrice !== "number" ||
+    isNaN(originalPrice) ||
+    isNaN(currentPrice) ||
+    originalPrice <= 0 ||
+    currentPrice <= 0 ||
+    originalPrice <= currentPrice
+  ) {
+    return 0;
+  }
   return Math.max(0, originalPrice - currentPrice);
 }
 

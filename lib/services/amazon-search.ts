@@ -56,6 +56,23 @@ function detectCategory(query: string, title: string): Category {
   }
 
   if (
+    text.includes("tv") ||
+    text.includes("television")
+  ) {
+    return categories.find((c) => c.slug === "appliances") || categories[4];
+  }
+
+  if (
+    text.includes("chocolate") ||
+    text.includes("cake") ||
+    text.includes("protein") ||
+    text.includes("whey") ||
+    text.includes("snack")
+  ) {
+    return categories.find((c) => c.slug === "beauty") || categories[5];
+  }
+
+  if (
     text.includes("phone") ||
     text.includes("mobile") ||
     text.includes("iphone") ||
@@ -1361,7 +1378,129 @@ const AUDIO_PRODUCTS = [
   },
 ];
 
+const CHOCOLATE_PRODUCTS = [
+  {
+    asin: "B07BF2M5Z2",
+    title: "Cadbury Dairy Milk Silk Chocolate Bar, 150g",
+    brand: "Cadbury",
+    price: 175,
+    mrp: 195,
+    imageUrl: "https://m.media-amazon.com/images/I/61y8x73Jp+L._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.5,
+    ratingCount: 18400,
+  },
+  {
+    asin: "B00BD89530",
+    title: "Ferrero Rocher Premium Hazelnut Chocolates Box of 24 Pieces",
+    brand: "Ferrero Rocher",
+    price: 945,
+    mrp: 1099,
+    imageUrl: "https://m.media-amazon.com/images/I/71u9sX8H2HL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.6,
+    ratingCount: 12500,
+  },
+  {
+    asin: "B07F2NVY9L",
+    title: "Hershey's Kisses Creamy Milk Chocolate with Almonds, 100.8g",
+    brand: "Hershey's",
+    price: 140,
+    mrp: 160,
+    imageUrl: "https://m.media-amazon.com/images/I/61+o+vT9rTL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.4,
+    ratingCount: 8900,
+  },
+  {
+    asin: "B07GBZJMWP",
+    title: "Amul 55% Rich Dark Chocolate Bar, 150g",
+    brand: "Amul",
+    price: 110,
+    mrp: 125,
+    imageUrl: "https://m.media-amazon.com/images/I/61NqKzT1rVL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.3,
+    ratingCount: 6400,
+  },
+  {
+    asin: "B00473TI2C",
+    title: "Lindt Excellence 70% Cocoa Dark Chocolate Bar, 100g",
+    brand: "Lindt",
+    price: 325,
+    mrp: 375,
+    imageUrl: "https://m.media-amazon.com/images/I/71X8k7r8q7L._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.6,
+    ratingCount: 4200,
+  },
+  {
+    asin: "B07K66W9P5",
+    title: "Nestle KitKat Dessert Delight Truffle Chocolate Bar, 150g",
+    brand: "Nestle",
+    price: 160,
+    mrp: 180,
+    imageUrl: "https://m.media-amazon.com/images/I/61d2D7o6VVL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.4,
+    ratingCount: 9700,
+  },
+  {
+    asin: "B00P8H122G",
+    title: "Betty Crocker Chocolate Fudge Cake Mix, 475g",
+    brand: "Betty Crocker",
+    price: 320,
+    mrp: 375,
+    imageUrl: "https://m.media-amazon.com/images/I/71s8L9n5KGL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.4,
+    ratingCount: 5100,
+  },
+];
+
+const NUTRITION_PRODUCTS = [
+  {
+    asin: "B000QSNZ5K",
+    title: "Optimum Nutrition (ON) Gold Standard 100% Whey Protein Powder, Double Rich Chocolate, 2 lb",
+    brand: "Optimum Nutrition",
+    price: 3499,
+    mrp: 4499,
+    imageUrl: "https://m.media-amazon.com/images/I/716uW8q8vGL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.4,
+    ratingCount: 31200,
+  },
+  {
+    asin: "B0892D5F2T",
+    title: "MuscleBlaze Biozyme Performance Whey Protein Powder, Rich Chocolate, 1 kg",
+    brand: "MuscleBlaze",
+    price: 2299,
+    mrp: 3299,
+    imageUrl: "https://m.media-amazon.com/images/I/61hZ8gZ8m1L._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.3,
+    ratingCount: 18400,
+  },
+];
+
+const TV_PRODUCTS = [
+  {
+    asin: "B0CX5CGFBG",
+    title: "Samsung 108 cm (43 inches) Crystal 4K Vivid Pro Ultra HD Smart LED TV",
+    brand: "Samsung",
+    price: 28990,
+    mrp: 44900,
+    imageUrl: "https://m.media-amazon.com/images/I/71u9sX8H2HL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.3,
+    ratingCount: 12400,
+  },
+  {
+    asin: "B0CX5BQ14S",
+    title: "Samsung 80 cm (32 inches) HD Ready Smart LED TV (Glossy Black)",
+    brand: "Samsung",
+    price: 13990,
+    mrp: 22900,
+    imageUrl: "https://m.media-amazon.com/images/I/71d53MmHNfL._AC_UL640_FMwebp_QL65_.jpg",
+    rating: 4.2,
+    ratingCount: 9800,
+  },
+];
+
 export const ALL_CURATED = [
+  ...CHOCOLATE_PRODUCTS,
+  ...NUTRITION_PRODUCTS,
+  ...TV_PRODUCTS,
   ...HEEL_PRODUCTS,
   ...FOOTWEAR_PRODUCTS,
   ...ETHNIC_FASHION_PRODUCTS,
@@ -1374,20 +1513,23 @@ export const ALL_CURATED = [
 ];
 
 /**
- * Lookup curated product by ASIN, Product ID, or canonical Slug
+ * Lookup curated product by ASIN, Product ID, or canonical Slug (case-insensitive, variant-tolerant)
  */
 export function findCuratedItem(idOrAsinOrSlug: string) {
   if (!idOrAsinOrSlug) return null;
   const clean = idOrAsinOrSlug.trim();
   const rawAsin = clean.replace(/^prod_amz_/, "").replace(/^amazon-/, "");
+  const lowerClean = clean.toLowerCase();
+  const lowerRawAsin = rawAsin.toLowerCase();
 
   return (
     ALL_CURATED.find((item) => {
+      const itemAsinLower = item.asin.toLowerCase();
       return (
-        item.asin === clean ||
-        item.asin === rawAsin ||
-        `prod_amz_${item.asin}` === clean ||
-        `amazon-${item.asin}` === clean
+        itemAsinLower === lowerClean ||
+        itemAsinLower === lowerRawAsin ||
+        `prod_amz_${itemAsinLower}` === lowerClean ||
+        `amazon-${itemAsinLower}` === lowerClean
       );
     }) || null
   );
@@ -1398,9 +1540,12 @@ export function findCuratedItemByAsin(asin: string) {
 }
 
 /**
- * Builds authentic PriceComparison for an item in ALL_CURATED
+ * Builds authentic PriceComparison for an item in ALL_CURATED, preserving variant ID if requested
  */
-export function buildCuratedProductComparison(item: (typeof ALL_CURATED)[0]): PriceComparison {
+export function buildCuratedProductComparison(
+  item: (typeof ALL_CURATED)[0],
+  requestedId?: string
+): PriceComparison {
   let itemCat = detectCategory(item.title, item.brand);
   if (BEAUTY_PRODUCTS.some((p) => p.asin === item.asin)) {
     itemCat = categories.find((c) => c.slug === "beauty") || itemCat;
@@ -1420,13 +1565,17 @@ export function buildCuratedProductComparison(item: (typeof ALL_CURATED)[0]): Pr
     itemCat = categories.find((c) => c.slug === "fashion") || itemCat;
   }
 
-  const productId = `prod_amz_${item.asin}`;
-  const offerId = `off_amz_${item.asin}`;
+  const cleanRequested = requestedId ? requestedId.trim() : "";
+  const rawId = cleanRequested.replace(/^prod_amz_/, "").replace(/^amazon-/, "");
+  const productId = cleanRequested.startsWith("prod_amz_")
+    ? cleanRequested
+    : (rawId.includes("_") ? `prod_amz_${rawId}` : `prod_amz_${item.asin}`);
+  const offerId = `off_amz_${rawId || item.asin}`;
 
   const product: Product = {
     id: productId,
     title: item.title,
-    slug: `amazon-${item.asin}`,
+    slug: `amazon-${item.asin.toLowerCase()}`,
     brand: item.brand,
     categoryId: itemCat.id,
     description: `${item.title}. Available on Amazon India with fast doorstep delivery, verified merchant warranty, and customer reviews.`,
@@ -1490,7 +1639,7 @@ export function buildCuratedProductComparison(item: (typeof ALL_CURATED)[0]): Pr
 export function getCuratedProductByIdOrSlug(idOrSlug: string): PriceComparison | null {
   const item = findCuratedItem(idOrSlug);
   if (!item) return null;
-  return buildCuratedProductComparison(item);
+  return buildCuratedProductComparison(item, idOrSlug);
 }
 
 /**
@@ -1540,6 +1689,29 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
 
   // Category and product-type intent routing
   if (
+    lower.includes("choc") ||
+    lower.includes("cadbury") ||
+    lower.includes("ferrero") ||
+    lower.includes("hershey") ||
+    lower.includes("amul") ||
+    lower.includes("lindt") ||
+    lower.includes("kitkat") ||
+    lower.includes("cake")
+  ) {
+    selectedItems = CHOCOLATE_PRODUCTS;
+  } else if (
+    lower.includes("protein") ||
+    lower.includes("whey") ||
+    lower.includes("muscleblaze") ||
+    lower.includes("nutrition")
+  ) {
+    selectedItems = NUTRITION_PRODUCTS;
+  } else if (
+    lower.includes("tv") ||
+    lower.includes("television")
+  ) {
+    selectedItems = TV_PRODUCTS;
+  } else if (
     lower.includes("heel") ||
     lower.includes("stiletto") ||
     lower === "sandals" ||

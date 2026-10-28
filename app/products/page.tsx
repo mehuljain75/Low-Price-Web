@@ -200,7 +200,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 sortBy,
                 inStockOnly,
               }}
-              totalProductsCount={comparisons.length}
             />
           )}
         </div>

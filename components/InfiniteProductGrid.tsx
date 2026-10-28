@@ -69,10 +69,13 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(() => {
     const clean = deduplicateProductList(initialComparisons);
-    if (numericTotal !== undefined) {
-      return clean.length < numericTotal;
+    if (numericTotal !== undefined && numericTotal > clean.length) {
+      return true;
     }
-    return initialComparisons.length >= 24;
+    if (numericTotal !== undefined && numericTotal <= clean.length) {
+      return false;
+    }
+    return clean.length >= 24;
   });
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -299,7 +302,23 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
       {/* Results Status Banner */}
       <div className="flex items-center justify-between bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-xs shadow-card">
         <span className="text-[#6B7280] font-medium">
-          Showing <strong className="text-[#111827]">1–{products.length}</strong> {totalProductsCount ? `of ${totalProductsCount}` : ""} products
+          {products.length === 0 ? (
+            "No matching products"
+          ) : products.length === 1 ? (
+            "Showing 1 product"
+          ) : numericTotal !== undefined && numericTotal >= products.length ? (
+            <>
+              Showing <strong className="text-[#111827]">1–{products.length}</strong> of {numericTotal} products
+            </>
+          ) : hasMore ? (
+            <>
+              Showing <strong className="text-[#111827]">1–{products.length}</strong> products
+            </>
+          ) : (
+            <>
+              Showing all <strong className="text-[#111827]">{products.length}</strong> products
+            </>
+          )}
         </span>
         <span className="inline-flex items-center gap-1.5 text-amber-900 font-bold bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200 text-[11px]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>

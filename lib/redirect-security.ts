@@ -11,12 +11,38 @@ export const ALLOWED_REDIRECT_DOMAINS = [
 ];
 
 export function isAllowedTargetUrl(urlStr: string): boolean {
+  if (!urlStr || typeof urlStr !== "string") return false;
   try {
-    const parsed = new URL(urlStr);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    const trimmed = urlStr.trim();
+    // Reject control characters or whitespace
+    if (/[\s\u0000-\u001F\u007F-\u009F]/.test(trimmed)) {
       return false;
     }
-    const hostname = parsed.hostname.toLowerCase();
+
+    const parsed = new URL(trimmed);
+
+    // Require strict HTTPS protocol
+    if (parsed.protocol !== "https:") {
+      return false;
+    }
+
+    // Reject userinfo (e.g. https://user:pass@amazon.in or https://amazon.in@attacker.com)
+    if (parsed.username || parsed.password) {
+      return false;
+    }
+
+    // Reject non-standard ports (anything other than 443 or empty)
+    if (parsed.port && parsed.port !== "443") {
+      return false;
+    }
+
+    // Clean hostname: strip trailing dot if present
+    let hostname = parsed.hostname.toLowerCase();
+    if (hostname.endsWith(".")) {
+      hostname = hostname.slice(0, -1);
+    }
+
+    // Hostname must strictly match an allowed domain or an approved subdomain (.domain)
     return ALLOWED_REDIRECT_DOMAINS.some(
       (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
     );

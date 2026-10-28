@@ -798,10 +798,11 @@ export class ProductRepository {
   async getProductByIdOrSlug(idOrSlug: string): Promise<PriceComparison | null> {
     if (!idOrSlug) return null;
     const cleanId = decodeURIComponent(idOrSlug.trim());
+    const lowerId = cleanId.toLowerCase();
 
-    // 1. Check baseline demo catalog (filter strictly to active Amazon offers)
+    // 1. Check baseline demo catalog (case-insensitive lookup, filter strictly to active Amazon offers)
     const product = demoProducts.find(
-      (p) => p.id === cleanId || p.slug === cleanId
+      (p) => p.id.toLowerCase() === lowerId || p.slug.toLowerCase() === lowerId
     );
     if (product) {
       const cat = categories.find((c) => c.id === product.categoryId);
@@ -811,6 +812,21 @@ export class ProductRepository {
       if (activeOffers.length > 0) {
         const comp = computeProductComparison(product, activeOffers, cat);
         if (hasActivePresentDeal(comp)) return comp;
+      }
+    }
+
+    // If ID contains variant suffix (e.g. prod_amz_B0BQ37G9P7_blue-zen-quad-mic-enc),
+    // prioritize template-synthesized products to preserve variant titles, specs, and attributes.
+    const rawVariantId = cleanId.replace(/^prod_amz_/, "").replace(/^amazon-/, "");
+    if (rawVariantId.includes("_")) {
+      try {
+        const { findTemplateProductByIdOrSlug } = await import("./endless-catalog");
+        const templateComparison = findTemplateProductByIdOrSlug(cleanId);
+        if (templateComparison && hasActivePresentDeal(templateComparison)) {
+          return templateComparison;
+        }
+      } catch (err) {
+        console.warn("[Repository] Error resolving template variant:", err);
       }
     }
 
@@ -837,10 +853,10 @@ export class ProductRepository {
     }
 
     // 4. Check live in-memory product cache (e.g. from active PA-API live search)
-    if (cleanId.startsWith("prod_amz_") || cleanId.startsWith("amazon-")) {
+    if (lowerId.startsWith("prod_amz_") || lowerId.startsWith("amazon-")) {
       try {
         const { getLiveProductById, getLiveOffersByProductId } = await import("../services/amazon-search");
-        const liveProd = getLiveProductById(cleanId);
+        const liveProd = getLiveProductById(cleanId) || getLiveProductById(lowerId);
         if (liveProd) {
           const liveOffers = getLiveOffersByProductId(liveProd.id);
           const activeLiveOffers = liveOffers.filter((o) => o.retailerSlug === "amazon" && o.price > 0 && o.inStock !== false);
@@ -853,27 +869,7 @@ export class ProductRepository {
       }
     }
 
-    // 5. Intelligent Deal Auto-Recovery
-    // If exact ID lookup didn't match, attempt to locate an active, present deal
-    // using clean keyword tokens extracted from the ID
-    try {
-      const cleanTokens = cleanId
-        .replace(/^prod_amz_/, "")
-        .replace(/^amazon-/, "")
-        .split(/[-_]+/)
-        .filter((t) => t.length > 2 && !/^\d+$/.test(t) && !/^v\d+$/.test(t));
-
-      if (cleanTokens.length > 0) {
-        const queryHint = cleanTokens.slice(0, 3).join(" ");
-        const candidateDeals = await this.getProducts({ searchQuery: queryHint, limit: 1 });
-        if (candidateDeals.length > 0 && hasActivePresentDeal(candidateDeals[0])) {
-          return candidateDeals[0];
-        }
-      }
-    } catch (err) {
-      console.warn("[Repository] Error auto-recovering deal:", err);
-    }
-
+    // Genuinely non-existent product: return null deterministically (no dummy deal auto-recovery)
     return null;
   }
 

@@ -62,7 +62,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ comparison }) => {
                 {discountPercent}% OFF
               </span>
             )}
-            {lowestOffer.isDemo ? (
+            {lowestOffer.provenance === "amazon_paapi_live" ? (
+              <span className="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-300 shadow-2xs flex items-center gap-1">
+                <span>Amazon Live</span>
+              </span>
+            ) : lowestOffer.isDemo ? (
               <DemoBadge size="sm" />
             ) : (lowestOffer.isStale || hasStalePrices) ? (
               <span className="bg-amber-50 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-200 shadow-2xs flex items-center gap-1">

@@ -1,7 +1,7 @@
 import { Product, Offer, PriceComparison, Category, RetailerSlug } from "../types";
 import { categories } from "./demo-products";
 import { computeProductComparison } from "../matching";
-import { buildSafeAmazonUrl } from "../redirect-security";
+import { buildSafeAmazonUrl, isGenuineAmazonAsin } from "../redirect-security";
 import {
   ALL_CURATED,
   createCompanionOffers,
@@ -2221,7 +2221,15 @@ function detectCategoryForQuery(query: string): string | null {
     q.includes("face wash") ||
     q.includes("cream") ||
     q.includes("skincare") ||
-    q.includes("trimmer")
+    q.includes("trimmer") ||
+    q.includes("chocolate") ||
+    q.includes("chocolates") ||
+    q.includes("protein") ||
+    q.includes("whey") ||
+    q.includes("snack") ||
+    q.includes("biscuit") ||
+    q.includes("cookie") ||
+    q.includes("cake")
   ) {
     return "beauty";
   }
@@ -2453,7 +2461,7 @@ function buildTemplateProductComparison(
   for (let sIdx = 0; sIdx < template.specs.length; sIdx++) {
     const spec = template.specs[sIdx];
     const specSlug = spec.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30);
-    if (rawId.includes(specSlug)) {
+    if (rawId.toLowerCase().includes(specSlug)) {
       matchedSpec = spec;
       specIndex = sIdx;
       break;
@@ -2484,7 +2492,7 @@ function buildTemplateProductComparison(
   const product: Product = {
     id: productId,
     title,
-    slug: `amazon-${asin}`,
+    slug: `amazon-${asin.toLowerCase()}`,
     brand: template.brand,
     categoryId: targetCategory.id,
     description: `${title}. Authentic retail unit with valid manufacturer warranty, genuine Amazon India invoice, fast delivery, and verified user ratings.`,
@@ -2502,6 +2510,8 @@ function buildTemplateProductComparison(
     updatedAt: new Date().toISOString(),
   };
 
+  const baseRequestedAsin = rawId.split("_")[0];
+  const hasRealAsin = Boolean(template.asin && asin === template.asin && isGenuineAmazonAsin(baseRequestedAsin));
   const amazonOffer: Offer = {
     id: offerId,
     productId,
@@ -2550,6 +2560,8 @@ export function findTemplateProductByIdOrSlug(idOrSlug: string): PriceComparison
 
   // 1. Strip leading prefix
   const rawId = cleanId.replace(/^prod_amz_/, "").replace(/^amazon-/, "");
+  const lowerRawId = rawId.toLowerCase();
+  const lowerCleanId = cleanId.toLowerCase();
 
   // 2. Collect all templates
   const allTemplates: { template: CatalogTemplate; categorySlug: string; templateIndex: number }[] = [];
@@ -2559,38 +2571,44 @@ export function findTemplateProductByIdOrSlug(idOrSlug: string): PriceComparison
     });
   }
 
-  // A. Check for matching genuine ASIN on template
+  // A. Check for matching genuine ASIN on template (case-insensitive)
   for (const { template, categorySlug, templateIndex } of allTemplates) {
-    if (template.asin && (rawId === template.asin || rawId.startsWith(template.asin + "_") || cleanId.includes(template.asin))) {
-      return buildTemplateProductComparison(template, categorySlug, rawId, templateIndex);
+    if (template.asin) {
+      const tAsinLower = template.asin.toLowerCase();
+      if (
+        lowerRawId === tAsinLower ||
+        lowerRawId.startsWith(tAsinLower + "_") ||
+        lowerCleanId.includes(tAsinLower)
+      ) {
+        return buildTemplateProductComparison(template, categorySlug, rawId, templateIndex);
+      }
     }
   }
 
-  // B. Check for synthetic ASIN match
+  // B. Check for synthetic ASIN match (case-insensitive)
   for (const { template, categorySlug, templateIndex } of allTemplates) {
     const brandClean = template.brand.replace(/[^a-zA-Z0-9]/g, "").slice(0, 3).toUpperCase();
     const catClean = categorySlug.replace(/[^a-zA-Z0-9]/g, "").slice(0, 3).toUpperCase();
     const padIdx3 = String(templateIndex + 1).padStart(3, "0");
     const padIdx5 = String(templateIndex + 1).padStart(5, "0");
-    const syn3 = `B0${catClean}${brandClean}${padIdx3}`;
-    const syn5 = `B0${catClean}${brandClean}${padIdx5}`;
+    const syn3 = `B0${catClean}${brandClean}${padIdx3}`.toLowerCase();
+    const syn5 = `B0${catClean}${brandClean}${padIdx5}`.toLowerCase();
 
     if (
-      rawId === syn3 ||
-      rawId.startsWith(syn3 + "_") ||
-      rawId === syn5 ||
-      rawId.startsWith(syn5 + "_")
+      lowerRawId === syn3 ||
+      lowerRawId.startsWith(syn3 + "_") ||
+      lowerRawId === syn5 ||
+      lowerRawId.startsWith(syn5 + "_")
     ) {
       return buildTemplateProductComparison(template, categorySlug, rawId, templateIndex);
     }
   }
 
-  // B2. Robust Brand & Category Prefix Match: e.g. "B0FASERI..."
-  // If an ID was synthesized under a query or filter where index varied, match by category & brand
-  const prefixMatch = rawId.match(/^B0([A-Z]{3})([A-Z0-9]{3})/);
+  // B2. Robust Brand & Category Prefix Match: e.g. "B0FASERI..." (case-insensitive)
+  const prefixMatch = rawId.match(/^[bB]0([a-zA-Z]{3})([a-zA-Z0-9]{3})/);
   if (prefixMatch) {
-    const rawCat = prefixMatch[1];
-    const rawBrand = prefixMatch[2];
+    const rawCat = prefixMatch[1].toUpperCase();
+    const rawBrand = prefixMatch[2].toUpperCase();
     for (const { template, categorySlug, templateIndex } of allTemplates) {
       const catClean = categorySlug.replace(/[^a-zA-Z0-9]/g, "").slice(0, 3).toUpperCase();
       const brandClean = template.brand.replace(/[^a-zA-Z0-9]/g, "").slice(0, 3).toUpperCase();
@@ -2600,23 +2618,23 @@ export function findTemplateProductByIdOrSlug(idOrSlug: string): PriceComparison
     }
   }
 
-  // C. Check brand and model slug match
+  // C. Check brand and model slug match (case-insensitive)
   for (const { template, categorySlug, templateIndex } of allTemplates) {
     const brandSlug = template.brand.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const modelSlug = template.model.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 24).replace(/-$/, "");
-    if (brandSlug.length >= 3 && modelSlug.length >= 3 && rawId.includes(brandSlug) && rawId.includes(modelSlug)) {
+    if (brandSlug.length >= 3 && modelSlug.length >= 3 && lowerRawId.includes(brandSlug) && lowerRawId.includes(modelSlug)) {
       return buildTemplateProductComparison(template, categorySlug, rawId, templateIndex);
     }
   }
 
   // D. Legacy backward compatibility: strictly "B0<CAT><BRAND>..._<globalIdx>"
-  const isLegacyAsin = cleanId.startsWith("prod_amz_B0") || rawId.startsWith("B0");
-  const legacyMatch = isLegacyAsin && rawId.match(/^B0[A-Z0-9]+_(\d+)$/);
+  const isLegacyAsin = lowerCleanId.startsWith("prod_amz_b0") || lowerRawId.startsWith("b0");
+  const legacyMatch = isLegacyAsin && rawId.match(/^[bB]0[a-zA-Z0-9]+_(\d+)$/);
   if (legacyMatch) {
     const legacyIdx = parseInt(legacyMatch[1], 10);
     for (const catSlug of Object.keys(BASE_TEMPLATES)) {
       const catClean = catSlug.slice(0, 3).toUpperCase();
-      if (rawId.includes(catClean)) {
+      if (rawId.toUpperCase().includes(catClean)) {
         const synth = synthesizeEndlessProducts({ categorySlug: catSlug, startIndex: legacyIdx, count: 1 });
         if (synth.length > 0) return synth[0];
       }
