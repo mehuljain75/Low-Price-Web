@@ -78,7 +78,9 @@ function detectCategory(query: string, title: string): Category {
     text.includes("iphone") ||
     text.includes("samsung") ||
     text.includes("oneplus") ||
-    text.includes("pixel")
+    text.includes("pixel") ||
+    text.includes("watch") ||
+    text.includes("smart band")
   ) {
     return categories.find((c) => c.slug === "mobiles") || categories[0];
   }
@@ -363,7 +365,6 @@ export function parseAmazonSearchHtml(html: string, query: string): LiveSearchRe
       dataSource: "api",
       provenance: "amazon_paapi_live",
       deliveryTimeEstimate: "2-4 business days (Prime available)",
-      bankOffersDescription: "Instant Discount on select bank credit cards & Amazon Pay ICICI",
     };
 
     // Store in global lookup caches
@@ -1551,7 +1552,10 @@ export function buildCuratedProductComparison(
     itemCat = categories.find((c) => c.slug === "beauty") || itemCat;
   } else if (APPLIANCE_PRODUCTS.some((p) => p.asin === item.asin)) {
     itemCat = categories.find((c) => c.slug === "appliances") || itemCat;
-  } else if (MOBILE_PRODUCTS.some((p) => p.asin === item.asin)) {
+  } else if (
+    MOBILE_PRODUCTS.some((p) => p.asin === item.asin) ||
+    WATCH_PRODUCTS.some((p) => p.asin === item.asin)
+  ) {
     itemCat = categories.find((c) => c.slug === "mobiles") || itemCat;
   } else if (LAPTOP_PRODUCTS.some((p) => p.asin === item.asin)) {
     itemCat = categories.find((c) => c.slug === "laptops") || itemCat;
@@ -1614,7 +1618,6 @@ export function buildCuratedProductComparison(
     dataSource: "catalog",
     provenance: "amazon_catalog_verified",
     deliveryTimeEstimate: "2-3 business days (Prime available)",
-    bankOffersDescription: "10% Instant Bank Discount on Card Payments",
   };
 
   productCache.set(productId, product);
@@ -1668,6 +1671,14 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
   // Split query into individual words (e.g. ["nike", "shoes"])
   const queryTokens = lower.split(/\s+/).filter(Boolean);
 
+  // Generic watch searches ("watches", "smart watch", "smartwatch") should list every watch,
+  // not only titles that happen to contain the exact spelling typed
+  const GENERIC_WATCH_WORDS = new Set(["watch", "watches", "smart", "smartwatch", "smartwatches"]);
+  const isGenericWatchQuery =
+    queryTokens.length > 0 &&
+    queryTokens.every((t) => GENERIC_WATCH_WORDS.has(t)) &&
+    queryTokens.some((t) => t.includes("watch"));
+
   // 1. Check direct multi-token match (matches title, brand, or shoeType)
   const tokenMatches = ALL_CURATED.filter((item) => {
     const combined = `${item.title} ${item.brand} ${(item as any).shoeType || ""}`.toLowerCase();
@@ -1718,6 +1729,8 @@ function generateQueryFallbackResults(query: string): LiveSearchResult[] {
     lower === "heeled sandals"
   ) {
     selectedItems = HEEL_PRODUCTS;
+  } else if (isGenericWatchQuery) {
+    selectedItems = WATCH_PRODUCTS;
   } else if (tokenMatches.length > 0 && queryTokens.length > 1) {
     selectedItems = tokenMatches;
   } else if (brandMatches.length > 0) {
@@ -1933,7 +1946,6 @@ export async function searchLiveAmazonIndia(query: string): Promise<LiveSearchRe
             dataSource: "api",
             provenance: "amazon_paapi_live",
             deliveryTimeEstimate: "2-3 business days (Prime)",
-            bankOffersDescription: "10% Instant Discount on select bank cards",
           };
 
           productCache.set(productId, product);

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Filter, RotateCcw, Search, Star } from "lucide-react";
 import { Category, Retailer } from "@/lib/types";
+import { resolveCategoryNavigationPath } from "@/lib/filter-navigation";
 
 interface FilterSidebarProps {
   categories: Category[];
@@ -78,8 +79,8 @@ const FilterSidebarInternal: React.FC<FilterSidebarProps> = ({
       setBrandSearch("");
     }
 
-    const basePath = key === "category" && value && value !== "all" 
-      ? `/category/${value}`
+    const basePath = key === "category"
+      ? resolveCategoryNavigationPath(pathname, value, Boolean(params.get("q") || params.get("search")))
       : getBasePath();
 
     router.push(`${basePath}?${params.toString()}`);
@@ -460,12 +461,12 @@ const FilterSidebarInternal: React.FC<FilterSidebarProps> = ({
                   : "text-gray-600 hover:bg-gray-50 hover:text-[#111827]"
               }`}
             >
-              <div className="flex items-center text-amber-500">
+              <div className="flex items-center text-amber-500" aria-hidden="true">
                 {Array.from({ length: star }).map((_, i) => (
                   <Star key={i} className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                 ))}
               </div>
-              <span className="text-gray-700 font-medium">&amp; above</span>
+              <span className="text-gray-700 font-medium">{star}★ &amp; above</span>
             </button>
           ))}
         </div>

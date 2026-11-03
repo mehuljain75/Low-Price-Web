@@ -80,12 +80,12 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Search Engine (Amazon + Google Style Typeahead) */}
-          <div className="hidden md:flex flex-1 max-w-xl relative items-center">
+          <div className="hidden md:flex flex-1 min-w-0 max-w-xl relative items-center">
             <SearchAutocomplete variant="navbar" />
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6" aria-label="Main Navigation">
+          <nav className="hidden xl:flex items-center gap-6 flex-shrink-0" aria-label="Main Navigation">
             <Link
               href="/products"
               className="text-xs font-semibold text-gray-700 hover:text-[#111827] transition-colors py-1"
@@ -115,8 +115,8 @@ export const Navbar: React.FC = () => {
             </Link>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center gap-2">
+          {/* Mobile Menu Button (also used on tablets/small laptops where the link row would squeeze the search box) */}
+          <div className="flex xl:hidden items-center gap-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-gray-700 hover:text-[#111827] hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/20"
@@ -128,8 +128,8 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Search Engine: Only rendered on sub-pages; on homepage ('/') Hero search provides the primary search box */}
-        {pathname !== "/" && (
+        {/* Mobile Search Engine: Only rendered on sub-pages; the homepage and search page already have a large search box */}
+        {pathname !== "/" && !pathname.startsWith("/search") && (
           <div className="md:hidden pb-3">
             <SearchAutocomplete
               variant="navbar"
@@ -163,7 +163,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-[#E5E7EB] px-4 pt-3 pb-6 space-y-1 shadow-dropdown">
+        <div className="xl:hidden bg-white border-t border-[#E5E7EB] px-4 pt-3 pb-6 space-y-1 shadow-dropdown">
           <Link
             href="/products"
             onClick={() => setMobileMenuOpen(false)}

@@ -55,9 +55,12 @@ export function hasActivePresentDeal(comp: PriceComparison | null | undefined): 
 export const CATEGORY_BRANDS: Record<string, string[]> = {
   mobiles: [
     "Apple",
+    "boAt",
+    "Fire-Boltt",
     "Google Pixel",
     "iQOO",
     "Motorola",
+    "Noise",
     "Nothing",
     "OnePlus",
     "Oppo",
@@ -297,6 +300,63 @@ export function extractProductAsin(comp: PriceComparison): string | null {
   return null;
 }
 
+// Compound words shoppers type either joined or split ("smartwatch" vs "Smart Watch")
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  smartwatch: ["smart watch", "watch"],
+  smartwatches: ["smart watch", "watch"],
+  smartband: ["smart band", "band"],
+  earbuds: ["earbud", "buds"],
+  tshirt: ["t-shirt", "t shirt"],
+  tshirts: ["t-shirt", "t shirt"],
+};
+
+/**
+ * Splits a search query into one group of acceptable spellings per word
+ * (the word itself, its singular/stemmed forms, and known synonyms).
+ */
+export function getSearchTermGroups(query: string): string[][] {
+  return query
+    .toLowerCase()
+    .trim()
+    .split(/\s+/)
+    // Single stray characters (e.g. left over from "<b>") would match nearly every product
+    .filter((tok) => tok.length > 1 || /^[0-9]$/.test(tok))
+    .map((tok) => {
+      const terms = [tok];
+      if (tok.endsWith("ies") && tok.length > 4) terms.push(tok.slice(0, -3) + "y");
+      if (tok.endsWith("es") && tok.length > 3) terms.push(tok.slice(0, -2));
+      if (tok.endsWith("s") && !tok.endsWith("ss") && tok.length > 2) terms.push(tok.slice(0, -1));
+      if (tok.endsWith("ed") && tok.length > 3) terms.push(tok.slice(0, -2));
+      if (tok.endsWith("ing") && tok.length > 4) terms.push(tok.slice(0, -3));
+      terms.push(...(SEARCH_SYNONYMS[tok] || []));
+      return Array.from(new Set(terms));
+    });
+}
+
+/**
+ * Checks product text against search term groups. "any" needs one word to match,
+ * "all" needs every word. Text is also compared with spaces/hyphens removed so
+ * "smartwatch" finds "Smart Watch" and "fireboltt" finds "Fire-Boltt".
+ */
+export function matchesSearchTerms(text: string, groups: string[][], mode: "any" | "all"): boolean {
+  const lower = text.toLowerCase();
+  const compact = lower.replace(/[\s-]+/g, "");
+  const groupMatches = (group: string[]) =>
+    group.some((t) => lower.includes(t) || compact.includes(t.replace(/[\s-]+/g, "")));
+  return mode === "all" ? groups.every(groupMatches) : groups.some(groupMatches);
+}
+
+function getSearchableText(comp: PriceComparison): string {
+  const attrs = comp.product.attributes as Record<string, unknown> | undefined;
+  return [
+    comp.product.title,
+    comp.product.brand,
+    comp.product.modelNumber || "",
+    comp.product.description,
+    typeof attrs?.shoeType === "string" ? attrs.shoeType : "",
+  ].join(" ");
+}
+
 /**
  * Normalizes a product title to its base model for deduplication across variant specs.
  */
@@ -454,40 +514,17 @@ export class ProductRepository {
       );
     }
 
-    // Helper to generate stemmed search query tokens
-    const getStemmedTokens = (q: string): string[] => {
-      const qTokens = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
-      return Array.from(
-        new Set(
-          qTokens.flatMap((tok) => {
-            const terms = [tok];
-            if (tok.endsWith("ies") && tok.length > 4) terms.push(tok.slice(0, -3) + "y");
-            if (tok.endsWith("es") && tok.length > 3) terms.push(tok.slice(0, -2));
-            if (tok.endsWith("s") && !tok.endsWith("ss") && tok.length > 2) terms.push(tok.slice(0, -1));
-            if (tok.endsWith("ed") && tok.length > 3) terms.push(tok.slice(0, -2));
-            if (tok.endsWith("ing") && tok.length > 4) terms.push(tok.slice(0, -3));
-            return terms;
-          })
-        )
-      );
-    };
+    const searchTermGroups = filters.searchQuery ? getSearchTermGroups(filters.searchQuery) : [];
 
     // Search query filter with stemming
-    if (filters.searchQuery && filters.searchQuery.trim().length > 0) {
-      const searchTerms = getStemmedTokens(filters.searchQuery);
-      products = products.filter((p) => {
-        const titleLower = p.title.toLowerCase();
-        const brandLower = p.brand.toLowerCase();
-        const modelLower = (p.modelNumber || "").toLowerCase();
-        const descLower = p.description.toLowerCase();
-        return searchTerms.some(
-          (t) =>
-            titleLower.includes(t) ||
-            brandLower.includes(t) ||
-            modelLower.includes(t) ||
-            descLower.includes(t)
-        );
-      });
+    if (searchTermGroups.length > 0) {
+      products = products.filter((p) =>
+        matchesSearchTerms(
+          [p.title, p.brand, p.modelNumber || "", p.description].join(" "),
+          searchTermGroups,
+          "any"
+        )
+      );
     }
 
     // Calculate comparisons for candidate products and filter out items with no active offers
@@ -557,22 +594,8 @@ export class ProductRepository {
           }
 
           // Search query check with stemming: Must match query tokens if searchQuery is specified
-          if (filters.searchQuery && filters.searchQuery.trim().length > 0) {
-            const searchTerms = getStemmedTokens(filters.searchQuery);
-            const titleLower = liveComp.product.title.toLowerCase();
-            const brandLower = liveComp.product.brand.toLowerCase();
-            const descLower = liveComp.product.description.toLowerCase();
-            const shoeTypeLower = ((liveComp.product.attributes as any)?.shoeType || "").toLowerCase();
-            const matchesQuery = searchTerms.some(
-              (token) =>
-                titleLower.includes(token) ||
-                brandLower.includes(token) ||
-                descLower.includes(token) ||
-                shoeTypeLower.includes(token)
-            );
-            if (!matchesQuery) {
-              continue;
-            }
+          if (searchTermGroups.length > 0 && !matchesSearchTerms(getSearchableText(liveComp), searchTermGroups, "any")) {
+            continue;
           }
 
           if (canAddToProductList(liveComp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins)) {
@@ -774,6 +797,17 @@ export class ProductRepository {
 
     // Sort all gathered comparisons deterministically
     comparisons.sort(sortComparator);
+
+    // Multi-word queries ("smart watch", "nike shoes"): when some products match every word,
+    // drop the ones that only matched a single word so unrelated items don't flood results
+    if (searchTermGroups.length > 1) {
+      const allWordMatches = comparisons.filter((c) =>
+        matchesSearchTerms(getSearchableText(c), searchTermGroups, "all")
+      );
+      if (allWordMatches.length > 0) {
+        comparisons = allWordMatches;
+      }
+    }
 
     // Filter to active, present Amazon deals
     const activeResults = comparisons.filter(hasActivePresentDeal);

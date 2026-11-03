@@ -78,6 +78,21 @@ export async function generateMetadata({ params }: ProductDetailsPageProps): Pro
   };
 }
 
+const SPEC_LABELS: Record<string, string> = {
+  asin: "ASIN",
+  shoeType: "Shoe Type",
+  availableSizes: "Available Sizes",
+};
+
+// "availableSizes" -> "Available Sizes", "ram" -> "Ram"
+function formatSpecLabel(key: string): string {
+  if (SPEC_LABELS[key]) return SPEC_LABELS[key];
+  return key
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export default async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
   const resolvedParams = await params;
   const cleanId = decodeURIComponent(resolvedParams.id || "");
@@ -201,6 +216,10 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
   }
 
   const { product, lowestOffer, offers, category } = comparison;
+  // Only show specs that have a value (catalog items carry empty footwear fields like shoeType)
+  const specEntries = Object.entries(product.attributes || {}).filter(
+    ([, val]) => val !== undefined && val !== null && String(val).trim() !== ""
+  );
   // Strictly isolate customer-facing offers to verified Amazon India listings
   const verifiedOffers = (offers || []).filter((o) => o.retailerSlug === "amazon");
 
@@ -375,16 +394,16 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
           </div>
 
           {/* Key Variant Specifications (Storage, RAM, Color, etc.) */}
-          {product.attributes && Object.keys(product.attributes).length > 0 && (
+          {specEntries.length > 0 && (
             <div className="p-4 bg-white border border-[#E5E7EB] rounded-xl space-y-2 shadow-2xs">
               <div className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                 Product Specifications
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {Object.entries(product.attributes).map(([key, val]) => (
+                {specEntries.map(([key, val]) => (
                   <div key={key} className="bg-gray-50 p-2.5 rounded-lg border border-[#E5E7EB]">
                     <span className="block text-[10px] text-[#6B7280] uppercase font-semibold">
-                      {key}
+                      {formatSpecLabel(key)}
                     </span>
                     <span className="font-bold text-xs text-[#111827]">{val}</span>
                   </div>

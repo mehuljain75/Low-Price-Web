@@ -2017,6 +2017,15 @@ export const BASE_TEMPLATES: Record<string, CatalogTemplate[]> = {
 };
 
 /**
+ * Builds a display title without repeating the brand when the model name already
+ * starts with it (e.g. "OnePlus" + "OnePlus 12 5G" -> "OnePlus 12 5G").
+ */
+export function composeProductTitle(brand: string, model: string, variant: string): string {
+  const base = model.toLowerCase().startsWith(brand.toLowerCase()) ? model : `${brand} ${model}`;
+  return `${base} (${variant})`;
+}
+
+/**
  * Filter templates matching optional brand, category, and search query keywords
  */
 function getMatchingTemplates(
@@ -2355,7 +2364,7 @@ export function synthesizeEndlessProducts(
     const mrp = Math.round(Math.max(template.mrp * priceMod, price * 1.25));
 
     const finalVariant = variantSpec;
-    const title = `${template.brand} ${template.model} (${finalVariant})`;
+    const title = composeProductTitle(template.brand, template.model, finalVariant);
     const amazonUrl = buildSafeAmazonUrl(asin, title);
 
     const product: Product = {
@@ -2399,7 +2408,6 @@ export function synthesizeEndlessProducts(
       dataSource: "catalog",
       provenance: "amazon_catalog_verified",
       deliveryTimeEstimate: "2-3 business days (Prime)",
-      bankOffersDescription: "10% Instant Discount on HDFC & ICICI Cards",
     };
 
     // Cache in global lookup maps for instant product detail page navigation
@@ -2486,7 +2494,7 @@ function buildTemplateProductComparison(
   const price = Math.round(template.basePrice * priceMod);
   const mrp = Math.round(Math.max(template.mrp * priceMod, price * 1.25));
 
-  const title = `${template.brand} ${template.model} (${matchedSpec})`;
+  const title = composeProductTitle(template.brand, template.model, matchedSpec);
   const amazonUrl = buildSafeAmazonUrl(asin, title);
 
   const product: Product = {
@@ -2532,7 +2540,6 @@ function buildTemplateProductComparison(
     dataSource: "catalog",
     provenance: "amazon_catalog_verified",
     deliveryTimeEstimate: "2-3 business days (Prime)",
-    bankOffersDescription: "10% Instant Discount on HDFC & ICICI Cards",
   };
 
   productCache.set(productId, product);

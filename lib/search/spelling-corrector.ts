@@ -72,6 +72,12 @@ const ECOMMERCE_DICTIONARY = new Set<string>([
   "libas", "biba", "manyavar", "fabindia", "levis", "allen", "solly", "peter",
   "england",
 
+  // Watches & Wearables
+  "watch", "watches", "smartwatch", "smartwatches", "wearable", "wearables",
+  "band", "bands", "strap", "straps", "fitness", "tracker", "analog", "digital",
+  "colorfit", "firebolt", "fireboltt", "titan", "fastrack", "casio",
+  "fossil", "amazfit", "garmin",
+
   // Beauty & Personal Care
   "serum", "serums", "face", "wash", "sunscreen", "moisturizer", "shampoo",
   "conditioner", "oil", "cream", "lotion", "perfume", "trimmer", "trimmers",
@@ -129,6 +135,13 @@ const HIGH_PRIORITY_CORRECTIONS: Record<string, string> = {
   sunscrin: "sunscreen",
   sanscreen: "sunscreen",
   serom: "serum",
+  wach: "watch",
+  wtch: "watch",
+  wacth: "watch",
+  whatch: "watch",
+  watchs: "watches",
+  smartwach: "smartwatch",
+  smartwtch: "smartwatch",
 };
 
 /**

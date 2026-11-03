@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Filter, X, RotateCcw, Check, Search, SlidersHorizontal, Star } from "lucide-react";
 import { Category, Retailer } from "@/lib/types";
+import { resolveCategoryNavigationPath } from "@/lib/filter-navigation";
 
 interface MobileFilterDrawerProps {
   categories: Category[];
@@ -103,10 +104,7 @@ const MobileFilterDrawerInternal: React.FC<MobileFilterDrawerProps> = ({
   if (currentMinRating) activeFilterCount++;
   if (currentInStock) activeFilterCount++;
 
-  const getBasePath = (catSlug?: string) => {
-    if (catSlug && catSlug !== "all") {
-      return `/category/${catSlug}`;
-    }
+  const getBasePath = () => {
     if (pathname.startsWith("/category/") || pathname.startsWith("/search")) {
       return pathname;
     }
@@ -147,7 +145,8 @@ const MobileFilterDrawerInternal: React.FC<MobileFilterDrawerProps> = ({
     if (inStockOnly) params.set("inStock", "true");
     else params.delete("inStock");
 
-    router.push(`${getBasePath(selectedCategory)}?${params.toString()}`);
+    const hasTextQuery = Boolean(params.get("q") || params.get("search"));
+    router.push(`${resolveCategoryNavigationPath(pathname, selectedCategory, hasTextQuery)}?${params.toString()}`);
     setIsOpen(false);
   };
 
@@ -168,7 +167,7 @@ const MobileFilterDrawerInternal: React.FC<MobileFilterDrawerProps> = ({
       params.set("q", q);
     }
     const queryStr = params.toString();
-    router.push(`${getBasePath(undefined)}${queryStr ? `?${queryStr}` : ""}`);
+    router.push(`${getBasePath()}${queryStr ? `?${queryStr}` : ""}`);
     setIsOpen(false);
   };
 
@@ -623,12 +622,12 @@ const MobileFilterDrawerInternal: React.FC<MobileFilterDrawerProps> = ({
                         }`}
                       >
                         <div className="flex items-center gap-1.5">
-                          <div className="flex text-amber-500">
+                          <div className="flex text-amber-500" aria-hidden="true">
                             {Array.from({ length: star }).map((_, i) => (
                               <Star key={i} className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                             ))}
                           </div>
-                          <span className="text-gray-700 font-medium">&amp; above</span>
+                          <span className="text-gray-700 font-medium">{star}★ &amp; above</span>
                         </div>
                         {selectedMinRating === star && (
                           <Check className="w-4 h-4 text-amber-600" />

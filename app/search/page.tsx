@@ -66,9 +66,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const forceExact = resolved.exact === "1" || resolved.exact === "true";
 
   const categories = await repository.getCategories();
-  const brands = await repository.getBrands(categorySlug);
 
-  const searchResult = await executeSearchPipeline({
+  const pipelineOptions = {
     query: searchQuery,
     categorySlug,
     brand,
@@ -83,9 +82,23 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     page: 1,
     limit: 24,
     forceExact,
-  });
+  };
+  const searchResult = await executeSearchPipeline(pipelineOptions);
 
   const comparisons = searchResult.results;
+
+  // While searching, list only brands that actually appear in the matching results
+  // (ignoring the brand filter itself so the shopper can switch brands)
+  let brands = await repository.getBrands(categorySlug);
+  if (searchQuery) {
+    const brandSource = brand
+      ? (await executeSearchPipeline({ ...pipelineOptions, brand: undefined })).results
+      : comparisons;
+    const resultBrands = Array.from(new Set(brandSource.map((c) => c.product.brand).filter(Boolean)));
+    if (resultBrands.length > 0) {
+      brands = resultBrands.sort((a, b) => a.localeCompare(b));
+    }
+  }
 
   // Helper to remove one filter while keeping other active filters and q
   const getFilterRemoveUrl = (removeKey: string) => {
@@ -222,7 +235,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <p className="text-xs sm:text-sm text-[#6B7280] mt-1">
               {comparisons.length > 0
                 ? `Found ${comparisons.length} product listings on Amazon India`
-                : "Enter product keywords to explore deals on Amazon India"}
+                : searchQuery
+                  ? "No matching products in our catalog yet"
+                  : "Enter product keywords to explore deals on Amazon India"}
             </p>
           </div>
 
@@ -383,12 +398,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   <SearchIcon className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-[#111827]">
-                  No direct matches found in our catalog for &ldquo;{searchQuery || "your search"}&rdquo;
+                  {searchQuery ? (
+                    <>No direct matches found in our catalog for &ldquo;{searchQuery}&rdquo;</>
+                  ) : (
+                    "What are you shopping for today?"
+                  )}
                 </h3>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  {hasAnyFilter
-                    ? "No products matched your combined filters. Try clearing filters or searching for more general keywords."
-                    : "While this exact item is currently not in our indexed catalog, you can search live listings, verified stock, and Prime offers directly on Amazon India."}
+                  {!searchQuery
+                    ? "Type a product, brand, or model in the search box above, or pick a category below."
+                    : hasAnyFilter
+                      ? "No products matched your combined filters. Try clearing filters or searching for more general keywords."
+                      : "While this exact item is currently not in our indexed catalog, you can search live listings, verified stock, and Prime offers directly on Amazon India."}
                 </p>
               </div>
 
@@ -445,16 +466,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {[
-                    { name: "Mobiles & Tablets", slug: "mobiles", desc: "iPhones, Samsung, OnePlus" },
+                    { name: "Mobiles & Tablets", slug: "mobiles", desc: "iPhones, Samsung, Smartwatches" },
                     { name: "Laptops & PCs", slug: "laptops", desc: "MacBooks, Gaming, Dell" },
                     { name: "Audio & Headphones", slug: "audio", desc: "Sony, boAt, AirPods" },
-                    { name: "Fashion & Apparel", slug: "fashion", desc: "Kurtas, Footwear, Watches" },
+                    { name: "Fashion & Apparel", slug: "fashion", desc: "Kurtas, Footwear, Denim" },
                     { name: "Home Appliances", slug: "appliances", desc: "Air Fryers, Kitchen" },
                     { name: "Beauty & Personal", slug: "beauty", desc: "Skincare, Grooming" },
                   ].map((cat) => (
                     <Link
                       key={cat.slug}
-                      href={`/search?category=${cat.slug}`}
+                      href={`/category/${cat.slug}`}
                       className="p-3 rounded-xl bg-gray-50 hover:bg-amber-50 hover:border-amber-200 border border-gray-200 transition-all group"
                     >
                       <div className="font-semibold text-xs text-gray-900 group-hover:text-amber-900">
