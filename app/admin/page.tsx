@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { getAmazonAssociatesTag } from "@/lib/affiliate-tag";
 import {
   Activity,
   CheckCircle2,
@@ -90,7 +91,7 @@ export default async function AdminPage() {
             <Key className="w-4 h-4 text-gray-400" />
           </div>
           <div className="text-base font-bold text-[#111827] mt-2 font-mono">
-            dealfinderin-21
+            {getAmazonAssociatesTag()}
           </div>
           <div className="text-[11px] text-gray-400 mt-1">
             Direct monetized routing
@@ -164,7 +165,7 @@ export default async function AdminPage() {
                       }`}
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{isLive ? "Live PA-API 5.0" : "Tag Active (dealfinderin-21)"}</span>
+                      <span>{isLive ? "Live PA-API 5.0" : `Tag Active (${getAmazonAssociatesTag()})`}</span>
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
@@ -239,7 +240,7 @@ FLIPKART_AFFILIATE_TOKEN=your_secret_token`}
               Register at <strong>affiliate-program.amazon.in</strong>. Note: Amazon requires driving <strong>3 qualified sales within 180 days</strong> before unlocking PA-API keys. Direct affiliate redirects work immediately with:
             </p>
             <pre className="bg-[#111827] text-gray-200 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
-{`AMAZON_ASSOCIATES_TAG=dealfinder-21
+{`AMAZON_ASSOCIATES_TAG=${getAmazonAssociatesTag()}
 AMAZON_ACCESS_KEY=your_key
 AMAZON_SECRET_KEY=your_secret`}
             </pre>

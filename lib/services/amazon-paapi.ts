@@ -4,6 +4,8 @@
  * Fully compatible with Node.js, Next.js Edge runtime, and Cloudflare Workers.
  */
 
+import { getAmazonAssociatesTag } from "../affiliate-tag";
+
 export interface PAAPIItem {
   ASIN: string;
   DetailPageURL?: string;
@@ -123,9 +125,7 @@ export async function sendPAAPIRequest<T>(
   const accessKey = process.env.AMAZON_ACCESS_KEY;
   const secretKey = process.env.AMAZON_SECRET_KEY;
   const partnerTag =
-    process.env.AMAZON_ASSOCIATES_TAG ||
-    process.env.NEXT_PUBLIC_AMAZON_TAG ||
-    "dealfinderin-21";
+    getAmazonAssociatesTag();
 
   if (!accessKey || !secretKey) {
     return null;

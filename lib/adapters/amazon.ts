@@ -2,6 +2,7 @@ import { Offer, AdapterHealth, RetailerSlug } from "../types";
 import { RetailerAdapter, SearchOptions } from "./types";
 import { demoOffers } from "../data/demo-products";
 import { searchLiveAmazonIndia, getLiveOfferById } from "../services/amazon-search";
+import { getAmazonAssociatesTag } from "../affiliate-tag";
 
 export class AmazonAdapter implements RetailerAdapter {
   readonly slug: RetailerSlug = "amazon";
@@ -12,7 +13,7 @@ export class AmazonAdapter implements RetailerAdapter {
   private secretKey: string | undefined;
 
   constructor() {
-    this.partnerTag = process.env.AMAZON_ASSOCIATES_TAG || process.env.NEXT_PUBLIC_AMAZON_TAG || "dealfinderin-21";
+    this.partnerTag = getAmazonAssociatesTag();
     this.accessKey = process.env.AMAZON_ACCESS_KEY;
     this.secretKey = process.env.AMAZON_SECRET_KEY;
   }
@@ -74,12 +75,12 @@ export class AmazonAdapter implements RetailerAdapter {
       missingCredentials: missing,
       notes: isLive
         ? "Connected to Amazon Product Advertising API (PA-API 5.0) with AWS SigV4 authentication."
-        : "Associates tracking active with tag 'dealfinderin-21'. PA-API 5.0 keys pending (Amazon unlocks keys after 3 qualified referrals within 180 days). Direct outbound affiliate link routing is fully functional with verified Amazon catalog.",
+        : `Associates tracking active with tag '${getAmazonAssociatesTag()}'. PA-API 5.0 keys pending (Amazon unlocks keys after 3 qualified referrals within 180 days). Direct outbound affiliate link routing is fully functional with verified Amazon catalog.`,
     };
   }
 
   buildAffiliateUrl(originalUrl: string, subId?: string): string {
-    const tag = this.partnerTag || "dealfinder-21";
+    const tag = this.partnerTag || getAmazonAssociatesTag();
     try {
       const url = new URL(originalUrl);
       url.searchParams.set("tag", tag);

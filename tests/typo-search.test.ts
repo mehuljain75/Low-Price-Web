@@ -143,7 +143,7 @@ describe("Typo-Tolerant Search & Zero-Results Recovery Pipeline", () => {
       expect(result.searchStatus).toBe("zero_results");
       expect(result.results.length).toBe(0);
       expect(result.externalSearchUrl).toContain("choclate");
-      expect(result.externalSearchUrl).toContain("tag=dealfinderin-21");
+      expect(result.externalSearchUrl).toContain("tag=dealfinder025-21");
     });
 
     it("resolves exact query 'chocolate' with searchStatus: 'exact'", async () => {
@@ -186,20 +186,20 @@ describe("Typo-Tolerant Search & Zero-Results Recovery Pipeline", () => {
       expect(result.searchStatus).toBe("zero_results");
       expect(result.results.length).toBe(0);
       expect(result.externalSearchUrl).toBe(
-        "https://www.amazon.in/s?k=nonexistentproductxyz999&tag=dealfinderin-21"
+        "https://www.amazon.in/s?k=nonexistentproductxyz999&tag=dealfinder025-21"
       );
       expect(result.suggestions.length).toBeGreaterThan(0);
     });
 
     it("safely handles special characters and URL encoding", () => {
       const url1 = buildExternalAmazonSearchUrl("100% cotton shirt");
-      expect(url1).toBe("https://www.amazon.in/s?k=100%25%20cotton%20shirt&tag=dealfinderin-21");
+      expect(url1).toBe("https://www.amazon.in/s?k=100%25%20cotton%20shirt&tag=dealfinder025-21");
 
       const url2 = buildExternalAmazonSearchUrl("women's heels & flats");
-      expect(url2).toBe("https://www.amazon.in/s?k=women's%20heels%20%26%20flats&tag=dealfinderin-21");
+      expect(url2).toBe("https://www.amazon.in/s?k=women's%20heels%20%26%20flats&tag=dealfinder025-21");
 
       const url3 = buildExternalAmazonSearchUrl("c++ programming book");
-      expect(url3).toBe("https://www.amazon.in/s?k=c%2B%2B%20programming%20book&tag=dealfinderin-21");
+      expect(url3).toBe("https://www.amazon.in/s?k=c%2B%2B%20programming%20book&tag=dealfinder025-21");
     });
   });
 

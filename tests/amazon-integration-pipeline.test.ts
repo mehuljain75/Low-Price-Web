@@ -29,7 +29,7 @@ describe("Production-Ready Amazon Product Integration (Option A) & External Fall
       const status = getAmazonApiStatus();
       expect(status.isConfigured).toBe(false);
       expect(status.missingCredentials).toContain("AMAZON_ACCESS_KEY");
-      expect(status.partnerTag).toBe("dealfinderin-21");
+      expect(status.partnerTag).toBe("dealfinder025-21");
 
       if (originalAccess) process.env.AMAZON_ACCESS_KEY = originalAccess;
     });
@@ -58,7 +58,7 @@ describe("Production-Ready Amazon Product Integration (Option A) & External Fall
     it("correctly maps genuine PA-API 5.0 item fields to PriceComparison", () => {
       const sampleItem: PAAPIItem = {
         ASIN: "B09W9F5G1N",
-        DetailPageURL: "https://www.amazon.in/dp/B09W9F5G1N?tag=dealfinderin-21",
+        DetailPageURL: "https://www.amazon.in/dp/B09W9F5G1N?tag=dealfinder025-21",
         ItemInfo: {
           Title: { DisplayValue: "Apple iPhone 15 Pro (128 GB) - Natural Titanium" },
           ByLineInfo: { Brand: { DisplayValue: "Apple" } },
@@ -84,7 +84,7 @@ describe("Production-Ready Amazon Product Integration (Option A) & External Fall
         },
       };
 
-      const comparison = mapPaapiItemToComparison(sampleItem, "dealfinderin-21");
+      const comparison = mapPaapiItemToComparison(sampleItem, "dealfinder025-21");
       expect(comparison).not.toBeNull();
       expect(comparison!.product.id).toBe("prod_amz_B09W9F5G1N");
       expect(comparison!.product.title).toBe("Apple iPhone 15 Pro (128 GB) - Natural Titanium");
@@ -106,7 +106,7 @@ describe("Production-Ready Amazon Product Integration (Option A) & External Fall
           Items: [
             {
               ASIN: "B0CX5CGFBG",
-              DetailPageURL: "https://www.amazon.in/dp/B0CX5CGFBG?tag=dealfinderin-21",
+              DetailPageURL: "https://www.amazon.in/dp/B0CX5CGFBG?tag=dealfinder025-21",
               ItemInfo: {
                 Title: { DisplayValue: "Samsung 43 Inch 4K Crystal UHD TV" },
                 ByLineInfo: { Brand: { DisplayValue: "Samsung" } },
@@ -177,21 +177,21 @@ describe("Production-Ready Amazon Product Integration (Option A) & External Fall
   describe("Option B: Authentic Amazon India Search Fallback", () => {
     it("constructs valid HTTPS Amazon India URL with partner tag", () => {
       const url = buildExternalAmazonSearchUrl("chocolate");
-      expect(url).toBe("https://www.amazon.in/s?k=chocolate&tag=dealfinderin-21");
+      expect(url).toBe("https://www.amazon.in/s?k=chocolate&tag=dealfinder025-21");
     });
 
     it("safely URL-encodes original queries including spaces and symbols", () => {
       expect(buildExternalAmazonSearchUrl("chocolate cake")).toBe(
-        "https://www.amazon.in/s?k=chocolate%20cake&tag=dealfinderin-21"
+        "https://www.amazon.in/s?k=chocolate%20cake&tag=dealfinder025-21"
       );
       expect(buildExternalAmazonSearchUrl("100% cotton shirt")).toBe(
-        "https://www.amazon.in/s?k=100%25%20cotton%20shirt&tag=dealfinderin-21"
+        "https://www.amazon.in/s?k=100%25%20cotton%20shirt&tag=dealfinder025-21"
       );
       expect(buildExternalAmazonSearchUrl("c++ programming")).toBe(
-        "https://www.amazon.in/s?k=c%2B%2B%20programming&tag=dealfinderin-21"
+        "https://www.amazon.in/s?k=c%2B%2B%20programming&tag=dealfinder025-21"
       );
       expect(buildExternalAmazonSearchUrl("women's heels")).toBe(
-        "https://www.amazon.in/s?k=women's%20heels&tag=dealfinderin-21"
+        "https://www.amazon.in/s?k=women's%20heels&tag=dealfinder025-21"
       );
     });
 
@@ -231,7 +231,7 @@ describe("Production-Ready Amazon Product Integration (Option A) & External Fall
             // Duplicate: Already exists in local catalog (prod_iphone_15_128)
             {
               ASIN: "B0CHX1W1XY",
-              DetailPageURL: "https://www.amazon.in/dp/B0CHX1W1XY?tag=dealfinderin-21",
+              DetailPageURL: "https://www.amazon.in/dp/B0CHX1W1XY?tag=dealfinder025-21",
               ItemInfo: {
                 Title: { DisplayValue: "Apple iPhone 15 (128 GB) - Black" },
                 ByLineInfo: { Brand: { DisplayValue: "Apple" } },
@@ -248,7 +248,7 @@ describe("Production-Ready Amazon Product Integration (Option A) & External Fall
             // Unique new Amazon item
             {
               ASIN: "B0NEWITEM123",
-              DetailPageURL: "https://www.amazon.in/dp/B0NEWITEM123?tag=dealfinderin-21",
+              DetailPageURL: "https://www.amazon.in/dp/B0NEWITEM123?tag=dealfinder025-21",
               ItemInfo: {
                 Title: { DisplayValue: "Apple iPhone 15 Silicone Case with MagSafe" },
                 ByLineInfo: { Brand: { DisplayValue: "Apple" } },

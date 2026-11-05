@@ -1,3 +1,5 @@
+import { getAmazonAssociatesTag } from "./affiliate-tag";
+
 export const ALLOWED_REDIRECT_DOMAINS = [
   "amazon.in",
   "amazon.com",
@@ -107,7 +109,7 @@ export function ensureReachableAmazonUrl(url: string, productTitle: string, trus
     return url;
   }
   const query = productTitle.trim() || match[1];
-  return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=dealfinderin-21`;
+  return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=${getAmazonAssociatesTag()}`;
 }
 
 /**
@@ -118,7 +120,7 @@ export function ensureReachableAmazonUrl(url: string, productTitle: string, trus
 export function buildSafeAmazonUrl(asinOrUrl: string, title?: string): string {
   if (!asinOrUrl) {
     const query = title?.trim() || "deals";
-    return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=dealfinderin-21`;
+    return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=${getAmazonAssociatesTag()}`;
   }
 
   // 1. If an Amazon product DP link was passed
@@ -129,7 +131,7 @@ export function buildSafeAmazonUrl(asinOrUrl: string, title?: string): string {
       return `https://www.amazon.in/dp/${rawCode}`;
     }
     const query = title?.trim() || (rawCode ? rawCode.replace(/^B0(FAS|MOB|LAP|AUD|APP|BEA)/i, "") : "") || "deals";
-    return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=dealfinderin-21`;
+    return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=${getAmazonAssociatesTag()}`;
   }
 
   // 2. If it's already an Amazon search URL
@@ -145,6 +147,6 @@ export function buildSafeAmazonUrl(asinOrUrl: string, title?: string): string {
   }
 
   const query = title?.trim() || (cleanAsin ? cleanAsin.replace(/^B0(FAS|MOB|LAP|AUD|APP|BEA)/i, "") : "") || "deals";
-  return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=dealfinderin-21`;
+  return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=${getAmazonAssociatesTag()}`;
 }
 

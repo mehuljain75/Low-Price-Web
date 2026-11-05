@@ -58,7 +58,7 @@ describe("Customer QA: Buy on Amazon destinations", () => {
 
   it("sends unverified product IDs to a search for the product name", () => {
     expect(ensureReachableAmazonUrl("https://www.amazon.in/dp/B0BG1XNW3R", "Fire-Boltt Phoenix Pro")).toBe(
-      "https://www.amazon.in/s?k=Fire-Boltt%20Phoenix%20Pro&tag=dealfinderin-21"
+      "https://www.amazon.in/s?k=Fire-Boltt%20Phoenix%20Pro&tag=dealfinder025-21"
     );
   });
 
@@ -66,5 +66,14 @@ describe("Customer QA: Buy on Amazon destinations", () => {
     expect(ensureReachableAmazonUrl("https://www.amazon.in/dp/B0NEWLIVE1", "x", true)).toBe(
       "https://www.amazon.in/dp/B0NEWLIVE1"
     );
+  });
+});
+
+describe("Affiliate store ID", () => {
+  it("tags every outbound Amazon link with the account's store ID", async () => {
+    const { getAmazonAssociatesTag } = await import("@/lib/affiliate-tag");
+    const { buildExternalAmazonSearchUrl } = await import("@/lib/search/search-orchestrator");
+    expect(getAmazonAssociatesTag()).toBe("dealfinder025-21");
+    expect(buildExternalAmazonSearchUrl("watch")).toContain("tag=dealfinder025-21");
   });
 });

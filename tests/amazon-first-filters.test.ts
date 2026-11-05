@@ -170,12 +170,12 @@ describe("Amazon-First Filtering & Query Engine", () => {
       }
     });
 
-    it("builds valid Amazon affiliate tracking URL with tag dealfinderin-21", () => {
+    it("builds valid Amazon affiliate tracking URL with tag dealfinder025-21", () => {
       const amazonProvider = providerRegistry.getProvider("amazon");
       expect(amazonProvider).toBeDefined();
 
       const url = amazonProvider!.buildAffiliateUrl("https://www.amazon.in/dp/B0DFMGNY45", "df_test");
-      expect(url).toContain("tag=dealfinderin-21");
+      expect(url).toContain("tag=dealfinder025-21");
       expect(url).toContain("ascsubtag=df_test");
     });
 

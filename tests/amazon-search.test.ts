@@ -77,7 +77,7 @@ describe("Live Amazon Search & Parser", () => {
   it("formats outbound Amazon URLs with the associate partner tag", () => {
     const adapter = new AmazonAdapter();
     const url = adapter.buildAffiliateUrl("https://www.amazon.in/dp/B0DFMGNY45", "df_web");
-    expect(url).toContain("tag=dealfinderin-21");
+    expect(url).toContain("tag=dealfinder025-21");
     expect(url).toContain("ascsubtag=df_web");
   });
 });

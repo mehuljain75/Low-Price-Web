@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Flame, Sparkles, Clock } from "lucide-react";
 import { repository } from "@/lib/data/repository";
 import { ProductCard } from "@/components/ProductCard";
+import { getAmazonAssociatesTag } from "@/lib/affiliate-tag";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,7 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
           </span>
           <span>•</span>
           <span className="bg-white/10 px-2 py-0.5 rounded text-[11px] font-mono text-gray-300">
-            Tag: dealfinderin-21
+            Tag: {getAmazonAssociatesTag()}
           </span>
         </div>
       </div>

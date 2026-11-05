@@ -203,19 +203,19 @@ describe("Critical Fix: Product Card Links, Identity & Resolution Integrity", ()
     // Synthetic ASIN -> Amazon India search with product title (NEVER /dp/)
     const safeUrl1 = buildSafeAmazonUrl("B0FASERI00014", "ERIDANI Women's Braided Strap Chunky Block Heels");
     expect(safeUrl1).toContain("amazon.in/s?k=ERIDANI");
-    expect(safeUrl1).toContain("tag=dealfinderin-21");
+    expect(safeUrl1).toContain("tag=dealfinder025-21");
     expect(safeUrl1).not.toContain("/dp/");
 
     // Synthetic ASIN in URL -> converted to safe search
     const safeUrl2 = buildSafeAmazonUrl("https://www.amazon.in/dp/B0FASERI00014", "ERIDANI Heels");
     expect(decodeURIComponent(safeUrl2)).toContain("amazon.in/s?k=ERIDANI Heels");
-    expect(safeUrl2).toContain("tag=dealfinderin-21");
+    expect(safeUrl2).toContain("tag=dealfinder025-21");
     expect(safeUrl2).not.toContain("/dp/");
 
     // Synthetic ASIN with NO title passed -> fallback query avoids dead 404
     const safeUrl3 = buildSafeAmazonUrl("https://www.amazon.in/dp/B0FASERI00014");
     expect(safeUrl3).toContain("amazon.in/s?k=");
-    expect(safeUrl3).toContain("tag=dealfinderin-21");
+    expect(safeUrl3).toContain("tag=dealfinder025-21");
     expect(safeUrl3).not.toContain("/dp/");
   });
 
@@ -250,7 +250,7 @@ describe("Critical Fix: Product Card Links, Identity & Resolution Integrity", ()
     expect(res1.status).toBe(307);
     const loc1 = res1.headers.get("location") || "";
     expect(loc1).toContain("amazon.in/dp/B0FK2P93T5");
-    expect(loc1).toContain("tag=dealfinderin-21");
+    expect(loc1).toContain("tag=dealfinder025-21");
 
     // 2. B0GWQJDVJJ opens a different ERIDANI product on Amazon, so it goes to a search for our title
     const req2 = new NextRequest(
@@ -264,7 +264,7 @@ describe("Critical Fix: Product Card Links, Identity & Resolution Integrity", ()
     const loc2 = res2.headers.get("location") || "";
     expect(loc2).toContain("amazon.in/s?k=ERIDANI+Pointed+Toe+Stiletto+High+Heels");
     expect(loc2).not.toContain("/dp/B0GWQJDVJJ");
-    expect(loc2).toContain("tag=dealfinderin-21");
+    expect(loc2).toContain("tag=dealfinder025-21");
 
     // 3. Verified ASIN (Acer Nitro V) continues to route directly to /dp/
     const req3 = new NextRequest(
@@ -275,7 +275,7 @@ describe("Critical Fix: Product Card Links, Identity & Resolution Integrity", ()
     expect(res3.status).toBe(307);
     const loc3 = res3.headers.get("location") || "";
     expect(loc3).toContain("amazon.in/dp/B0CHJJZ9G8");
-    expect(loc3).toContain("tag=dealfinderin-21");
+    expect(loc3).toContain("tag=dealfinder025-21");
 
     // 4. Without a title, an unverified ASIN searches the catalog's product name, not the bare ID
     const req4 = new NextRequest(

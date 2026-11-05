@@ -1,4 +1,5 @@
 import { Product, Offer, RetailerSlug, AdapterHealth, DataProvenance } from "../types";
+import { getAmazonAssociatesTag } from "../affiliate-tag";
 
 export type { DataProvenance };
 export type ProviderStatus = "active" | "inactive" | "pending_approval" | "failed";
@@ -46,9 +47,7 @@ export class AmazonProvider implements RetailerProvider {
 
   constructor() {
     this.partnerTag =
-      process.env.AMAZON_ASSOCIATES_TAG ||
-      process.env.NEXT_PUBLIC_AMAZON_TAG ||
-      "dealfinderin-21";
+      getAmazonAssociatesTag();
     this.accessKey = process.env.AMAZON_ACCESS_KEY;
     this.secretKey = process.env.AMAZON_SECRET_KEY;
   }
@@ -99,7 +98,7 @@ export class AmazonProvider implements RetailerProvider {
       missingCredentials: missing,
       notes: hasKeys
         ? "Connected to Amazon Product Advertising API (PA-API 5.0) with AWS SigV4 authentication."
-        : "Associates tracking active with tag 'dealfinderin-21'. PA-API 5.0 keys pending (Amazon unlocks keys after 3 qualified referrals within 180 days). Serving verified authentic Amazon India catalog.",
+        : `Associates tracking active with tag '${getAmazonAssociatesTag()}'. PA-API 5.0 keys pending (Amazon unlocks keys after 3 qualified referrals within 180 days). Serving verified authentic Amazon India catalog.`,
     };
   }
 

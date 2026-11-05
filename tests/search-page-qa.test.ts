@@ -57,13 +57,13 @@ describe("DealFinder India - Search Page QA and UX Verification", () => {
       // 1. Verified ASIN URL (Sony WH-1000XM5) goes straight to the product page
       const validReq = new NextRequest(
         "http://localhost:3000/api/redirect?offerId=off_amz_B09XS7JWHH&url=" +
-          encodeURIComponent("https://www.amazon.in/dp/B09XS7JWHH?tag=dealfinderin-21")
+          encodeURIComponent("https://www.amazon.in/dp/B09XS7JWHH?tag=dealfinder025-21")
       );
       const validRes = await redirectHandler(validReq);
       expect(validRes.status).toBe(307);
       const validLocation = validRes.headers.get("location") || "";
       expect(validLocation).toContain("amazon.in/dp/B09XS7JWHH");
-      expect(validLocation).toContain("tag=dealfinderin-21");
+      expect(validLocation).toContain("tag=dealfinder025-21");
 
       // 1b. A real-format but unverified ASIN (dead on amazon.in) searches the product name instead
       const deadReq = new NextRequest(
@@ -87,7 +87,7 @@ describe("DealFinder India - Search Page QA and UX Verification", () => {
       expect(fallbackRes.status).toBe(307);
       const fallbackLocation = fallbackRes.headers.get("location") || "";
       expect(fallbackLocation).toContain("amazon.in/s?k=Puma+Running+Shoes");
-      expect(fallbackLocation).toContain("tag=dealfinderin-21");
+      expect(fallbackLocation).toContain("tag=dealfinder025-21");
       expect(fallbackLocation).not.toContain("dp/B0FAS");
     });
 

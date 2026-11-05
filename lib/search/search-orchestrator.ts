@@ -27,6 +27,7 @@ import {
   getAmazonApiStatus,
   AmazonApiStatus,
 } from "../services/amazon-product-api";
+import { getAmazonAssociatesTag } from "../affiliate-tag";
 
 export interface SearchOrchestratorOptions {
   query: string;
@@ -83,10 +84,7 @@ export interface SearchOrchestratorResult {
  * Strictly uses trusted amazon.in domain and never accepts arbitrary user URLs.
  */
 export function buildExternalAmazonSearchUrl(query: string): string {
-  const tag =
-    process.env.AMAZON_ASSOCIATES_TAG ||
-    process.env.NEXT_PUBLIC_AMAZON_TAG ||
-    "dealfinderin-21";
+  const tag = getAmazonAssociatesTag();
   const clean = (query || "").trim();
   return `https://www.amazon.in/s?k=${encodeURIComponent(clean)}&tag=${encodeURIComponent(tag)}`;
 }

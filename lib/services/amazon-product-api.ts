@@ -8,6 +8,7 @@ import { PriceComparison, Product, Offer, Category } from "../types";
 import { categories } from "../data/demo-products";
 import { computeProductComparison } from "../matching";
 import { isPAAPIConfigured, sendPAAPIRequest, PAAPISearchResponse, PAAPIItem } from "./amazon-paapi";
+import { getAmazonAssociatesTag } from "../affiliate-tag";
 
 export type AmazonApiStatus =
   | "ready"
@@ -73,9 +74,7 @@ export function getAmazonApiStatus(): {
   const accessKey = process.env.AMAZON_ACCESS_KEY;
   const secretKey = process.env.AMAZON_SECRET_KEY;
   const partnerTag =
-    process.env.AMAZON_ASSOCIATES_TAG ||
-    process.env.NEXT_PUBLIC_AMAZON_TAG ||
-    "dealfinderin-21";
+    getAmazonAssociatesTag();
 
   const missing: string[] = [];
   if (!accessKey) missing.push("AMAZON_ACCESS_KEY");
