@@ -179,7 +179,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
               sortBy,
               inStockOnly,
             }}
-            totalProductsCount={comparisons.length}
           />
         </div>
       </div>

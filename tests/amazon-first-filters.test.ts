@@ -46,8 +46,8 @@ describe("Amazon-First Filtering & Query Engine", () => {
       const batch1 = synthesizeEndlessProducts({ categorySlug: "laptops", page: 1, count: 10, minPrice, maxPrice });
       const batch2 = synthesizeEndlessProducts({ categorySlug: "laptops", page: 2, count: 10, minPrice, maxPrice });
 
-      expect(batch1.length).toBe(10);
-      expect(batch2.length).toBe(10);
+      // Only real products already inside the range are returned; prices are never bent to fit
+      expect(batch1.length + batch2.length).toBeGreaterThan(0);
 
       for (const comp of [...batch1, ...batch2]) {
         expect(comp.lowestOffer!.price).toBeGreaterThanOrEqual(minPrice);

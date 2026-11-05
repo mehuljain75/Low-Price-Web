@@ -252,27 +252,39 @@ describe("Critical Fix: Product Card Links, Identity & Resolution Integrity", ()
     expect(loc1).toContain("amazon.in/dp/B0FK2P93T5");
     expect(loc1).toContain("tag=dealfinderin-21");
 
-    // 2. ERIDANI product redirect routes directly to /dp/B0GWQJDVJJ with affiliate tag
+    // 2. B0GWQJDVJJ opens a different ERIDANI product on Amazon, so it goes to a search for our title
     const req2 = new NextRequest(
-      "http://localhost:3000/api/redirect?offerId=off_amz_B0GWQJDVJJ&url=" +
+      "http://localhost:3000/api/redirect?offerId=off_amz_B0GWQJDVJJ&title=" +
+        encodeURIComponent("ERIDANI Pointed Toe Stiletto High Heels") +
+        "&url=" +
         encodeURIComponent("https://www.amazon.in/dp/B0GWQJDVJJ")
     );
     const res2 = await redirectHandler(req2);
     expect(res2.status).toBe(307);
     const loc2 = res2.headers.get("location") || "";
-    expect(loc2).toContain("amazon.in/dp/B0GWQJDVJJ");
+    expect(loc2).toContain("amazon.in/s?k=ERIDANI+Pointed+Toe+Stiletto+High+Heels");
+    expect(loc2).not.toContain("/dp/B0GWQJDVJJ");
     expect(loc2).toContain("tag=dealfinderin-21");
 
-    // 3. Genuine ASIN continues to route directly to /dp/
+    // 3. Verified ASIN (Acer Nitro V) continues to route directly to /dp/
     const req3 = new NextRequest(
-      "http://localhost:3000/api/redirect?offerId=off_amz_B09W9F5G1N&url=" +
-        encodeURIComponent("https://www.amazon.in/dp/B09W9F5G1N")
+      "http://localhost:3000/api/redirect?offerId=off_amz_B0CHJJZ9G8&url=" +
+        encodeURIComponent("https://www.amazon.in/dp/B0CHJJZ9G8")
     );
     const res3 = await redirectHandler(req3);
     expect(res3.status).toBe(307);
     const loc3 = res3.headers.get("location") || "";
-    expect(loc3).toContain("amazon.in/dp/B09W9F5G1N");
+    expect(loc3).toContain("amazon.in/dp/B0CHJJZ9G8");
     expect(loc3).toContain("tag=dealfinderin-21");
+
+    // 4. Without a title, an unverified ASIN searches the catalog's product name, not the bare ID
+    const req4 = new NextRequest(
+      "http://localhost:3000/api/redirect?offerId=off_amz_B09W9F5G1N&url=" +
+        encodeURIComponent("https://www.amazon.in/dp/B09W9F5G1N")
+    );
+    const loc4 = (await redirectHandler(req4)).headers.get("location") || "";
+    expect(loc4).toContain("amazon.in/s?k=");
+    expect(loc4).not.toContain("k=B09W9F5G1N");
   });
 
   it("guarantees 100% of BASE_TEMPLATES across all categories have authentic Amazon India ASINs", () => {

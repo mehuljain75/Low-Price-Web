@@ -301,13 +301,24 @@ export function extractProductAsin(comp: PriceComparison): string | null {
 }
 
 // Compound words shoppers type either joined or split ("smartwatch" vs "Smart Watch")
+// Larger than the whole catalog, so paginated requests always see every matching product
+const FULL_CATALOG_POOL_SIZE = 2000;
+
+// Words are matched at word starts, so compounds need explicit links
+// ("watch" should still find "Smartwatch", "phone" should find "iPhone")
 const SEARCH_SYNONYMS: Record<string, string[]> = {
-  smartwatch: ["smart watch", "watch"],
-  smartwatches: ["smart watch", "watch"],
-  smartband: ["smart band", "band"],
+  watch: ["smartwatch"],
+  watches: ["smartwatch"],
+  smartwatch: ["watch"],
+  smartwatches: ["watch"],
+  smartband: ["band"],
+  phone: ["iphone", "smartphone"],
+  phones: ["iphone", "smartphone"],
+  mobile: ["iphone", "smartphone", "phone"],
+  mobiles: ["iphone", "smartphone", "phone"],
   earbuds: ["earbud", "buds"],
-  tshirt: ["t-shirt", "t shirt"],
-  tshirts: ["t-shirt", "t shirt"],
+  tshirt: ["t-shirt"],
+  tshirts: ["t-shirt"],
 };
 
 /**
@@ -333,16 +344,31 @@ export function getSearchTermGroups(query: string): string[][] {
     });
 }
 
+const termPatternCache = new Map<string, RegExp>();
+
+// A term must start at a word boundary ("book" must not match "MacBook", "phone" must not
+// match "headphone"). Spaces/hyphens are optional between letters so "smartwatch" still
+// finds "Smart Watch" and "fireboltt" finds "Fire-Boltt".
+function getTermPattern(term: string): RegExp {
+  let pattern = termPatternCache.get(term);
+  if (!pattern) {
+    const letters = term
+      .replace(/[\s-]+/g, "")
+      .split("")
+      .map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    pattern = new RegExp(`(?:^|[^a-z0-9])${letters.join("[\\s-]?")}`);
+    termPatternCache.set(term, pattern);
+  }
+  return pattern;
+}
+
 /**
  * Checks product text against search term groups. "any" needs one word to match,
- * "all" needs every word. Text is also compared with spaces/hyphens removed so
- * "smartwatch" finds "Smart Watch" and "fireboltt" finds "Fire-Boltt".
+ * "all" needs every word.
  */
 export function matchesSearchTerms(text: string, groups: string[][], mode: "any" | "all"): boolean {
   const lower = text.toLowerCase();
-  const compact = lower.replace(/[\s-]+/g, "");
-  const groupMatches = (group: string[]) =>
-    group.some((t) => lower.includes(t) || compact.includes(t.replace(/[\s-]+/g, "")));
+  const groupMatches = (group: string[]) => group.some((t) => getTermPattern(t).test(lower));
   return mode === "all" ? groups.every(groupMatches) : groups.some(groupMatches);
 }
 
@@ -352,16 +378,20 @@ function getSearchableText(comp: PriceComparison): string {
     comp.product.title,
     comp.product.brand,
     comp.product.modelNumber || "",
-    comp.product.description,
+    // Category name lets "laptop" find "Dell XPS 13" and "headphones" find earbuds
+    comp.category?.name || categories.find((c) => c.id === comp.product.categoryId)?.name || "",
     typeof attrs?.shoeType === "string" ? attrs.shoeType : "",
   ].join(" ");
 }
 
 /**
  * Normalizes a product title to its base model for deduplication across variant specs.
+ * Feature tails ("... with 60H Playtime & Zen ENC Mic") are dropped so two listings of the
+ * same model with differently worded titles count as one product.
  */
 export function normalizeTitleForDeduplication(title: string): string {
   return title
+    .replace(/\s+(with|featuring)\s.*$/i, "")
     .replace(/\s*\([^)]*\)\s*$/g, "")
     .replace(/[^a-zA-Z0-9\s]/g, " ")
     .toLowerCase()
@@ -520,7 +550,7 @@ export class ProductRepository {
     if (searchTermGroups.length > 0) {
       products = products.filter((p) =>
         matchesSearchTerms(
-          [p.title, p.brand, p.modelNumber || "", p.description].join(" "),
+          [p.title, p.brand, p.modelNumber || "", categories.find((c) => c.id === p.categoryId)?.name || ""].join(" "),
           searchTermGroups,
           "any"
         )
@@ -539,12 +569,13 @@ export class ProductRepository {
     const seenCanonicalKeys = new Set<string>();
     const seenCanonicalIds = new Set<string>();
     const seenCanonicalTitles = new Set<string>();
-    // Strictly enforce 1-product-per-ASIN deduplication for heels query to guarantee 24 authentic distinct models
-    const isHeelsQuery = (filters.searchQuery || "").toLowerCase().includes("heel");
-    const seenCanonicalAsins = isHeelsQuery ? new Set<string>() : undefined;
+    // One card per product: by ASIN, and by brand + base model title for listings of the same
+    // model under different ASINs or wording (shoppers saw the same earbuds twice)
+    const seenCanonicalAsins = new Set<string>();
+    const seenModelTitles = new Set<string>();
     const deduplicatedBase: PriceComparison[] = [];
     for (const comp of comparisons) {
-      if (canAddToProductList(comp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins)) {
+      if (canAddToProductList(comp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins, seenModelTitles)) {
         deduplicatedBase.push(comp);
       }
     }
@@ -598,7 +629,7 @@ export class ProductRepository {
             continue;
           }
 
-          if (canAddToProductList(liveComp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins)) {
+          if (canAddToProductList(liveComp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins, seenModelTitles)) {
             comparisons.push(liveComp);
           }
         }
@@ -720,8 +751,10 @@ export class ProductRepository {
     // Calculate required product volume based on pagination or browse requirements
     const page = filters.page ? Math.max(1, filters.page) : 1;
     const limit = filters.limit ? Math.max(1, filters.limit) : 24;
+    // Paginated (infinite scroll) requests build the whole matching catalog every time so each
+    // page is a stable slice; growing the pool per page reshuffled items and repeated them.
     const targetCount = filters.page !== undefined
-      ? Math.max(page * limit, 96)
+      ? FULL_CATALOG_POOL_SIZE
       : (filters.limit ? Math.max(24, filters.limit) : 24);
 
     // Rich catalog hydration: synthesize additional products if volume is below targetCount
@@ -789,7 +822,7 @@ export class ProductRepository {
 
       for (const comp of filteredSynth) {
         if (comparisons.length >= targetCount) break;
-        if (canAddToProductList(comp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins)) {
+        if (canAddToProductList(comp, seenCanonicalIds, seenCanonicalKeys, seenCanonicalTitles, seenCanonicalAsins, seenModelTitles)) {
           comparisons.push(comp);
         }
       }
@@ -800,6 +833,10 @@ export class ProductRepository {
 
     // Multi-word queries ("smart watch", "nike shoes"): when some products match every word,
     // drop the ones that only matched a single word so unrelated items don't flood results
+    if (searchTermGroups.length > 0) {
+      // Catalog hydration below uses looser keyword matching, so re-check every result
+      comparisons = comparisons.filter((c) => matchesSearchTerms(getSearchableText(c), searchTermGroups, "any"));
+    }
     if (searchTermGroups.length > 1) {
       const allWordMatches = comparisons.filter((c) =>
         matchesSearchTerms(getSearchableText(c), searchTermGroups, "all")

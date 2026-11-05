@@ -2310,12 +2310,18 @@ export function synthesizeEndlessProducts(
 
   const results: PriceComparison[] = [];
   const offset = startIndex !== undefined ? startIndex : (page - 1) * count;
+  // Template matching depends only on the category here, so filter once per category
+  const templatesByCategory = new Map<string, ReturnType<typeof getMatchingTemplates>>();
 
   for (let i = 0; i < count; i++) {
     const globalIdx = offset + i;
     const currentCatSlug = isAllCategories ? activeSlugs[globalIdx % activeSlugs.length] : defaultCategory.slug;
     const targetCategory = categories.find((c) => c.slug === currentCatSlug) || defaultCategory;
-    const currentTemplates = getMatchingTemplates(targetCategory.slug, brand, searchQuery, minPrice, maxPrice, shoeType, gender, size);
+    let currentTemplates = templatesByCategory.get(targetCategory.slug);
+    if (!currentTemplates) {
+      currentTemplates = getMatchingTemplates(targetCategory.slug, brand, searchQuery, minPrice, maxPrice, shoeType, gender, size);
+      templatesByCategory.set(targetCategory.slug, currentTemplates);
+    }
     if (!currentTemplates || currentTemplates.length === 0) {
       continue;
     }
@@ -2329,6 +2335,9 @@ export function synthesizeEndlessProducts(
     const cycle = isAllCategories
       ? Math.floor(Math.floor(globalIdx / activeSlugs.length) / currentTemplates.length)
       : Math.floor(globalIdx / currentTemplates.length);
+    // List each real product once. Later cycles used to invent colour/storage variants with
+    // made-up ASINs, which showed shoppers duplicate cards and dead "Buy on Amazon" links.
+    if (cycle > 0) continue;
     const variantIdx = cycle % template.specs.length;
     const variantSpec = template.specs[variantIdx];
 
@@ -2350,16 +2359,11 @@ export function synthesizeEndlessProducts(
 
     // Realistic price variation per variant (+/- 6%)
     const priceMod = 1 + (((variantIdx * 11) % 13) - 6) * 0.01;
-    let price = Math.round(template.basePrice * priceMod);
+    const price = Math.round(template.basePrice * priceMod);
 
-    // Strictly enforce price bounds if specified
-    if (minPrice !== undefined && price < minPrice) {
-      const spread = maxPrice && maxPrice > minPrice ? maxPrice - minPrice : 2000;
-      price = minPrice + ((globalIdx * 97) % spread);
-    }
-    if (maxPrice !== undefined && price > maxPrice) {
-      const spread = minPrice && maxPrice > minPrice ? maxPrice - minPrice : 2000;
-      price = Math.max(minPrice || 99, maxPrice - ((globalIdx * 73) % spread));
+    // Leave out products outside the requested price range; never adjust a price to fit
+    if ((minPrice !== undefined && price < minPrice) || (maxPrice !== undefined && price > maxPrice)) {
+      continue;
     }
     const mrp = Math.round(Math.max(template.mrp * priceMod, price * 1.25));
 

@@ -86,6 +86,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const searchResult = await executeSearchPipeline(pipelineOptions);
 
   const comparisons = searchResult.results;
+  const scrollSearchQuery =
+    searchResult.searchStatus === "corrected" && searchResult.correctedQuery
+      ? searchResult.correctedQuery
+      : forceExact
+        ? searchQuery
+        : searchResult.intent.cleanKeywords;
 
   // While searching, list only brands that actually appear in the matching results
   // (ignoring the brand filter itself so the shopper can switch brands)
@@ -234,7 +240,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </h1>
             <p className="text-xs sm:text-sm text-[#6B7280] mt-1">
               {comparisons.length > 0
-                ? `Found ${comparisons.length} product listings on Amazon India`
+                ? comparisons.length >= 24
+                  ? "Showing the best matches on Amazon India — scroll for more"
+                  : `Found ${comparisons.length} product listings on Amazon India`
                 : searchQuery
                   ? "No matching products in our catalog yet"
                   : "Enter product keywords to explore deals on Amazon India"}
@@ -518,19 +526,20 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               <InfiniteProductGrid
                 initialComparisons={comparisons}
                 filters={{
-                  searchQuery,
+                  // Later pages must search exactly what page 1 searched: the spelling-corrected
+                  // words, with "under 50000"-style budgets moved into the price filter
+                  searchQuery: scrollSearchQuery,
                   categorySlug,
                   brand,
                   shoeType,
                   gender,
                   size,
-                  minPrice,
-                  maxPrice,
+                  minPrice: searchResult.appliedFilters.minPrice,
+                  maxPrice: searchResult.appliedFilters.maxPrice,
                   minRating,
                   sortBy,
                   inStockOnly,
                 }}
-                totalProductsCount={comparisons.length}
               />
 
               {/* Persistent Option B Fallback at Bottom of Results */}

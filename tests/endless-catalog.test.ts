@@ -55,62 +55,55 @@ describe("Endless Catalog & Infinite Pagination Engine", () => {
     expect(overlap13.length).toBe(0);
   });
 
-  it("checks products count for each category in unpaginated mode", async () => {
+  // Collects every page until the catalog runs out (an empty page), like infinite scroll does
+  const collectAllPages = async (filters: Record<string, unknown>, limit: number) => {
+    const pages: number[] = [];
+    const ids: string[] = [];
+    for (let page = 1; page <= 20; page++) {
+      const items = await repository.getProducts({ ...filters, page, limit });
+      if (items.length === 0) break;
+      pages.push(items.length);
+      ids.push(...items.map((c) => c.product.id));
+    }
+    return { pages, ids };
+  };
+
+  it("lists a healthy first page for every category", async () => {
     for (const slug of ["mobiles", "laptops", "audio", "fashion", "appliances", "beauty"]) {
-      const prods = await repository.getProducts({ categorySlug: slug });
-      console.log(`CATEGORY ${slug}: count = ${prods.length}`);
-      expect(prods.length).toBeGreaterThanOrEqual(24);
+      const prods = await repository.getProducts({ categorySlug: slug, page: 1, limit: 24 });
+      expect(prods.length, slug).toBeGreaterThanOrEqual(12);
     }
   });
 
-  it("supports endless pagination across 4 consecutive pages for ANY category", async () => {
-    const category = "audio";
-    const pages = await Promise.all([
-      repository.getProducts({ categorySlug: category, page: 1, limit: 24 }),
-      repository.getProducts({ categorySlug: category, page: 2, limit: 24 }),
-      repository.getProducts({ categorySlug: category, page: 3, limit: 24 }),
-      repository.getProducts({ categorySlug: category, page: 4, limit: 24 }),
-    ]);
-
-    const seenIds = new Set<string>();
-    for (let pIdx = 0; pIdx < pages.length; pIdx++) {
-      const pageProducts = pages[pIdx];
-      expect(pageProducts.length).toBe(24);
-
-      for (const comp of pageProducts) {
-        expect(seenIds.has(comp.product.id)).toBe(false);
-        seenIds.add(comp.product.id);
-        expect(comp.product.categoryId).toBe("cat_audio");
-      }
-    }
-    expect(seenIds.size).toBe(96); // 24 * 4 = 96 unique products!
+  it("paginates a category to the end without repeating products", async () => {
+    const { pages, ids } = await collectAllPages({ categorySlug: "fashion" }, 24);
+    expect(pages.length).toBeGreaterThan(1);
+    // Every page except the last is full, so infinite scroll keeps loading until the real end
+    for (const size of pages.slice(0, -1)) expect(size).toBe(24);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("supports endless pagination across multiple pages for ANY brand", async () => {
+  it("paginates brand listings without repeating products", async () => {
     for (const brand of ["Samsung", "Apple", "Sony", "Nike", "Dell"]) {
-      const p1 = await repository.getProducts({ brand, page: 1, limit: 12 });
-      const p2 = await repository.getProducts({ brand, page: 2, limit: 12 });
-
-      expect(p1.length).toBe(12);
-      expect(p2.length).toBe(12);
-
-      const ids1 = new Set(p1.map((p) => p.product.id));
-      const overlap = p2.filter((p) => ids1.has(p.product.id));
-      expect(overlap.length).toBe(0);
+      const { ids } = await collectAllPages({ brand }, 12);
+      expect(ids.length, brand).toBeGreaterThan(0);
+      expect(new Set(ids).size, brand).toBe(ids.length);
     }
   });
 
-  it("supports endless pagination for search queries", async () => {
+  it("paginates search queries without repeating products", async () => {
     for (const searchQuery of ["iphone", "shoes", "laptop", "air fryer"]) {
-      const p1 = await repository.getProducts({ searchQuery, page: 1, limit: 12 });
-      const p2 = await repository.getProducts({ searchQuery, page: 2, limit: 12 });
+      const { pages, ids } = await collectAllPages({ searchQuery }, 12);
+      expect(pages[0], searchQuery).toBeGreaterThan(0);
+      expect(new Set(ids).size, searchQuery).toBe(ids.length);
+    }
+  });
 
-      expect(p1.length).toBe(12);
-      expect(p2.length).toBe(12);
-
-      const ids1 = new Set(p1.map((p) => p.product.id));
-      const overlap = p2.filter((p) => ids1.has(p.product.id));
-      expect(overlap.length).toBe(0);
+  it("never lists invented variants with made-up ASINs", async () => {
+    const { ids } = await collectAllPages({ categorySlug: "laptops" }, 24);
+    for (const id of ids) {
+      expect(id).not.toMatch(/_c\d+$/);
+      expect(id).not.toMatch(/^prod_amz_B0(FAS|MOB|LAP|AUD|APP|BEA)/);
     }
   });
 

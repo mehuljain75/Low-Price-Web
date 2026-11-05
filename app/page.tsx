@@ -18,7 +18,9 @@ import { ProductCard } from "@/components/ProductCard";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 import { InfiniteProductGrid } from "@/components/InfiniteProductGrid";
 
-export const revalidate = 60; // ISR cache
+// Render on each request like the other pages. ISR here sent "stale-while-revalidate" for about
+// a year, so browsers kept showing the old homepage after a deploy.
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const categories = await repository.getCategories();

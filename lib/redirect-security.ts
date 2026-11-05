@@ -67,6 +67,50 @@ export function isGenuineAmazonAsin(asin: string): boolean {
 }
 
 /**
+ * Catalog ASINs confirmed on 2026-11-04 to open the same product on amazon.in (page exists
+ * and its title matches our listing). Most hand-entered catalog ASINs were dead or pointed at
+ * unrelated products (e.g. a running-shoe listing opened a gemstone), so only these are sent
+ * to a product page. Products from the live Product Advertising API carry their own trusted
+ * link and don't need to be listed here. See catalog-link-audit.md for the full check.
+ */
+export const VERIFIED_PRODUCT_ASINS = new Set<string>([
+  "B08THTHDVH", // Bata Women's Block Heel Sandal
+  "B09G9BL5CP", // Apple iPhone 13
+  "B09N3ZNHTY", // boAt Airdopes 141
+  "B09TVVGXWS", // OnePlus Bullets Wireless Z2
+  "B09XS7JWHH", // Sony WH-1000XM5
+  "B0BDK62PDX", // Apple iPhone 14
+  "B0C3WBJPSR", // Marc Loire Pointed Toe Block Heel Sandals
+  "B0C4TKV717", // Theater Mary Jane Block Heels
+  "B0C7CCSQZL", // Metro Women's Block Heel Sandals
+  "B0C8TLJ4ND", // Mochi Women Wedge Heel Sandal
+  "B0CHJJZ9G8", // Acer Nitro V Gaming Laptop
+  "B0CHX1W1XY", // Apple iPhone 15
+  "B0CNKMDY5R", // Inc.5 Wedge Sandals
+  "B0DCVXKKJG", // Carlton London Block Heel Pumps
+  "B0DFMGNY45", // TRASE Transparent Block Heels
+  "B0FK2P93T5", // Shoetopia Ankle Strap Block Heels
+  "B0FMS373M7", // Samsung Galaxy Book4
+  "B0FR561MLB", // Theater Twiggy Slingback Block Heels
+  "B0GYRRLP87", // Samsung 55" Crystal 4K Smart TV
+  "B0HK7K5TH4", // LG 55" OLED evo TV
+]);
+
+/**
+ * Keeps "Buy on Amazon" honest: an amazon.in/dp/ link is kept only when the ASIN is verified
+ * (or came from the live Product Advertising API); otherwise the shopper is sent to an Amazon
+ * search for the exact product name instead of a "Page Not Found" or the wrong product.
+ */
+export function ensureReachableAmazonUrl(url: string, productTitle: string, trustLiveAsin = false): string {
+  const match = url.match(/amazon\.in\/(?:[^/?]+\/)?dp\/([A-Za-z0-9]{10})/);
+  if (!match || trustLiveAsin || VERIFIED_PRODUCT_ASINS.has(match[1].toUpperCase())) {
+    return url;
+  }
+  const query = productTitle.trim() || match[1];
+  return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=dealfinderin-21`;
+}
+
+/**
  * Builds a safe Amazon India destination URL.
  * Authentic ASINs route to /dp/${asin}.
  * Synthetic or non-standard ASINs route to Amazon India search (/s?k=...) with product title to guarantee ZERO 404s.

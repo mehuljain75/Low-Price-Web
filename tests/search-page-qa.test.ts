@@ -54,16 +54,27 @@ describe("DealFinder India - Search Page QA and UX Verification", () => {
     });
 
     it("verifies outbound Amazon redirect route safeguards against dead links", async () => {
-      // 1. Valid ASIN URL
+      // 1. Verified ASIN URL (Sony WH-1000XM5) goes straight to the product page
       const validReq = new NextRequest(
-        "http://localhost:3000/api/redirect?offerId=off_amz_B09W9F5G1N&url=" +
-          encodeURIComponent("https://www.amazon.in/dp/B09W9F5G1N?tag=dealfinderin-21")
+        "http://localhost:3000/api/redirect?offerId=off_amz_B09XS7JWHH&url=" +
+          encodeURIComponent("https://www.amazon.in/dp/B09XS7JWHH?tag=dealfinderin-21")
       );
       const validRes = await redirectHandler(validReq);
       expect(validRes.status).toBe(307);
       const validLocation = validRes.headers.get("location") || "";
-      expect(validLocation).toContain("amazon.in/dp/B09W9F5G1N");
+      expect(validLocation).toContain("amazon.in/dp/B09XS7JWHH");
       expect(validLocation).toContain("tag=dealfinderin-21");
+
+      // 1b. A real-format but unverified ASIN (dead on amazon.in) searches the product name instead
+      const deadReq = new NextRequest(
+        "http://localhost:3000/api/redirect?offerId=off_amz_B09W9F5G1N&title=" +
+          encodeURIComponent("Noise Buds VS104") +
+          "&url=" +
+          encodeURIComponent("https://www.amazon.in/dp/B09W9F5G1N")
+      );
+      const deadLocation = (await redirectHandler(deadReq)).headers.get("location") || "";
+      expect(deadLocation).toContain("amazon.in/s?k=Noise+Buds+VS104");
+      expect(deadLocation).not.toContain("/dp/B09W9F5G1N");
 
       // 2. Synthetic or unknown ASIN safely falls back to Amazon India search with product title
       const fallbackReq = new NextRequest(

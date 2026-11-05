@@ -78,6 +78,26 @@ const ECOMMERCE_DICTIONARY = new Set<string>([
   "colorfit", "firebolt", "fireboltt", "titan", "fastrack", "casio",
   "fossil", "amazfit", "garmin",
 
+  // Common shopping words that aren't in the catalog yet. Knowing them stops the
+  // corrector from "fixing" a real word into a different product (toys -> tops).
+  "toy", "toys", "game", "games", "lego", "puzzle", "puzzles", "doll", "dolls",
+  "book", "books", "novel", "novels", "pen", "pens", "pencil", "pencils", "notebook",
+  "diary", "stationery", "bag", "bags", "backpack", "backpacks", "wallet", "wallets",
+  "belt", "belts", "sunglasses", "umbrella", "chair", "chairs", "table", "tables",
+  "sofa", "sofas", "bed", "beds", "mattress", "pillow", "pillows", "bedsheet",
+  "curtain", "curtains", "lamp", "lamps", "fan", "fans", "bulb", "bulbs", "light",
+  "lights", "power", "bank", "powerbank", "adapter", "router", "printer", "camera",
+  "cameras", "drone", "tripod", "mouse", "pad", "webcam", "pendrive", "harddisk",
+  "rice", "atta", "dal", "flour", "sugar", "salt", "ghee", "masala", "spices", "honey",
+  "bottle", "bottles", "flask", "lunchbox", "tiffin", "cookware", "pan", "pans",
+  "kadai", "cooker", "kettle", "toaster", "plate", "plates", "cup", "cups", "mug",
+  "mugs", "knife", "knives", "baby", "diaper", "diapers", "pet", "dog", "cat", "food",
+  "soap", "toothpaste", "toothbrush", "deodorant", "razor", "lipstick", "makeup",
+  "nail", "polish", "comb", "dryer", "straightener", "yoga", "mat", "dumbbell",
+  "dumbbells", "cycle", "bicycle", "helmet", "tent", "car", "bike", "tyre", "watchband",
+  "socks", "shorts", "track", "hoodie", "hoodies", "sweater", "sweatshirt",
+  "lehenga", "dupatta", "innerwear", "bra", "boxer", "cap", "caps", "hat", "gift",
+
   // Beauty & Personal Care
   "serum", "serums", "face", "wash", "sunscreen", "moisturizer", "shampoo",
   "conditioner", "oil", "cream", "lotion", "perfume", "trimmer", "trimmers",
@@ -143,6 +163,48 @@ const HIGH_PRIORITY_CORRECTIONS: Record<string, string> = {
   smartwach: "smartwatch",
   smartwtch: "smartwatch",
 };
+
+// Neighbouring keys on a QWERTY keyboard. A substitution only counts as a cheap typo when
+// the two letters sit next to each other; "toys" -> "tops" (y/p) is a different word, not a slip.
+const KEYBOARD_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+function areAdjacentKeys(a: string, b: string): boolean {
+  for (let r = 0; r < KEYBOARD_ROWS.length; r++) {
+    const i = KEYBOARD_ROWS[r].indexOf(a);
+    if (i < 0) continue;
+    for (let dr = -1; dr <= 1; dr++) {
+      const row = KEYBOARD_ROWS[r + dr];
+      if (!row) continue;
+      const j = row.indexOf(b);
+      if (j >= 0 && Math.abs(j - i) <= 1) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Damerau-Levenshtein distance where substituting a non-neighbouring key costs 2.
+ * Used to pick spelling corrections that look like real typing mistakes.
+ */
+export function typoDistance(source: string, target: string): number {
+  const src = source.toLowerCase();
+  const tgt = target.toLowerCase();
+  if (src === tgt) return 0;
+  const d: number[][] = Array.from({ length: src.length + 1 }, () => new Array(tgt.length + 1).fill(0));
+  for (let i = 0; i <= src.length; i++) d[i][0] = i;
+  for (let j = 0; j <= tgt.length; j++) d[0][j] = j;
+  for (let i = 1; i <= src.length; i++) {
+    for (let j = 1; j <= tgt.length; j++) {
+      const a = src[i - 1];
+      const b = tgt[j - 1];
+      const subCost = a === b ? 0 : areAdjacentKeys(a, b) ? 1 : 2;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + subCost);
+      if (i > 1 && j > 1 && a === tgt[j - 2] && src[i - 2] === b) {
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      }
+    }
+  }
+  return d[src.length][tgt.length];
+}
 
 /**
  * Calculates Damerau-Levenshtein distance between two strings
@@ -288,7 +350,8 @@ function findClosestWord(token: string): { match: string; distance: number } | n
     return null;
   }
 
-  const maxAllowedDistance = t.length <= 4 ? 1 : t.length <= 8 ? 2 : 3;
+  // Short words get a single slip; "books" must not become "boots" or "chair" become "air"
+  const maxAllowedDistance = t.length <= 5 ? 1 : t.length <= 8 ? 2 : 3;
   let bestMatch: string | null = null;
   let bestDistance = maxAllowedDistance + 1;
 
@@ -298,7 +361,7 @@ function findClosestWord(token: string): { match: string; distance: number } | n
       continue;
     }
 
-    const dist = damerauLevenshteinDistance(t, dictWord);
+    const dist = typoDistance(t, dictWord);
     if (dist < bestDistance) {
       bestDistance = dist;
       bestMatch = dictWord;

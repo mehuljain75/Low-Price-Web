@@ -67,16 +67,13 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
 
   const [products, setProducts] = useState<PriceComparison[]>(() => deduplicateProductList(initialComparisons));
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(() => {
-    const clean = deduplicateProductList(initialComparisons);
-    if (numericTotal !== undefined && numericTotal > clean.length) {
-      return true;
-    }
-    if (numericTotal !== undefined && numericTotal <= clean.length) {
-      return false;
-    }
-    return clean.length >= 24;
-  });
+  // A full first page means the server may have more. Judge by the raw page size, not the
+  // de-duplicated one, or hiding a few repeats would wrongly stop infinite scroll.
+  const [hasMore, setHasMore] = useState(() =>
+    numericTotal !== undefined
+      ? deduplicateProductList(initialComparisons).length < numericTotal
+      : initialComparisons.length >= 24
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -134,7 +131,7 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
     const canHaveMore =
       numericTotal !== undefined
         ? cleanInitial.length < numericTotal
-        : cleanInitial.length >= 24;
+        : initialComparisons.length >= 24;
     setHasMore(canHaveMore);
     setIsLoading(false);
     setLoadError(null);
@@ -235,7 +232,8 @@ export const InfiniteProductGrid: React.FC<InfiniteProductGridProps> = ({
                 : numericTotal !== undefined
                 ? combined.length < numericTotal
                 : newItems.length >= 24;
-            setHasMore(moreAvailable && unique.length > 0);
+            // Keep going even if this page was all repeats; the server says when the catalog ends
+            setHasMore(moreAvailable);
             return combined;
           });
           setPage(nextPage);

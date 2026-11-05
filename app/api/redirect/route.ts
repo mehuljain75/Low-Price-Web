@@ -29,7 +29,22 @@ function inferRetailerSlug(offerId: string, urlStr?: string): RetailerSlug {
   return "amazon";
 }
 
-import { isAllowedTargetUrl, buildSafeAmazonUrl, isGenuineAmazonAsin } from "@/lib/redirect-security";
+import {
+  isAllowedTargetUrl,
+  buildSafeAmazonUrl,
+  isGenuineAmazonAsin,
+  ensureReachableAmazonUrl,
+} from "@/lib/redirect-security";
+
+// Product name for an amazon.in/dp/ link, so an unverified ASIN can fall back to a useful search
+async function catalogTitleForAmazonUrl(url: string): Promise<string> {
+  const asin = url.match(/\/dp\/([A-Za-z0-9]{10})/)?.[1];
+  if (!asin) return "";
+  const curated = findCuratedItemByAsin(asin);
+  if (curated) return curated.title;
+  const { findTemplateProductByIdOrSlug } = await import("@/lib/data/endless-catalog");
+  return findTemplateProductByIdOrSlug(asin)?.product.title || "";
+}
 
 function performSafeRedirect(targetUrl: string, slug: string): NextResponse {
   if (!isAllowedTargetUrl(targetUrl)) {
@@ -55,6 +70,11 @@ export async function GET(request: NextRequest) {
   if (!offerId && !passedUrl) {
     return new NextResponse("Missing offerId or url parameter", { status: 400 });
   }
+
+  // Offers fetched live from the Product Advertising API have Amazon's own product link
+  const { getLiveOfferById } = await import("@/lib/services/amazon-search");
+  const cachedLiveOffer = offerId ? getLiveOfferById(offerId) : null;
+  const isLiveApiOffer = cachedLiveOffer?.provenance === "amazon_paapi_live";
 
   // 1. If explicit URL is provided, strictly validate against trusted retailer domain whitelist
   if (passedUrl) {
@@ -98,6 +118,11 @@ export async function GET(request: NextRequest) {
       } else {
         safeUrl = buildSafeAmazonUrl(passedUrl, titleToUse);
       }
+      safeUrl = ensureReachableAmazonUrl(
+        safeUrl,
+        titleToUse || (await catalogTitleForAmazonUrl(safeUrl)),
+        isLiveApiOffer
+      );
     }
 
     const slug = inferRetailerSlug(offerId || "", safeUrl);
@@ -107,12 +132,12 @@ export async function GET(request: NextRequest) {
 
   // 2. Check if it is a live offer from memory cache
   if (offerId) {
-    const { getLiveOfferById } = await import("@/lib/services/amazon-search");
-    const liveOffer = getLiveOfferById(offerId);
+    const liveOffer = cachedLiveOffer;
     if (liveOffer) {
       let targetUrl = liveOffer.productUrl;
       if (targetUrl.includes("amazon.in")) {
-        targetUrl = buildSafeAmazonUrl(targetUrl, passedTitle || liveOffer.title);
+        const title = passedTitle || liveOffer.title;
+        targetUrl = ensureReachableAmazonUrl(buildSafeAmazonUrl(targetUrl, title), title, isLiveApiOffer);
       }
 
       const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(
@@ -130,7 +155,8 @@ export async function GET(request: NextRequest) {
     if (offer) {
       let targetUrl = offer.productUrl;
       if (targetUrl.includes("amazon.in")) {
-        targetUrl = buildSafeAmazonUrl(targetUrl, passedTitle || offer.title);
+        const title = passedTitle || offer.title;
+        targetUrl = ensureReachableAmazonUrl(buildSafeAmazonUrl(targetUrl, title), title);
       }
       const finalAffiliateUrl = adapterRegistry.buildOutboundUrl(
         offer.retailerSlug,
@@ -159,7 +185,10 @@ export async function GET(request: NextRequest) {
     } catch {
       // ignore
     }
-    const targetUrl = matchedAsin ? `https://www.amazon.in/dp/${matchedAsin}` : buildSafeAmazonUrl(raw, titleToUse);
+    const targetUrl = ensureReachableAmazonUrl(
+      matchedAsin ? `https://www.amazon.in/dp/${matchedAsin}` : buildSafeAmazonUrl(raw, titleToUse),
+      titleToUse
+    );
     const finalAffiliateUrl = adapterRegistry.buildOutboundUrl("amazon", targetUrl, subId);
     return performSafeRedirect(finalAffiliateUrl, "amazon");
   }
